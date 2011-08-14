@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using KFA.Disks;
+using FileSystems;
+using KFA.FileSystem;
+using System.Threading;
+using FileSystems.FileSystem;
+using KFA.DataStream;
+
+namespace KickassUndelete {
+    public partial class MainForm : Form {
+        FileSystem m_FileSystem = null;
+        Dictionary<FileSystem, ScanState> m_ScanState = new Dictionary<FileSystem, ScanState>();
+
+        public MainForm() {
+            InitializeComponent();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e) {
+            LoadLogicalDisks();
+        }
+
+        private void LoadLogicalDisks() {
+            foreach (LogicalDisk disk in DiskLoader.LoadLogicalVolumes()) {
+                TreeNode node = new TreeNode(disk.ToString());
+                node.Tag = disk;
+                if (disk.FS == null) {
+                    node.ForeColor = Color.Gray;
+                }
+                diskTree.Nodes.Add(node);
+            }
+        }
+
+        
+
+        private void diskTree_AfterSelect(object sender, TreeViewEventArgs e) {
+            SetFileSystem((LogicalDisk)e.Node.Tag);
+        }
+
+        private void SetFileSystem(LogicalDisk logicalDisk) {
+            if (logicalDisk.FS != null) {
+                if (!m_ScanState.ContainsKey(logicalDisk.FS)) {
+                    m_ScanState[logicalDisk.FS] = new ScanState(logicalDisk.FS);
+                    splitContainer1.Panel2.Controls.Add(m_ScanState[logicalDisk.FS].Viewer);
+                }
+                if (m_FileSystem != null && m_ScanState.ContainsKey(m_FileSystem)) {
+                    m_ScanState[m_FileSystem].Viewer.Hide();
+                }
+                m_FileSystem = logicalDisk.FS;
+                m_ScanState[m_FileSystem].Viewer.Show();
+            }
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {
+            foreach (ScanState state in m_ScanState.Values) {
+                state.CancelScan();
+            }
+        }
+
+        private void diskTree_BeforeSelect(object sender, TreeViewCancelEventArgs e) {
+            if (((IFileSystemStore)e.Node.Tag).FS == null) {
+                e.Cancel = true;
+            }
+        }
+    }
+}

@@ -1,0 +1,153 @@
+﻿using System;
+using System.Xml.Serialization;
+using System.IO;
+using KFA.DataStream;
+
+namespace KFA.Disks {
+    public class Image : IFileSystemStore, IDescribable, IHasSectors {
+
+        public delegate void ImageCallback(ulong x, ulong total);
+        private static ulong callbackRate = 1024 * 1024;
+
+        public String Path { get; set; }
+
+        public string Name { get; set; }
+
+        public Attributes Attributes { get; set; }
+
+        public StorageType StorageType { get; set; }
+
+        public ulong DeviceOffset {
+            get {
+                return 0;
+            }
+        }
+
+        private FileSystem.FileSystem m_fileSystem;
+        [XmlIgnore]
+        public FileSystem.FileSystem FS {
+            get { return m_fileSystem; }
+        }
+
+        public static Image CreateImage(IImageable stream, String path, ImageCallback callback) {
+            BinaryWriter bw = new BinaryWriter(File.OpenWrite(path));
+            for (ulong l = 0; l < stream.StreamLength; l++) {
+                byte b = stream.GetByte(l);
+                bw.Write(b);
+                if (l % callbackRate == 0) {
+                    callback(l, stream.StreamLength);
+                }
+            }
+            bw.Close();
+            callback(stream.StreamLength, stream.StreamLength);
+
+            Image result = new Image();
+            result.Path = path;
+            result.Name = System.IO.Path.GetFileNameWithoutExtension(path);
+            result.Attributes = stream.GetAttributes();
+            if (stream is PhysicalDisk) {
+                result.StorageType = StorageType.PhysicalDisk;
+            } else if (stream is PhysicalDiskPartition) {
+                result.StorageType = StorageType.PhysicalDiskPartition;
+            } else {
+                result.StorageType = StorageType.PhysicalDiskRange;
+            }
+            result.LoadFileSystem();
+            return result;
+        }
+
+        private Image() {}
+
+        public void LoadFileSystem() {
+            m_fileSystem = FileSystem.FileSystem.TryLoad(this);
+        }
+
+        public override string ToString() {
+            return StreamName;
+        }
+
+        #region IDataStream Members
+
+        FileDataStream fileStream = null;
+
+        public byte GetByte(ulong offset) {
+            if (fileStream == null) {
+                Open();
+            }
+            return fileStream.GetByte(offset);
+        }
+
+        public byte[] GetBytes(ulong offset, ulong length) {
+            if (fileStream == null) {
+                Open();
+            }
+            return fileStream.GetBytes(offset, length);
+        }
+
+        public ulong StreamLength {
+            get {
+                if (fileStream == null) {
+                    Open();
+                }
+                return fileStream.StreamLength;
+            }
+        }
+
+        public String StreamName {
+            get { return Name; }
+        }
+
+        public virtual IDataStream Parent {
+            get { return null; }
+        }
+
+        public void Open() {
+            if (fileStream == null) {
+                fileStream = new FileDataStream(Path);
+                fileStream.Open();
+            }
+        }
+
+        public void Close() {
+            if (fileStream != null) {
+                fileStream.Close();
+                fileStream = null;
+            }
+        }
+
+        #endregion
+
+        #region IDescribable Members
+
+        public string TextDescription {
+            get { return Attributes.TextDescription; }
+        }
+
+        #endregion
+
+        #region IHasSectors Members
+
+        public ulong GetSectorSize() {
+            if (StorageType == StorageType.PhysicalDisk) {
+                return ((PhysicalDiskAttributes)Attributes).BytesPerSector;
+            } else if (StorageType == StorageType.PhysicalDiskPartition) {
+                return ((PhysicalDiskPartitionAttributes)Attributes).BlockSize;
+            } else {
+                return 512; // best guess
+            }
+        }
+
+        public SectorStatus GetSectorStatus(ulong sectorNum) {
+            if (StorageType == StorageType.PhysicalDiskPartition && FS != null) {
+                return FS.GetSectorStatus(sectorNum);
+            } else {
+                return SectorStatus.Unknown;
+            }
+            // TODO: We should probably add a StorageLayer abstraction so that Images
+            // can do all the same things as PhysicalDisks/Partitions/Ranges without code duplication.
+            // We should probably have a subclass of Image for each of the StorageType values.
+        }
+
+        #endregion
+    }
+}
