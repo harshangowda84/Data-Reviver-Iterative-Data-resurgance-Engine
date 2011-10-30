@@ -31,6 +31,7 @@
             this.bScan = new System.Windows.Forms.Button();
             this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.colType = new System.Windows.Forms.ColumnHeader();
+            this.tbFilter = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // progressBar
@@ -52,10 +53,10 @@
             this.colName,
             this.colType,
             this.colSize});
-            this.fileView.Location = new System.Drawing.Point(0, 103);
+            this.fileView.Location = new System.Drawing.Point(0, 123);
             this.fileView.Margin = new System.Windows.Forms.Padding(10);
             this.fileView.Name = "fileView";
-            this.fileView.Size = new System.Drawing.Size(702, 477);
+            this.fileView.Size = new System.Drawing.Size(702, 457);
             this.fileView.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.fileView.TabIndex = 4;
             this.fileView.UseCompatibleStateImageBehavior = false;
@@ -95,16 +96,30 @@
             // 
             this.colType.Text = "Type";
             // 
+            // tbFilter
+            // 
+            this.tbFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbFilter.Location = new System.Drawing.Point(0, 100);
+            this.tbFilter.Name = "tbFilter";
+            this.tbFilter.Size = new System.Drawing.Size(702, 20);
+            this.tbFilter.TabIndex = 6;
+            this.tbFilter.TextChanged += new System.EventHandler(this.tbFilter_TextChanged);
+            this.tbFilter.Leave += new System.EventHandler(this.tbFilter_Leave);
+            this.tbFilter.Enter += new System.EventHandler(this.tbFilter_Enter);
+            // 
             // DeletedFileViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.tbFilter);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.fileView);
             this.Controls.Add(this.bScan);
             this.Name = "DeletedFileViewer";
             this.Size = new System.Drawing.Size(702, 620);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -117,6 +132,7 @@
         private System.Windows.Forms.Button bScan;
         private System.Windows.Forms.Timer UpdateTimer;
         private System.Windows.Forms.ColumnHeader colType;
+        private System.Windows.Forms.TextBox tbFilter;
 
     }
 }

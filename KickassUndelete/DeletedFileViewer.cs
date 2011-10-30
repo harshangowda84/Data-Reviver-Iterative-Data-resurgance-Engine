@@ -13,8 +13,12 @@ using System.IO;
 
 namespace KickassUndelete {
     public partial class DeletedFileViewer : UserControl {
+        private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
+
+
         private ScanState m_ScanState = null;
         private int m_NumFilesShown = 0;
+        private string m_Filter = "";
 
         private ListViewColumnSorter lvwColumnSorter;
 
@@ -28,6 +32,19 @@ namespace KickassUndelete {
             state.ProgressUpdated += new Action(state_ProgressUpdated);
             state.ScanStarted += new Action(state_ScanStarted);
             state.ScanFinished += new Action(state_ScanFinished);
+
+            UpdateFilterTextBox();
+        }
+
+        private void UpdateFilterTextBox() {
+            if (tbFilter.Text == "" || tbFilter.Text == EMPTY_FILTER_TEXT) {
+                tbFilter.Text = EMPTY_FILTER_TEXT;
+                tbFilter.ForeColor = Color.Gray;
+                tbFilter.Font = new Font(tbFilter.Font, FontStyle.Italic);
+            } else {
+                tbFilter.ForeColor = Color.Black;
+                tbFilter.Font = new Font(tbFilter.Font, FontStyle.Regular);
+            }
         }
 
         void state_ScanStarted() {
@@ -73,11 +90,14 @@ namespace KickassUndelete {
         }
 
         private ListViewItem[] MakeListItems(List<INodeMetadata> metadatas) {
-            ListViewItem[] items = new ListViewItem[metadatas.Count];
+            List<ListViewItem> items = new List<ListViewItem>(metadatas.Count);
             for (int i = 0; i < metadatas.Count; i++) {
-                items[i] = MakeListItem(metadatas[i]);
+                ListViewItem item = MakeListItem(metadatas[i]);
+                if (item.Text.ToLower().Contains(m_Filter)) {
+                    items.Add(item);
+                }
             }
-            return items;
+            return items.ToArray();
         }
 
         private ListViewItem MakeListItem(INodeMetadata metadata) {
@@ -93,6 +113,17 @@ namespace KickassUndelete {
 
         private void SetProgress(double progress) {
             progressBar.Value = (int)(progress * progressBar.Maximum);
+        }
+
+        private void FilterBy(string filter) {
+            if (m_Filter != filter.ToLower()) {
+                m_Filter = filter.ToLower();
+
+                fileView.Items.Clear();
+                ListViewItem[] items = MakeListItems(m_ScanState.DeletedFiles);
+                fileView.Items.AddRange(items);
+                m_NumFilesShown = m_ScanState.DeletedFiles.Count;
+            }
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {
@@ -159,6 +190,26 @@ namespace KickassUndelete {
 
             // Perform the sort with these new sort options.
             this.fileView.Sort();
+        }
+
+        private void tbFilter_Enter(object sender, EventArgs e) {
+            if (tbFilter.Text == "" || tbFilter.Text == EMPTY_FILTER_TEXT) {
+                tbFilter.Text = "";
+                tbFilter.ForeColor = Color.Black;
+                tbFilter.Font = new Font(tbFilter.Font, FontStyle.Regular);
+            }
+        }
+
+        private void tbFilter_Leave(object sender, EventArgs e) {
+            UpdateFilterTextBox();
+        }
+
+        private void tbFilter_TextChanged(object sender, EventArgs e) {
+            if (tbFilter.Text != "" && tbFilter.Text != EMPTY_FILTER_TEXT) {
+                FilterBy(tbFilter.Text);
+            } else {
+                FilterBy("");
+            }
         }
     }
 }
