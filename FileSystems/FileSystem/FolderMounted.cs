@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using KFA.DataStream;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public class FolderMounted : Folder {
         private string m_Path;
         private IDataStream m_Parent;

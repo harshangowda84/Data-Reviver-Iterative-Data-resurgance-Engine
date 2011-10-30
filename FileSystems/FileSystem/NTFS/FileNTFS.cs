@@ -3,7 +3,7 @@ using System.Text;
 using KFA.DataStream;
 using KFA.Disks;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
     public class FileNTFS : File, IDescribable {
 
         private MFTRecord m_record;

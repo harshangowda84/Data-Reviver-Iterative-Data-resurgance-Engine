@@ -5,8 +5,10 @@ using KFA.DataStream;
 using KFA.Disks;
 using FileSystems.FileSystem;
 
-namespace KFA.FileSystem.FAT {
+namespace FileSystems.FileSystem.FAT {
     public class FileFAT : File, IDescribable {
+        private long m_Length;
+
         public FileAttributesFAT Attributes { get; private set; }
         public long FirstCluster { get; private set; }
         public new FileSystemFAT FileSystem {
@@ -21,7 +23,7 @@ namespace KFA.FileSystem.FAT {
             FileSystem = fileSystem;
             Name = entry.FileName;
             Path = path + Name;
-            Length = entry.Length;
+            m_Length = entry.Length;
             Attributes = new FileAttributesFAT(entry);
             FirstCluster = entry.ClusterNum;
             Deleted = Attributes.Deleted;
@@ -32,10 +34,10 @@ namespace KFA.FileSystem.FAT {
             Name = Util.GetRandomString(8);
             Path = "?/" + Name;
             long currentCluster = FirstCluster;
-            Length = 0;
+            m_Length = 0;
             while (currentCluster >= 0) {
                 currentCluster = FileSystem.GetNextCluster(currentCluster);
-                Length += FileSystem.BytesPerCluster;
+                m_Length += FileSystem.BytesPerCluster;
             }
             Attributes = new FileAttributesFAT();
             Deleted = true;
@@ -85,7 +87,7 @@ namespace KFA.FileSystem.FAT {
         }
 
         public override ulong StreamLength {
-            get { return (ulong)Length; }
+            get { return (ulong)m_Length; }
         }
 
         public override String StreamName {

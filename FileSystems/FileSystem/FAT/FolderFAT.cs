@@ -5,7 +5,7 @@ using System.Diagnostics;
 using KFA.DataStream;
 using KFA.Disks;
 
-namespace KFA.FileSystem.FAT {
+namespace FileSystems.FileSystem.FAT {
     public enum FATDirectoryAttributes : byte {
         ATTR_READ_ONLY = 0x01,
         ATTR_HIDDEN = 0x02,

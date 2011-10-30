@@ -23,47 +23,51 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.diskTree = new System.Windows.Forms.TreeView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // diskTree
             // 
-            this.diskTree.Location = new System.Drawing.Point(6, 19);
+            this.diskTree.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.diskTree.ImageIndex = 0;
+            this.diskTree.ImageList = this.imageList1;
+            this.diskTree.Location = new System.Drawing.Point(12, 12);
             this.diskTree.Name = "diskTree";
-            this.diskTree.Size = new System.Drawing.Size(348, 608);
+            this.diskTree.SelectedImageIndex = 0;
+            this.diskTree.Size = new System.Drawing.Size(271, 611);
             this.diskTree.TabIndex = 0;
             this.diskTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.diskTree_AfterSelect);
             this.diskTree.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.diskTree_BeforeSelect);
             // 
             // splitContainer1
             // 
+            this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer1.IsSplitterFixed = true;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.groupBox1);
+            this.splitContainer1.Panel1.Controls.Add(this.diskTree);
             this.splitContainer1.Size = new System.Drawing.Size(1081, 639);
-            this.splitContainer1.SplitterDistance = 360;
+            this.splitContainer1.SplitterDistance = 299;
             this.splitContainer1.TabIndex = 2;
             // 
-            // groupBox1
+            // imageList1
             // 
-            this.groupBox1.Controls.Add(this.diskTree);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(10);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(360, 639);
-            this.groupBox1.TabIndex = 2;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Disks";
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "HDD");
             // 
             // MainForm
             // 
@@ -77,7 +81,6 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -86,7 +89,7 @@
 
         private System.Windows.Forms.TreeView diskTree;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }
 

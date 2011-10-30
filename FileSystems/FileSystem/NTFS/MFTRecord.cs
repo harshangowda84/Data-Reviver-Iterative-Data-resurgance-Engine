@@ -4,7 +4,7 @@ using KFA.DataStream;
 using KFA.Exceptions;
 using FileSystems.FileSystem;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
 
     #region Attribute Structs
 

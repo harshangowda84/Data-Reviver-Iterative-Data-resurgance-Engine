@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using KFA.DataStream;
 using KFA.Disks;
-using KFA.FileSystem.FAT;
+using FileSystems.FileSystem.FAT;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public class FileAttributesFAT : IDescribable {
         public string Name { get; private set; }
         public ulong Size { get; private set; }

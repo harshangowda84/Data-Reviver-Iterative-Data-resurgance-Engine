@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using KFA.DataStream;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
     class NTFSFileStream : IDataStream {
 
         private IDataStream m_partitionStream, m_residentStream;
@@ -21,13 +21,13 @@ namespace KFA.FileSystem.NTFS {
                     m_residentStream = attr.value;
                     m_length = attr.value.StreamLength;
                 }
-            } 
+            }
             m_record = record;
             m_partitionStream = partition;
         }
 
         public NTFSFileStream(IDataStream partition, MFTRecord record, String attrName) :
-            this(partition, record, record.GetAttribute(attrName)){}
+            this(partition, record, record.GetAttribute(attrName)) { }
 
         public byte GetByte(ulong offset) {
             if (offset >= m_length) {

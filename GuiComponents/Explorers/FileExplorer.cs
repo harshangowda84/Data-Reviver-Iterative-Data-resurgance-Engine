@@ -9,9 +9,9 @@ using System.Windows.Forms;
 using System.IO;
 using KFA.DataStream;
 using KFA.Disks;
-using KFA.FileSystem;
-using KFA.FileSystem.NTFS;
-using File = KFA.FileSystem.File;
+using FileSystems.FileSystem;
+using FileSystems.FileSystem.NTFS;
+using File = FileSystems.FileSystem.File;
 
 namespace KFA.GUI.Explorers {
     public partial class FileExplorer : UserControl, IExplorer {
@@ -31,13 +31,13 @@ namespace KFA.GUI.Explorers {
                 if (child.Deleted) {
                     treeNode.ImageKey = "Deleted";
                     treeNode.ForeColor = Color.Red;
-                } else if (child is FileSystem.File || child is HiddenDataStreamFileNTFS) {
+                } else if (child is File || child is HiddenDataStreamFileNTFS) {
                     treeNode.ImageKey = "File";
                 } else {
                     treeNode.ImageKey = "Directory";
                 }
 
-                if (child is Folder || (child is FileSystem.File && ((FileSystem.File)child).IsZip)) {
+                if (child is Folder || (child is File && ((File)child).IsZip)) {
                     treeNode.Nodes.Add(new TreeNode("dummy"));
                     child.Loaded = false;
                 }
@@ -76,7 +76,7 @@ namespace KFA.GUI.Explorers {
                 m_CurrentStream = stream;
                 treeFiles.Nodes.Clear();
                 if (stream is IFileSystemStore) {
-                    FileSystem.FileSystem fs = (stream as IFileSystemStore).FS;
+                    FileSystem fs = (stream as IFileSystemStore).FS;
                     FileSystemNode fsRoot;
                     if (fs != null) {
                         fsRoot = fs.GetRoot();
@@ -106,7 +106,7 @@ namespace KFA.GUI.Explorers {
             if (fsnode != null) {
                 ContextMenu menu = new ContextMenu();
                 if (fsnode is Folder) {
-                    FileSystem.Folder f = fsnode as FileSystem.Folder;
+                    Folder f = fsnode as Folder;
                     menu.MenuItems.Add(new MenuItem("Refresh", new EventHandler(delegate(object o, EventArgs ea) {
                         fsnode.ReloadChildren();
                         AppendChildren(e.Node, fsnode.GetChildren());
@@ -122,8 +122,8 @@ namespace KFA.GUI.Explorers {
                             SaveFolder(f, saveFileDialog.FileName);                        }
                     })));
                 }
-                if (fsnode is FileSystem.File) {
-                    FileSystem.File f = fsnode as FileSystem.File;
+                if (fsnode is File) {
+                    File f = fsnode as File;
                     menu.MenuItems.Add(new MenuItem("Save File...", new EventHandler(delegate(object o, EventArgs ea) {
                         SaveFileDialog saveFileDialog = new SaveFileDialog();
                         saveFileDialog.Filter = "Any Files|*.*";
@@ -143,15 +143,15 @@ namespace KFA.GUI.Explorers {
         private void SaveFolder(Folder f, string p) {
             Directory.CreateDirectory(p);
             foreach (FileSystemNode node in f.GetChildren()) {
-                if (node is FileSystem.File || node is HiddenDataStreamFileNTFS) {
+                if (node is File || node is HiddenDataStreamFileNTFS) {
                     SaveFile(node, Path.Combine(p, node.Name));
-                } else if (node is FileSystem.Folder) {
-                    SaveFolder(node as FileSystem.Folder, Path.Combine(p, node.Name));
+                } else if (node is Folder) {
+                    SaveFolder(node as Folder, Path.Combine(p, node.Name));
                 }
             }
         }
 
-        private void SaveFile(FileSystem.FileSystemNode file, string filepath) {
+        private void SaveFile(FileSystemNode file, string filepath) {
             if (!System.IO.File.Exists(filepath)) {
                 using (ForensicsAppStream fas = new ForensicsAppStream(file)) {
                     using (Stream output = new FileStream(filepath, FileMode.Create)) {

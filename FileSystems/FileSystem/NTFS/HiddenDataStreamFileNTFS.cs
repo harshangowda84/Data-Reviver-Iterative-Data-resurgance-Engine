@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using KFA.DataStream;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
 
     public class HiddenDataStreamFileNTFS : Folder {
         private List<FileSystemNode> children;

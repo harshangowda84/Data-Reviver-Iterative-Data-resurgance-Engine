@@ -6,12 +6,11 @@ using Ionic.Zip;
 using System.IO;
 using KFA.DataStream;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public abstract class File : FileSystemNode {
-        public long Length { get; protected set; }
-
         private bool m_IsZip = false;
         private bool m_Known = false;
+
         public bool IsZip {
             get {
                 if (!m_Known) {

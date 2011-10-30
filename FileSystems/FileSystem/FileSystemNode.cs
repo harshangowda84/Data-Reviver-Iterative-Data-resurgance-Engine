@@ -5,7 +5,7 @@ using System.Text;
 using KFA.DataStream;
 using FileSystems.FileSystem;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public abstract class FileSystemNode : IDataStream, INodeMetadata {
         public string Name { get; protected set; }
         public ulong Size {

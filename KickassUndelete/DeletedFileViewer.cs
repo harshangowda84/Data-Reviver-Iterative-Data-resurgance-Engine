@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using FileSystems.FileSystem;
-using KFA.FileSystem;
 using System.Threading;
 using KFA.DataStream;
 using System.IO;
@@ -17,8 +16,13 @@ namespace KickassUndelete {
         private ScanState m_ScanState = null;
         private int m_NumFilesShown = 0;
 
+        private ListViewColumnSorter lvwColumnSorter;
+
         public DeletedFileViewer(ScanState state) {
             InitializeComponent();
+
+            lvwColumnSorter = new ListViewColumnSorter();
+            fileView.ListViewItemSorter = lvwColumnSorter;
 
             m_ScanState = state;
             state.ProgressUpdated += new Action(state_ProgressUpdated);
@@ -55,11 +59,13 @@ namespace KickassUndelete {
         public void SetScanButtonScanning() {
             bScan.Enabled = false;
             bScan.Text = "Scanning...";
+            progressBar.Show();
         }
 
         public void SetScanButtonFinished() {
             bScan.Enabled = false;
             bScan.Text = "Finished Scanning!";
+            progressBar.Hide();
         }
 
         private void bScan_Click(object sender, EventArgs e) {
@@ -75,7 +81,12 @@ namespace KickassUndelete {
         }
 
         private ListViewItem MakeListItem(INodeMetadata metadata) {
-            ListViewItem lvi = new ListViewItem(new string[] { metadata.Name, Util.ByteFormat(metadata.GetFileSystemNode().Size) });
+            FileSystemNode node = metadata.GetFileSystemNode();
+            ListViewItem lvi = new ListViewItem(new string[] {
+                metadata.Name,
+                Path.GetExtension(metadata.Name),
+                Util.ByteFormat(node.Size)
+            });
             lvi.Tag = metadata;
             return lvi;
         }
@@ -107,14 +118,47 @@ namespace KickassUndelete {
 
                         if (saveFileDialog.ShowDialog() == DialogResult.OK) {
                             FileSystemNode node = metadata.GetFileSystemNode();
-                            using (BinaryWriter bw = new BinaryWriter(new FileStream(saveFileDialog.FileName, FileMode.Create))) {
-                                bw.Write(Util.GetBytes(node));
-                            }
+                            SaveFile(node, saveFileDialog.FileName);
                         }
                     })));
                     menu.Show(fileView, e.Location);
                 }
             }
+        }
+
+        private void SaveFile(FileSystemNode node, string fileName) {
+            using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
+                ulong BLOCK_SIZE = 1024 * 1024; // 1MB
+                ulong offset = 0;
+                while (offset < node.StreamLength) {
+                    if (offset + BLOCK_SIZE < node.StreamLength) {
+                        bw.Write(node.GetBytes(offset, BLOCK_SIZE));
+                    } else {
+                        bw.Write(node.GetBytes(offset, node.StreamLength - offset));
+                    }
+                    offset += BLOCK_SIZE;
+                }
+            }
+        }
+
+        private void fileView_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn) {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending) {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                } else {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            } else {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            this.fileView.Sort();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 using KFA.DataStream;
 using KFA.Disks;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
     public class FolderNTFS : Folder, IDescribable {
         private class IndexBuffer {
             List<IndexEntry> entries = null;
@@ -225,6 +225,7 @@ namespace KFA.FileSystem.NTFS {
         }
 
         private string ComputePath() {
+            
             return "";
             //throw new NotImplementedException();
         }

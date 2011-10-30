@@ -7,11 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using KFA.Disks;
-using FileSystems;
-using KFA.FileSystem;
 using System.Threading;
 using FileSystems.FileSystem;
 using KFA.DataStream;
+using FileSystems;
 
 namespace KickassUndelete {
     public partial class MainForm : Form {
@@ -30,6 +29,7 @@ namespace KickassUndelete {
             foreach (LogicalDisk disk in DiskLoader.LoadLogicalVolumes()) {
                 TreeNode node = new TreeNode(disk.ToString());
                 node.Tag = disk;
+                node.ImageKey = "HDD";
                 if (disk.FS == null) {
                     node.ForeColor = Color.Gray;
                 }
@@ -47,7 +47,7 @@ namespace KickassUndelete {
             if (logicalDisk.FS != null) {
                 if (!m_ScanState.ContainsKey(logicalDisk.FS)) {
                     m_ScanState[logicalDisk.FS] = new ScanState(logicalDisk.FS);
-                    splitContainer1.Panel2.Controls.Add(m_ScanState[logicalDisk.FS].Viewer);
+                    AddDeletedFileViewer(m_ScanState[logicalDisk.FS].Viewer);
                 }
                 if (m_FileSystem != null && m_ScanState.ContainsKey(m_FileSystem)) {
                     m_ScanState[m_FileSystem].Viewer.Hide();
@@ -55,6 +55,15 @@ namespace KickassUndelete {
                 m_FileSystem = logicalDisk.FS;
                 m_ScanState[m_FileSystem].Viewer.Show();
             }
+        }
+
+        private void AddDeletedFileViewer(DeletedFileViewer viewer) {
+            int MARGIN = 12;
+            splitContainer1.Panel2.Controls.Add(viewer);
+            viewer.Top = viewer.Left = MARGIN;
+            viewer.Width = splitContainer1.Panel2.Width - MARGIN * 2;
+            viewer.Height = splitContainer1.Panel2.Height - MARGIN * 2;
+            viewer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {

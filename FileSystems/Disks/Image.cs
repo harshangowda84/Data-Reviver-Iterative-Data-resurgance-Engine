@@ -2,6 +2,7 @@
 using System.Xml.Serialization;
 using System.IO;
 using KFA.DataStream;
+using FileSystems.FileSystem;
 
 namespace KFA.Disks {
     public class Image : IFileSystemStore, IDescribable, IHasSectors {
@@ -23,14 +24,14 @@ namespace KFA.Disks {
             }
         }
 
-        private FileSystem.FileSystem m_fileSystem;
+        private FileSystem m_fileSystem;
         [XmlIgnore]
-        public FileSystem.FileSystem FS {
+        public FileSystem FS {
             get { return m_fileSystem; }
         }
 
         public static Image CreateImage(IImageable stream, String path, ImageCallback callback) {
-            BinaryWriter bw = new BinaryWriter(File.OpenWrite(path));
+            BinaryWriter bw = new BinaryWriter(System.IO.File.OpenWrite(path));
             for (ulong l = 0; l < stream.StreamLength; l++) {
                 byte b = stream.GetByte(l);
                 bw.Write(b);
@@ -59,7 +60,7 @@ namespace KFA.Disks {
         private Image() {}
 
         public void LoadFileSystem() {
-            m_fileSystem = FileSystem.FileSystem.TryLoad(this);
+            m_fileSystem = FileSystem.TryLoad(this);
         }
 
         public override string ToString() {

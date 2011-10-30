@@ -1,9 +1,10 @@
 ﻿using System;
 using KFA.Disks;
+using System.Collections.Generic;
+using System.Collections;
 
-namespace KFA.FileSystem.NTFS {
-    public class FileSystemNTFS : FileSystem
-    {
+namespace FileSystems.FileSystem.NTFS {
+    public class FileSystemNTFS : FileSystem {
         private const int BPB_SIZE = 84;
         ushort BPB_BytsPerSec;
         byte BPB_SecPerClus;
@@ -16,11 +17,9 @@ namespace KFA.FileSystem.NTFS {
         ushort BPB_SectorsPerMFTRecord;
         ulong BPB_SerialNumber;
 
-        private void LoadBPB()
-        {
+        private void LoadBPB() {
             byte[] bpb = new byte[BPB_SIZE];
-            for (int i = 0; i < BPB_SIZE; i++)
-            {
+            for (int i = 0; i < BPB_SIZE; i++) {
                 bpb[i] = Store.GetByte((ulong)(0x0B + i));
             }
 
@@ -32,13 +31,12 @@ namespace KFA.FileSystem.NTFS {
             BPB_TotSec64 = BitConverter.ToUInt64(bpb, 29);
             BPB_MFTStartCluster64 = BitConverter.ToUInt64(bpb, 37);
             BPB_MFTMirrorStartCluster64 = BitConverter.ToUInt64(bpb, 45);
-            
+
             byte b = bpb[53];
             if (b > 0x80) {
                 BPB_SectorsPerMFTRecord = (ushort)(Math.Pow(2, Math.Abs(256 - b)) / BPB_BytsPerSec);
-            }
-            else {
-                BPB_SectorsPerMFTRecord = (ushort) (BPB_SecPerClus * b);
+            } else {
+                BPB_SectorsPerMFTRecord = (ushort)(BPB_SecPerClus * b);
             }
             BPB_SerialNumber = BitConverter.ToUInt64(bpb, 57);
         }
@@ -76,15 +74,14 @@ namespace KFA.FileSystem.NTFS {
         }
 
         public FileNTFS MFT {
-            get {return m_MFT; }
+            get { return m_MFT; }
         }
 
         public ulong MFTSector {
             get { return m_mftSector; }
         }
 
-        public long BytesPerSector
-        {
+        public long BytesPerSector {
             get { return BPB_BytsPerSec; }
         }
 
@@ -92,22 +89,36 @@ namespace KFA.FileSystem.NTFS {
             get { return BPB_SectorsPerMFTRecord; }
         }
 
-        public long SectorsPerCluster
-        {
+        public long SectorsPerCluster {
             get { return BPB_SecPerClus; }
         }
 
-        public long BytesPerCluster
-        {
+        public long BytesPerCluster {
             get { return BytesPerSector * SectorsPerCluster; }
         }
 
-        public override void VisitFiles(FileSystem.NodeVisitCallback callback, bool mftScan) {
-            if (mftScan) {
-                MftScan(callback);
-            } else {
-                Visit(callback, this.m_Root);
+        public void SearchByTree(FileSystem.NodeVisitCallback callback, string searchPath) {
+            FileSystemNode searchRoot = this.m_Root;
+            if (!string.IsNullOrEmpty(searchPath)) {
+                searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
             }
+            Visit(callback, searchRoot);
+        }
+
+        public void SearchByMFT(FileSystem.NodeVisitCallback callback, string searchPath) {
+            MftScan(callback);
+        }
+
+        public override List<ISearchStrategy> GetSearchStrategies() {
+            List<ISearchStrategy> res = new List<ISearchStrategy>();
+
+            // Add the MFT search strategy (default)
+            res.Add(new SearchStrategy("MFT scan", SearchByMFT));
+
+            // Add the tree search strategy
+            res.Add(new SearchStrategy("Folder hierarchy scan", SearchByTree));
+
+            return res;
         }
 
         private void MftScan(FileSystem.NodeVisitCallback callback) {

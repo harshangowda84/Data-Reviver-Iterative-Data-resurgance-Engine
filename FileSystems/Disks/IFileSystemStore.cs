@@ -1,4 +1,5 @@
 ﻿using KFA.DataStream;
+using FileSystems.FileSystem;
 
 namespace KFA.Disks {
     public enum StorageType {
@@ -10,6 +11,6 @@ namespace KFA.Disks {
     public interface IFileSystemStore : IDataStream {
         StorageType StorageType { get; }
         Attributes Attributes { get; }
-        FileSystem.FileSystem FS { get; }
+        FileSystem FS { get; }
     }
 }

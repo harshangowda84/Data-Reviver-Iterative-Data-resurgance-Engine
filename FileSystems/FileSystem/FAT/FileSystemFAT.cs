@@ -2,8 +2,9 @@
 using System.Text;
 using KFA.Disks;
 using FileSystems.FileSystem;
+using System.Collections.Generic;
 
-namespace KFA.FileSystem.FAT {
+namespace FileSystems.FileSystem.FAT {
     /// <summary>
     /// A FAT filesystem. Only deals with FAT16 for now.
     /// </summary>
@@ -178,12 +179,28 @@ namespace KFA.FileSystem.FAT {
             get { return BPB_RootClus; }
         }
 
-        public override void VisitFiles(FileSystem.NodeVisitCallback callback, bool sectorSearch) {
-            if (sectorSearch) {
-                SectorSearch(callback);
-            } else {
-                Visit(callback, this.m_Root);
+        public void SearchByTree(FileSystem.NodeVisitCallback callback, string searchPath) {
+            FileSystemNode searchRoot = this.m_Root;
+            if (!string.IsNullOrEmpty(searchPath)) {
+                searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
             }
+            Visit(callback, searchRoot);
+        }
+
+        public void SearchByCluster(FileSystem.NodeVisitCallback callback, string searchPath) {
+            SectorSearch(callback);
+        }
+
+        public override List<ISearchStrategy> GetSearchStrategies() {
+            List<ISearchStrategy> res = new List<ISearchStrategy>();
+
+            // Add the tree search strategy (default)
+            res.Add(new SearchStrategy("Folder hierarchy scan", SearchByTree));
+
+            // Add the cluster search strategy
+            res.Add(new SearchStrategy("Cluster scan", SearchByCluster));
+
+            return res;
         }
 
         private void SectorSearch(FileSystem.NodeVisitCallback callback) {

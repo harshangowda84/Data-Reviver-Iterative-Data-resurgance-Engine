@@ -54,6 +54,7 @@
     <Compile Include="DeletedFileViewer.Designer.cs">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

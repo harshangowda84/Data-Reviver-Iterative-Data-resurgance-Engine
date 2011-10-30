@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using KFA.Disks;
-using KFA.FileSystem.FAT;
-using KFA.FileSystem.NTFS;
+using FileSystems.FileSystem.FAT;
+using FileSystems.FileSystem.NTFS;
 using FileSystems.FileSystem;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public abstract class FileSystem {
         public delegate bool NodeVisitCallback(INodeMetadata node, ulong current, ulong total);
 
@@ -90,10 +90,22 @@ namespace KFA.FileSystem {
             }
         }
 
+        public FileSystemNode GetFirstFile(string path) {
+            IEnumerator<FileSystemNode> en = this.GetFile(path).GetEnumerator();
+            if (en.MoveNext()) {
+                return en.Current;
+            }
+            return null;
+        }
+
         public virtual SectorStatus GetSectorStatus(ulong sectorNum) {
             return SectorStatus.Unknown;
         }
 
-        public abstract void VisitFiles(NodeVisitCallback callback, bool sectorSearch);
+        public abstract List<ISearchStrategy> GetSearchStrategies();
+
+        public virtual ISearchStrategy GetDefaultSearchStrategy() {
+            return GetSearchStrategies().First();
+        }
     }
 }

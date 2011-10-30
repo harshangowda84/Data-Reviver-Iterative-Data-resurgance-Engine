@@ -5,7 +5,6 @@ using System.Text;
 using FileSystems.FileSystem;
 using System.Threading;
 using System.Windows.Forms;
-using KFA.FileSystem;
 
 namespace KickassUndelete {
     public class ScanState {
@@ -36,7 +35,9 @@ namespace KickassUndelete {
             Progress = 0;
             ProgressUpdated();
 
-            m_FileSystem.VisitFiles(new FileSystem.NodeVisitCallback(delegate(INodeMetadata node, ulong current, ulong total) {
+            // TODO: Replace me with a search strategy selected from a text box!
+            ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
+            strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata node, ulong current, ulong total) {
                 if (node.Deleted && node.Name != null
                     && !node.Name.EndsWith(".manifest") 
                     && !node.Name.EndsWith(".cat")
@@ -50,7 +51,7 @@ namespace KickassUndelete {
                     ProgressUpdated();
                 }
                 return !m_ScanCancelled;
-            }), true);
+            }));
 
             if (!m_ScanCancelled) {
                 Progress = 1;

@@ -1,6 +1,6 @@
 ﻿using KFA.DataStream;
 
-namespace KFA.FileSystem.NTFS {
+namespace FileSystems.FileSystem.NTFS {
     public class FixupStream : SubStream {
         ushort m_Number;
         ushort[] m_Array;

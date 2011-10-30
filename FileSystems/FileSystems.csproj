@@ -98,6 +98,8 @@
     <Compile Include="FileSystem\NTFS\HiddenDataStreamFileNTFS.cs" />
     <Compile Include="FileSystem\NTFS\MFTRecord.cs" />
     <Compile Include="FileSystem\NTFS\NTFSFileStream.cs" />
+    <Compile Include="FileSystem\ISearchStrategy.cs" />
+    <Compile Include="FileSystem\SearchStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

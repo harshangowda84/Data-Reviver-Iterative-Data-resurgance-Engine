@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using KFA.FileSystem.NTFS;
+using FileSystems.FileSystem.NTFS;
 
 namespace KFA.Exceptions {
     public class NTFSException : FileSystemException {

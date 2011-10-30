@@ -2,13 +2,14 @@
 using System.Management;
 using System.Runtime.InteropServices;
 using KFA.DataStream;
+using FileSystems.FileSystem;
 
 namespace KFA.Disks {
     public class LogicalDisk : Disk, IFileSystemStore, IDescribable {
         public LogicalDiskAttributes Attributes { get; private set; }
 
         private ulong m_Size;
-        private FileSystem.FileSystem m_fileSystem;
+        private FileSystem m_fileSystem;
         public LogicalDisk(ManagementObject mo) {
             Attributes = new LogicalDiskAttributes(mo);
             Handle = Win32.CreateFile(@"\\.\" + Attributes.DeviceID, EFileAccess.GenericRead, EFileShare.Read | EFileShare.Write | EFileShare.Delete, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.None, IntPtr.Zero);
@@ -17,7 +18,7 @@ namespace KFA.Disks {
                 throw new Exception("Failed to get a handle to the logical volume. " + Marshal.GetLastWin32Error());
             }
             m_Size = Util.GetDiskSize(Handle);
-            m_fileSystem = FileSystem.FileSystem.TryLoad(this as IFileSystemStore);
+            m_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
         }
 
         #region IDescribable Members
@@ -50,7 +51,7 @@ namespace KFA.Disks {
             get { return Attributes; }
         }
 
-        public FileSystem.FileSystem FS {
+        public FileSystem FS {
             get { return m_fileSystem; }
         }
 

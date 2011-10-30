@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Management;
+using FileSystems.FileSystem;
 
 namespace KFA.Disks {
     public class PhysicalDiskPartition : PhysicalDiskSection, IFileSystemStore {
         public PhysicalDiskPartitionAttributes Attributes { get; private set; }
-        private FileSystem.FileSystem m_fileSystem;
+        private FileSystem m_fileSystem;
 
         public PhysicalDiskPartition(PhysicalDisk disk, MasterBootRecord.PartitionEntry pEntry) {
             PhysicalDisk = disk;
@@ -27,7 +28,7 @@ namespace KFA.Disks {
             }
             Attributes.PartitionType = pEntry.PartitionType;
 
-            m_fileSystem = FileSystem.FileSystem.TryLoad(this as IFileSystemStore);
+            m_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
         }
 
         public override string ToString() {
@@ -78,7 +79,7 @@ namespace KFA.Disks {
             get { return Attributes; }
         }
 
-        public FileSystem.FileSystem FS {
+        public FileSystem FS {
             get { return m_fileSystem; }
         }
 

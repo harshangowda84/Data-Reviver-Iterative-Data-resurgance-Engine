@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using KFA.DataStream;
 
-namespace KFA.FileSystem {
+namespace FileSystems.FileSystem {
     public class FileMounted : File {
         private FileStream m_Stream = null;
         private IDataStream m_Parent = null;
