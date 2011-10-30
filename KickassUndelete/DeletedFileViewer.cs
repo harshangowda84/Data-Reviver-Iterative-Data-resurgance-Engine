@@ -48,24 +48,30 @@ namespace KickassUndelete {
         }
 
         void state_ScanStarted() {
-            this.Invoke(new Action(() => {
-                SetScanButtonScanning();
-                UpdateTimer.Start();
-            }));
+            try {
+                this.Invoke(new Action(() => {
+                    SetScanButtonScanning();
+                    UpdateTimer.Start();
+                }));
+            } catch (InvalidOperationException) { }
         }
 
         void state_ScanFinished() {
-            this.Invoke(new Action(() => {
-                SetScanButtonFinished();
-                UpdateTimer.Stop();
-                UpdateTimer_Tick(null, null);
-            }));
+            try {
+                this.Invoke(new Action(() => {
+                    SetScanButtonFinished();
+                    UpdateTimer.Stop();
+                    UpdateTimer_Tick(null, null);
+                }));
+            } catch (InvalidOperationException) { }
         }
 
         void state_ProgressUpdated() {
-            this.Invoke(new Action(() => {
-                SetProgress(m_ScanState.Progress);
-            }));
+            try {
+                this.Invoke(new Action(() => {
+                    SetProgress(m_ScanState.Progress);
+                }));
+            } catch (InvalidOperationException) { }
         }
 
         public void EnableScanButton() {
@@ -83,6 +89,7 @@ namespace KickassUndelete {
             bScan.Enabled = false;
             bScan.Text = "Finished Scanning!";
             progressBar.Hide();
+            fileView.Height = Height - fileView.Top;
         }
 
         private void bScan_Click(object sender, EventArgs e) {
@@ -172,8 +179,7 @@ namespace KickassUndelete {
             }
         }
 
-        private void fileView_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
+        private void fileView_ColumnClick(object sender, ColumnClickEventArgs e) {
             // Determine if clicked column is already the column that is being sorted.
             if (e.Column == lvwColumnSorter.SortColumn) {
                 // Reverse the current sort direction for this column.
