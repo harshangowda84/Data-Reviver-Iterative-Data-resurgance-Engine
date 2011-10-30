@@ -10,6 +10,7 @@ using FileSystems.FileSystem;
 using System.Threading;
 using KFA.DataStream;
 using System.IO;
+using GuiComponents;
 
 namespace KickassUndelete {
     public partial class DeletedFileViewer : UserControl {
@@ -68,7 +69,7 @@ namespace KickassUndelete {
 
         void state_ProgressUpdated() {
             try {
-                this.Invoke(new Action(() => {
+                this.BeginInvoke(new Action(() => {
                     SetProgress(m_ScanState.Progress);
                 }));
             } catch (InvalidOperationException) { }
@@ -147,7 +148,7 @@ namespace KickassUndelete {
                 INodeMetadata metadata = fileView.SelectedItems[0].Tag as INodeMetadata;
                 if (metadata != null) {
                     ContextMenu menu = new ContextMenu();
-                    menu.MenuItems.Add(new MenuItem("Save File", new EventHandler(delegate(object o, EventArgs ea) {
+                    menu.MenuItems.Add(new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
                         SaveFileDialog saveFileDialog = new SaveFileDialog();
                         saveFileDialog.OverwritePrompt = true;
                         saveFileDialog.FileName = metadata.Name;
@@ -165,18 +166,31 @@ namespace KickassUndelete {
         }
 
         private void SaveFile(FileSystemNode node, string fileName) {
-            using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
-                ulong BLOCK_SIZE = 1024 * 1024; // 1MB
-                ulong offset = 0;
-                while (offset < node.StreamLength) {
-                    if (offset + BLOCK_SIZE < node.StreamLength) {
-                        bw.Write(node.GetBytes(offset, BLOCK_SIZE));
-                    } else {
-                        bw.Write(node.GetBytes(offset, node.StreamLength - offset));
+            SaveProgressDialog progressBar = new SaveProgressDialog();
+            progressBar.Show(this);
+            string file = Path.GetFileName(fileName);
+            Thread t = new Thread(delegate() {
+                using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
+                    ulong BLOCK_SIZE = 1024 * 1024; // 1MB
+                    ulong offset = 0;
+                    while (offset < node.StreamLength) {
+                        if (offset + BLOCK_SIZE < node.StreamLength) {
+                            bw.Write(node.GetBytes(offset, BLOCK_SIZE));
+                        } else {
+                            bw.Write(node.GetBytes(offset, node.StreamLength - offset));
+                        }
+                        this.BeginInvoke(new Action<double>(delegate(double progress) {
+                            progressBar.SetProgress(file, progress);
+                        }), (double)offset / (double)node.StreamLength);
+                        offset += BLOCK_SIZE;
                     }
-                    offset += BLOCK_SIZE;
+                    this.BeginInvoke(new Action(delegate() {
+                        progressBar.Close();
+                    }));
                 }
-            }
+            });
+
+            t.Start();
         }
 
         private void fileView_ColumnClick(object sender, ColumnClickEventArgs e) {
