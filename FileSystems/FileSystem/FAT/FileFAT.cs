@@ -45,41 +45,41 @@ namespace FileSystems.FileSystem.FAT {
 
         private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
 
-        public override byte GetByte(ulong _offset) {
-            long offset = (long)_offset;
-            long desiredCluster = FirstCluster + offset / FileSystem.BytesPerCluster;
-            long modOffset = offset % FileSystem.BytesPerCluster;
-            lock (m_ClusterCache) {
-                if (!m_ClusterCache.ContainsKey(desiredCluster)) {
-                    long currentCluster = FirstCluster;
-                    while (offset >= FileSystem.BytesPerCluster) {
-                        currentCluster = FileSystem.GetNextCluster(currentCluster);
-                        if (currentCluster < 0) {
-                            m_ClusterCache[desiredCluster] = null;
-                        }
-                        offset -= FileSystem.BytesPerCluster;
-                    }
-                    Debug.Assert(offset == modOffset);
-                    byte[] data = new byte[FileSystem.BytesPerCluster];
-                    for (int i = 0; i < FileSystem.BytesPerCluster; i++) {
-                        data[i] = FileSystem.Store.GetByte((ulong)(FileSystem.GetDiskOffsetOfFATCluster(currentCluster) + i));
-                    }
-                    m_ClusterCache[desiredCluster] = data;
-                }
-                if (m_ClusterCache[desiredCluster] == null) {
-                    return 0; // deleted file
-                } else {
-                    return m_ClusterCache[desiredCluster][modOffset];
-                }
-            }
+        public override byte GetByte(ulong offset) {
+            return GetBytes(offset, 1)[0];
         }
 
-        public override byte[] GetBytes(ulong offset, ulong length) {
-            byte[] res = new byte[length];
-            for (uint i = 0; i < length; i++) {
-                res[i] = GetByte(offset + i);
+        public override byte[] GetBytes(ulong _offset, ulong _length) {
+            long offset = (long)_offset;
+            long length = (long)_length;
+            long currentCluster = FirstCluster;
+
+            lock (m_ClusterCache) {
+                byte[] res = new byte[length];
+                long resindex = 0;
+                // Find the first cluster we want to read.
+                while (offset >= FileSystem.BytesPerCluster && currentCluster >= 0) {
+                    currentCluster = FileSystem.GetNextCluster(currentCluster);
+                    offset -= FileSystem.BytesPerCluster;
+                }
+                // Cache and retrieve the data for each cluster until we get all we need.
+                while (length > 0 && currentCluster >= 0) {
+                    // Cache the current cluster.
+                    if (!m_ClusterCache.ContainsKey(currentCluster)) {
+                        m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+                            (ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
+                            (ulong)FileSystem.BytesPerCluster);
+                    }
+
+                    // Read the cached data.
+                    long read = Math.Min(length, FileSystem.BytesPerCluster-offset);
+                    Array.Copy(m_ClusterCache[currentCluster], offset, res, resindex, read);
+                    offset = 0;
+                    length -= read;
+                    currentCluster = FileSystem.GetNextCluster(currentCluster);
+                }
+                return res;
             }
-            return res;
         }
 
         public override ulong DeviceOffset {

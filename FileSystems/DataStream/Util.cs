@@ -93,8 +93,9 @@ namespace KFA.DataStream {
             if (intSize > 8) throw new Exception("We can't get numbers bigger than ulongs");
             //intSize = Math.Min(intSize, 8);
             ulong result = 0;
+            byte[] bytesArb = stream.GetBytes(offset, intSize);
             for (int b = 0; (ulong)b < intSize; b++) {
-                result += ((ulong)stream.GetByte(offset + (ulong)b)) << (b * 8);
+                result += ((ulong)bytesArb[b]) << (b * 8);
             }
             return result;
         }
@@ -152,10 +153,14 @@ namespace KFA.DataStream {
 
 
         public static string CreateTemporaryFile(IDataStream stream) {
+            ulong BLOCK_SIZE = 1024 * 1024; // Write 1MB at a time
             string tempFile = Path.GetTempFileName();
             BinaryWriter writer = new BinaryWriter(new FileStream(tempFile, FileMode.Create));
-            for (ulong i = 0; i < stream.StreamLength; i++) {
-                writer.Write(stream.GetByte(i));
+            ulong offset = 0;
+            while (offset < stream.StreamLength) {
+                ulong read = Math.Min(BLOCK_SIZE,stream.StreamLength-offset);
+                writer.Write(stream.GetBytes(offset, read));
+                offset += read;
             }
             writer.Close();
             return tempFile;

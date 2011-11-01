@@ -28,12 +28,10 @@ namespace KFA.DataStream {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
-            UInt32 i;
-            for (i = 0; i < count && m_Position + (ulong)i < m_Stream.StreamLength; i++) {
-                buffer[offset + i] = m_Stream.GetByte(m_Position + (ulong)i);
-            }
-            m_Position += i;
-            return (int)i;
+            ulong read = Math.Min((ulong)count, m_Stream.StreamLength - m_Position);
+            m_Stream.GetBytes(m_Position, read);
+            m_Position += read;
+            return (int)read;
         }
 
         public override long Seek(long offset, System.IO.SeekOrigin origin) {

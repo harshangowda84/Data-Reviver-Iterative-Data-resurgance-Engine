@@ -6,9 +6,7 @@ using FileSystems.FileSystem;
 
 namespace KFA.Disks {
     public class Image : IFileSystemStore, IDescribable, IHasSectors {
-
         public delegate void ImageCallback(ulong x, ulong total);
-        private static ulong callbackRate = 1024 * 1024;
 
         public String Path { get; set; }
 
@@ -31,13 +29,14 @@ namespace KFA.Disks {
         }
 
         public static Image CreateImage(IImageable stream, String path, ImageCallback callback) {
+            ulong BLOCK_SIZE = 1024 * 1024; // Write 1MB at a time
             BinaryWriter bw = new BinaryWriter(System.IO.File.OpenWrite(path));
-            for (ulong l = 0; l < stream.StreamLength; l++) {
-                byte b = stream.GetByte(l);
-                bw.Write(b);
-                if (l % callbackRate == 0) {
-                    callback(l, stream.StreamLength);
-                }
+            ulong offset = 0;
+            while (offset < stream.StreamLength) {
+                ulong read = Math.Min(BLOCK_SIZE, stream.StreamLength - offset);
+                bw.Write(stream.GetBytes(offset, read));
+                callback(offset, stream.StreamLength);
+                offset += read;
             }
             bw.Close();
             callback(stream.StreamLength, stream.StreamLength);

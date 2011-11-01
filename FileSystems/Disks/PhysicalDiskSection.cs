@@ -10,17 +10,15 @@ namespace KFA.Disks {
         #region IDataStream Members
 
         public byte GetByte(ulong offset) {
-            // TODO: This line is shit right?
-            //if ((ulong)offset >= Offset + Length) {
             if ((ulong)offset >= Length) {
-                throw new Exception("WHARRRRRGARBL");
+                throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
             }
             return PhysicalDisk.GetByte(offset + Offset);
         }
 
         public byte[] GetBytes(ulong offset, ulong length) {
             if ((ulong)offset + length - 1 >= Length) {
-                throw new Exception("WHARRRRRGARBL");
+                throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
             }
             return PhysicalDisk.GetBytes(offset + Offset, length);
         }

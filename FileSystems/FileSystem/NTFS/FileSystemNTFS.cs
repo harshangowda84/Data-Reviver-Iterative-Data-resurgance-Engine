@@ -18,10 +18,7 @@ namespace FileSystems.FileSystem.NTFS {
         ulong BPB_SerialNumber;
 
         private void LoadBPB() {
-            byte[] bpb = new byte[BPB_SIZE];
-            for (int i = 0; i < BPB_SIZE; i++) {
-                bpb[i] = Store.GetByte((ulong)(0x0B + i));
-            }
+            byte[] bpb = Store.GetBytes((ulong)0x0B, (ulong)BPB_SIZE);
 
             BPB_BytsPerSec = BitConverter.ToUInt16(bpb, 0);
             BPB_SecPerClus = bpb[2];
