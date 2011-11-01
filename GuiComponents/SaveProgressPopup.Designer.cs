@@ -1,5 +1,5 @@
 ﻿namespace GuiComponents {
-    partial class SaveProgressDialog {
+    partial class SaveProgressPopup {
         /// <summary>
         /// Required designer variable.
         /// </summary>

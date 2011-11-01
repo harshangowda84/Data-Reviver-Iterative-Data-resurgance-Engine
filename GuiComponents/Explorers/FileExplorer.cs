@@ -14,16 +14,28 @@ using FileSystems.FileSystem.NTFS;
 using File = FileSystems.FileSystem.File;
 
 namespace KFA.GUI.Explorers {
+    /// <summary>
+    /// Builds a treeview of the filesystem in a given IFileSystemStore.
+    /// </summary>
     public partial class FileExplorer : UserControl, IExplorer {
-        private IDataStream m_CurrentStream = null;
+        private IDataStream m_CurrentStream;
 
+        /// <summary>
+        /// Constructs the file explorer.
+        /// </summary>
         public FileExplorer() {
             InitializeComponent();
             treeFiles.ImageList = imageList1;
             treeFiles.SelectedImageKey = null;
         }
 
-        private void AppendChildren(TreeNode node, IEnumerable<FileSystemNode> children) {
+        /// <summary>
+        /// Creates TreeNodes for a list of given FileSystemNodes and appends them to
+        /// the specified TreeNode as children.
+        /// </summary>
+        /// <param name="node">The node to which the new children will be appended.</param>
+        /// <param name="children">The filesystem nodes to create TreeNodes for.</param>
+        private static void AppendChildren(TreeNode node, IEnumerable<FileSystemNode> children) {
             node.Nodes.Clear();
             foreach (FileSystemNode child in children) {
                 TreeNode treeNode = new TreeNode(child.ToString());
@@ -67,16 +79,27 @@ namespace KFA.GUI.Explorers {
 
         #region IExplorer Members
 
+        /// <summary>
+        /// Gets whether this explorer can view a particular stream.
+        /// </summary>
+        /// <param name="stream">The stream to view.</param>
+        /// <returns>Whether the stream can be viewed by this explorer.</returns>
         public bool CanView(IDataStream stream) {
             return stream is IFileSystemStore;
         }
 
+        /// <summary>
+        /// Views a data stream. Clients should check that CanView(stream)
+        /// returns true before calling this method.
+        /// </summary>
+        /// <param name="stream">The data stream to view.</param>
         public void View(IDataStream stream) {
             if (stream != m_CurrentStream) {
                 m_CurrentStream = stream;
                 treeFiles.Nodes.Clear();
-                if (stream is IFileSystemStore) {
-                    FileSystem fs = (stream as IFileSystemStore).FS;
+                IFileSystemStore store = stream as IFileSystemStore;
+                if (store != null) {
+                    FileSystem fs = store.FS;
                     FileSystemNode fsRoot;
                     if (fs != null) {
                         fsRoot = fs.GetRoot();
@@ -140,21 +163,34 @@ namespace KFA.GUI.Explorers {
             }
         }
 
-        private void SaveFolder(Folder f, string p) {
-            Directory.CreateDirectory(p);
-            foreach (FileSystemNode node in f.GetChildren()) {
+        /// <summary>
+        /// Saves a folder full of recovered files to the specified path.
+        /// </summary>
+        /// <param name="folder">The folder to save.</param>
+        /// <param name="path">The path to save the folder to.</param>
+        private void SaveFolder(Folder folder, string path) {
+            Directory.CreateDirectory(path);
+            foreach (FileSystemNode node in folder.GetChildren()) {
                 if (node is File || node is HiddenDataStreamFileNTFS) {
-                    SaveFile(node, Path.Combine(p, node.Name));
-                } else if (node is Folder) {
-                    SaveFolder(node as Folder, Path.Combine(p, node.Name));
+                    SaveFile(node, Path.Combine(path, node.Name));
+                } else {
+                    Folder folderNode = node as Folder;
+                    if (folderNode != null) {
+                        SaveFolder(folderNode, Path.Combine(path, node.Name));
+                    }
                 }
             }
         }
 
-        private void SaveFile(FileSystemNode file, string filepath) {
-            if (!System.IO.File.Exists(filepath)) {
+        /// <summary>
+        /// Saves a single recovered file to disk.
+        /// </summary>
+        /// <param name="file">The file to save.</param>
+        /// <param name="filePath">The path to save the file to.</param>
+        private static void SaveFile(FileSystemNode file, string filePath) {
+            if (!System.IO.File.Exists(filePath)) {
                 using (ForensicsAppStream fas = new ForensicsAppStream(file)) {
-                    using (Stream output = new FileStream(filepath, FileMode.Create)) {
+                    using (Stream output = new FileStream(filePath, FileMode.Create)) {
                         byte[] buffer = new byte[32 * 1024];
                         int read;
 
@@ -166,6 +202,9 @@ namespace KFA.GUI.Explorers {
             }
         }
 
+        /// <summary>
+        /// This event is fired when an IDataStream is selected in this explorer by the user.
+        /// </summary>
         public event StreamSelectedEventHandler StreamSelected;
 
         private void OnStreamSelected(IDataStream stream) {
@@ -175,5 +214,10 @@ namespace KFA.GUI.Explorers {
         }
     }
 
+    /// <summary>
+    /// An event handler to be used when a stream is selected.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="stream"></param>
     public delegate void StreamSelectedEventHandler(object sender, IDataStream stream);
 }

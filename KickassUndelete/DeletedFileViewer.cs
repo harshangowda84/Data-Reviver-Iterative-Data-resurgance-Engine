@@ -20,7 +20,6 @@ namespace KickassUndelete {
     public partial class DeletedFileViewer : UserControl {
         private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
 
-
         private ScanState m_ScanState;
         private int m_NumFilesShown;
         private string m_Filter = "";
@@ -241,7 +240,7 @@ namespace KickassUndelete {
         /// <param name="filePath">The path to save the file to.</param>
         private void SaveFile(FileSystemNode node, string filePath) {
             m_Saving = true;
-            SaveProgressDialog progressBar = new SaveProgressDialog();
+            SaveProgressPopup progressBar = new SaveProgressPopup();
             progressBar.Show(this);
             string file = Path.GetFileName(filePath);
             Thread t = new Thread(delegate() {
@@ -276,7 +275,7 @@ namespace KickassUndelete {
         /// <param name="folderPath">The folder in which to save the recovered files.</param>
         private void SaveFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
             m_Saving = true;
-            SaveProgressDialog progressBar = new SaveProgressDialog();
+            SaveProgressPopup progressBar = new SaveProgressPopup();
             progressBar.Show(this);
 
             Thread t = new Thread(delegate() {
