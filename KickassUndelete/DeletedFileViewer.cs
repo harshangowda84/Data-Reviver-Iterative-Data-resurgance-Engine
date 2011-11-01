@@ -20,6 +20,8 @@ namespace KickassUndelete {
         private ScanState m_ScanState = null;
         private int m_NumFilesShown = 0;
         private string m_Filter = "";
+        private bool m_Scanning = false;
+        private bool m_Saving = false;
 
         private ListViewColumnSorter lvwColumnSorter;
 
@@ -49,6 +51,7 @@ namespace KickassUndelete {
         }
 
         void state_ScanStarted() {
+            m_Scanning = true;
             try {
                 this.Invoke(new Action(() => {
                     SetScanButtonScanning();
@@ -64,6 +67,7 @@ namespace KickassUndelete {
                     UpdateTimer.Stop();
                     UpdateTimer_Tick(null, null);
                 }));
+                m_Scanning = false;
             } catch (InvalidOperationException) { }
         }
 
@@ -90,7 +94,7 @@ namespace KickassUndelete {
             bScan.Enabled = false;
             bScan.Text = "Finished Scanning!";
             progressBar.Hide();
-            fileView.Height = Height - fileView.Top;
+            bRestoreFiles.Show();
         }
 
         private void bScan_Click(object sender, EventArgs e) {
@@ -144,22 +148,45 @@ namespace KickassUndelete {
         }
 
         private void fileView_MouseClick(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Right && fileView.SelectedItems.Count == 1) {
-                INodeMetadata metadata = fileView.SelectedItems[0].Tag as INodeMetadata;
-                if (metadata != null) {
-                    ContextMenu menu = new ContextMenu();
-                    menu.MenuItems.Add(new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
-                        SaveFileDialog saveFileDialog = new SaveFileDialog();
-                        saveFileDialog.OverwritePrompt = true;
-                        saveFileDialog.FileName = metadata.Name;
-                        saveFileDialog.Filter = "Any Files|*.*";
-                        saveFileDialog.Title = "Select a Location";
+            if (e.Button == MouseButtons.Right) {
+                if (fileView.SelectedItems.Count == 1) {
+                    INodeMetadata metadata = fileView.SelectedItems[0].Tag as INodeMetadata;
+                    if (metadata != null) {
+                        ContextMenu menu = new ContextMenu();
+                        MenuItem recoverFile = new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
+                            SaveFileDialog saveFileDialog = new SaveFileDialog();
+                            saveFileDialog.OverwritePrompt = true;
+                            saveFileDialog.FileName = metadata.Name;
+                            saveFileDialog.Filter = "Any Files|*.*";
+                            saveFileDialog.Title = "Select a Location";
 
-                        if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-                            FileSystemNode node = metadata.GetFileSystemNode();
-                            SaveFile(node, saveFileDialog.FileName);
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+                                FileSystemNode node = metadata.GetFileSystemNode();
+                                SaveFile(node, saveFileDialog.FileName);
+                            }
+                        }));
+                        recoverFile.Enabled = !m_Scanning && !m_Saving;
+                        menu.MenuItems.Add(recoverFile);
+                        menu.Show(fileView, e.Location);
+                    }
+                } else if (fileView.SelectedItems.Count > 1) {
+                    ContextMenu menu = new ContextMenu();
+                    MenuItem recoverFiles = new MenuItem("Recover Files...", new EventHandler(delegate(object o, EventArgs ea) {
+                        FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+
+                        if (folderDialog.ShowDialog() == DialogResult.OK) {
+                            List<FileSystemNode> nodes = new List<FileSystemNode>();
+                            foreach (ListViewItem item in fileView.SelectedItems) {
+                                INodeMetadata metadata = item.Tag as INodeMetadata;
+                                if (metadata != null) {
+                                    nodes.Add(metadata.GetFileSystemNode());
+                                }
+                            }
+                            SaveFiles(nodes, folderDialog.SelectedPath);
                         }
-                    })));
+                    }));
+                    recoverFiles.Enabled = !m_Scanning && !m_Saving;
+                    menu.MenuItems.Add(recoverFiles);
                     menu.Show(fileView, e.Location);
                 }
             }
@@ -188,6 +215,39 @@ namespace KickassUndelete {
                         progressBar.Close();
                     }));
                 }
+            });
+
+            t.Start();
+        }
+
+        private void SaveFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
+            SaveProgressDialog progressBar = new SaveProgressDialog();
+            progressBar.Show(this);
+
+            Thread t = new Thread(delegate() {
+                foreach (FileSystemNode node in nodes) {
+                    string file = node.Name;
+                    string fileName = Path.Combine(folderPath, file);
+                    using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
+                        ulong BLOCK_SIZE = 1024 * 1024; // 1MB
+                        ulong offset = 0;
+                        while (offset < node.StreamLength) {
+                            if (offset + BLOCK_SIZE < node.StreamLength) {
+                                bw.Write(node.GetBytes(offset, BLOCK_SIZE));
+                            } else {
+                                bw.Write(node.GetBytes(offset, node.StreamLength - offset));
+                            }
+                            offset += BLOCK_SIZE;
+                            this.BeginInvoke(new Action<double>(delegate(double progress) {
+                                progressBar.SetProgress(file, progress);
+                            }), Math.Min(1, (double)offset / (double)node.StreamLength));
+                        }
+                    }
+                }
+                this.BeginInvoke(new Action(delegate() {
+                    progressBar.Close();
+                    UpdateRestoreButton();
+                }));
             });
 
             t.Start();
@@ -230,6 +290,33 @@ namespace KickassUndelete {
             } else {
                 FilterBy("");
             }
+        }
+
+        private void bRestoreFiles_Click(object sender, EventArgs e) {
+            if (fileView.CheckedItems.Count > 1) {
+                FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+
+                if (folderDialog.ShowDialog() == DialogResult.OK) {
+                    List<FileSystemNode> nodes = new List<FileSystemNode>();
+                    foreach (ListViewItem item in fileView.CheckedItems) {
+                        INodeMetadata metadata = item.Tag as INodeMetadata;
+                        if (metadata != null) {
+                            nodes.Add(metadata.GetFileSystemNode());
+                        }
+                    }
+                    SaveFiles(nodes, folderDialog.SelectedPath);
+                }
+            }
+        }
+
+        private void UpdateRestoreButton() {
+            if (!m_Scanning && !m_Saving) {
+                bRestoreFiles.Enabled = fileView.CheckedItems.Count > 0;
+            }
+        }
+
+        private void fileView_ItemCheck(object sender, ItemCheckEventArgs e) {
+            UpdateRestoreButton();
         }
     }
 }
