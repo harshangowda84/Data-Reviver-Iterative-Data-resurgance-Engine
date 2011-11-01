@@ -81,7 +81,7 @@ namespace KickassUndelete {
                     && !node.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
                     && !node.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)
                     && node.GetFileSystemNode().Size > 0 ) {
-                    DeletedFiles.Add(node);
+                    m_DeletedFiles.Add(node);
                 }
 
                 if (current % 100 == 0) {
