@@ -24,8 +24,34 @@ th {
 	margin: 5px;
 }
 table.downloads {
-	width: 500px;
+	width:100%;
+	border-left: 1px solid #9ab46d;
+	border-bottom: 1px solid #9ab46d;
+	border-spacing: 0;
 }
+.downloads td, .downloads th {
+	padding:5px;
+	border-top: 1px solid #9ab46d;
+	border-right: 1px solid #9ab46d;
+}
+
+.downloads th {
+	background-color:#dafea6;
+}
+
+.download_button {
+	float:right;
+	border: 1px solid #9ab46d;
+	background-color:#dafea6;
+	padding: 15px;
+	margin: 15px;
+	margin-right:0;
+}
+
+.download_button h3, .download_button p {
+	margin:5px 0 0 0;
+}
+
 </style>
 </head>
 <body>
@@ -34,6 +60,10 @@ table.downloads {
 <img src="images/header.png"/>
 </div>
 <div class="content">
+<div class="download_button">
+<h3>Download the latest version</h3>
+<p><a href="http://sourceforge.net/projects/kickassundelete/files/Kickass%20Undelete%201.0%20beta/KickassUndelete_1.0_beta.zip/download">KickassUndelete_1.0_beta.zip</a></p>
+</div>
 <h1>About</h1>
 <p>
 Kickass Undelete is a free, fully featured, file recovery tool for Windows. Accidentally deleted a file? Never fear; the data is probably still on your drive and may be recoverable. Kickass Undelete finds all of the deleted files on your hard drive, flash drive or SD card and allows you to recover them.
@@ -48,22 +78,12 @@ Features:
 <li>Support for both FAT and NTFS filesystems</li>
 <li>Filter by filename and extension</li>
 <li>Easy-to-use interface</li>
+<li>Unreasonably large scan button</li>
 </ul>
 </p>
 <p>
 Kickass Undelete is open source! Visit <a href="http://sourceforge.net/projects/kickassundelete/">our project on Sourceforge</a> to report bugs or contribute to the project.
 </p>
-<h1>Downloads</h1>
-<h2>Latest version:</h2>
-<table class="downloads">
-<tr><th colspan="2">1.0 beta</th></tr>
-<!--tr><td>Windows installer</td><td>Link</td></tr-->
-<tr><td>Zip file</td><td><a href="http://sourceforge.net/projects/kickassundelete/files/Kickass%20Undelete%201.0%20beta/KickassUndelete_1.0_beta.zip/download">KickassUndelete_1.0_beta.zip</a></td></tr>
-<!--tr><td>Release notes</td><td>Link</td></tr-->
-</table>
-
-<!--h2>Previous versions:</h2-->
-
 
 
 
@@ -75,10 +95,26 @@ Kickass Undelete is open source! Visit <a href="http://sourceforge.net/projects/
 <a href="images/screen5.png"><img src="images/screen5.png" width="259" height="145"/></a>
 
 
+
+<h1><a name="downloads">Downloads</a></h1>
+<h2>Latest version:</h2>
+<table class="downloads alldownloads">
+<tr><th colspan="3">1.0 beta</th></tr>
+<tr><td>Windows installer</td><td>Coming Soon!</td><td>&nbsp;</td></tr>
+<tr><td>Zip file</td><td><a href="http://sourceforge.net/projects/kickassundelete/files/Kickass%20Undelete%201.0%20beta/KickassUndelete_1.0_beta.zip/download">KickassUndelete_1.0_beta.zip</a></td><td>329.8 kB</td></tr>
+<tr><td>Release notes</td><td>Coming Soon!</td><td>&nbsp;</td></tr>
+</table>
+
+<!--h2>Previous versions:</h2-->
+
+
+
+
+
 <h1>Developers</h1>
 <p>
 Joey Scarr - <a href="http://www.joey.scarr.co.nz/">personal website</a><br/>
-Josh Oosterman - <a href="http://www.josh.oosterman.co.nz/">personal website</a><br/>
+Josh Oosterman - <a href="http://josh.oosterman.co.nz/">personal website</a><br/>
 Lukas Korsika
 </p>
 
