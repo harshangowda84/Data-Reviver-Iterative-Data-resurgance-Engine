@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections;
 using System.Windows.Forms;
 using FileSystems.FileSystem;
+using System.Globalization;
 
 namespace KickassUndelete {
     /// <summary>
@@ -28,14 +29,11 @@ namespace KickassUndelete {
         /// Class constructor.  Initializes various elements
         /// </summary>
         public ListViewColumnSorter() {
-            // Initialize the column to '0'
-            ColumnToSort = 0;
-
             // Initialize the sort order to 'none'
             OrderOfSort = SortOrder.None;
 
             // Initialize the CaseInsensitiveComparer object
-            ObjectCompare = new CaseInsensitiveComparer();
+            ObjectCompare = new CaseInsensitiveComparer(CultureInfo.CurrentCulture);
         }
 
         /// <summary>

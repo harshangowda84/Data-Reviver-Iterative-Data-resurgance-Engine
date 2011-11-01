@@ -5,63 +5,127 @@ using System.Text;
 using FileSystems.FileSystem;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.ObjectModel;
 
 namespace KickassUndelete {
+    /// <summary>
+    /// Encapsulates the state of a scan for deleted files.
+    /// </summary>
     public class ScanState {
-        public List<INodeMetadata> DeletedFiles = new List<INodeMetadata>();
-        public DeletedFileViewer Viewer;
-        public double Progress = 0.0;
-        public Thread Thread = null;
-        public bool m_ScanCancelled = false;
-        public FileSystem m_FileSystem = null;
+        private List<INodeMetadata> m_DeletedFiles = new List<INodeMetadata>();
+        private DeletedFileViewer m_Viewer;
+        private double m_Progress;
+        private Thread m_Thread;
+        private bool m_ScanCancelled;
+        private FileSystem m_FileSystem;
 
+        /// <summary>
+        /// Constructs a ScanState on the specified filesystem.
+        /// </summary>
+        /// <param name="fileSystem">The filesystem to scan.</param>
         public ScanState(FileSystem fileSystem) {
             m_FileSystem = fileSystem;
-            Viewer = new DeletedFileViewer(this);
+            m_Viewer = new DeletedFileViewer(this);
         }
 
+        /// <summary>
+        /// Gets the deleted files found by the scan.
+        /// </summary>
+        public IList<INodeMetadata> DeletedFiles {
+            get { return m_DeletedFiles.AsReadOnly(); }
+        }
+
+        /// <summary>
+        /// Gets the viewer for this ScanState.
+        /// </summary>
+        public DeletedFileViewer Viewer {
+            get { return m_Viewer; }
+        }
+
+        /// <summary>
+        /// Gets the current progress of the scan (between 0 and 1).
+        /// </summary>
+        public double Progress {
+            get { return m_Progress; }
+        }
+
+        /// <summary>
+        /// Starts a scan on the filesystem.
+        /// </summary>
         public void StartScan() {
             m_ScanCancelled = false;
-            Thread = new Thread(Run);
-            Thread.Start();
+            m_Thread = new Thread(Run);
+            m_Thread.Start();
         }
 
+        /// <summary>
+        /// Cancels the currently running scan.
+        /// </summary>
         public void CancelScan() {
             m_ScanCancelled = true;
         }
 
-        public void Run() {
-            ScanStarted();
-            Progress = 0;
-            ProgressUpdated();
+        /// <summary>
+        /// Runs a scan.
+        /// </summary>
+        private void Run() {
+            OnScanStarted();
+            m_Progress = 0;
+            OnProgressUpdated();
 
             // TODO: Replace me with a search strategy selected from a text box!
             ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
             strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata node, ulong current, ulong total) {
                 if (node.Deleted && node.Name != null
-                    && !node.Name.EndsWith(".manifest") 
-                    && !node.Name.EndsWith(".cat")
-                    && !node.Name.EndsWith(".mum")
+                    && !node.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
+                    && !node.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
+                    && !node.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)
                     && node.GetFileSystemNode().Size > 0 ) {
                     DeletedFiles.Add(node);
                 }
 
                 if (current % 100 == 0) {
-                    Progress = (double)current / (double)total;
-                    ProgressUpdated();
+                    m_Progress = (double)current / (double)total;
+                    OnProgressUpdated();
                 }
                 return !m_ScanCancelled;
             }));
 
             if (!m_ScanCancelled) {
-                Progress = 1;
-                ProgressUpdated();
-                ScanFinished();
+                m_Progress = 1;
+                OnProgressUpdated();
+                OnScanFinished();
             }
         }
 
-        public event Action ProgressUpdated;
-        public event Action ScanStarted;
-        public event Action ScanFinished;
+        /// <summary>
+        /// This event fires repeatedly as the scan progresses.
+        /// </summary>
+        public event EventHandler ProgressUpdated;
+        private void OnProgressUpdated() {
+            if (ProgressUpdated != null) {
+                ProgressUpdated(this, null);
+            }
+        }
+
+        /// <summary>
+        /// This event fires when the scan is started.
+        /// </summary>
+        public event EventHandler ScanStarted;
+        private void OnScanStarted() {
+            if (ScanStarted != null) {
+                ScanStarted(this, null);
+            }
+        }
+
+        /// <summary>
+        /// This event fires when the scan finishes.
+        /// </summary>
+        public event EventHandler ScanFinished;
+        private void OnScanFinished() {
+            if (ScanFinished != null) {
+                ScanFinished(this, null);
+            }
+        }
     }
 }

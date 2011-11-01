@@ -13,10 +13,16 @@ using KFA.DataStream;
 using FileSystems;
 
 namespace KickassUndelete {
+    /// <summary>
+    /// The main form of Kickass Undelete.
+    /// </summary>
     public partial class MainForm : Form {
-        FileSystem m_FileSystem = null;
+        FileSystem m_FileSystem;
         Dictionary<FileSystem, ScanState> m_ScanState = new Dictionary<FileSystem, ScanState>();
 
+        /// <summary>
+        /// Constructs the main form.
+        /// </summary>
         public MainForm() {
             InitializeComponent();
         }

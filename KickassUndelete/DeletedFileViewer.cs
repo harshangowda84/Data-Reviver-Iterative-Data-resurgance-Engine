@@ -13,18 +13,26 @@ using System.IO;
 using GuiComponents;
 
 namespace KickassUndelete {
+    /// <summary>
+    /// A custom GUI control for viewing a list of deleted files.
+    /// Acts as the View to a ScanState object.
+    /// </summary>
     public partial class DeletedFileViewer : UserControl {
         private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
 
 
-        private ScanState m_ScanState = null;
-        private int m_NumFilesShown = 0;
+        private ScanState m_ScanState;
+        private int m_NumFilesShown;
         private string m_Filter = "";
-        private bool m_Scanning = false;
-        private bool m_Saving = false;
+        private bool m_Scanning;
+        private bool m_Saving;
 
         private ListViewColumnSorter lvwColumnSorter;
 
+        /// <summary>
+        /// Constructs a DeletedFileViewer, using a given ScanState.
+        /// </summary>
+        /// <param name="state">The ScanState that will be the model for this DeletedFileViewer.</param>
         public DeletedFileViewer(ScanState state) {
             InitializeComponent();
 
@@ -32,15 +40,18 @@ namespace KickassUndelete {
             fileView.ListViewItemSorter = lvwColumnSorter;
 
             m_ScanState = state;
-            state.ProgressUpdated += new Action(state_ProgressUpdated);
-            state.ScanStarted += new Action(state_ScanStarted);
-            state.ScanFinished += new Action(state_ScanFinished);
+            state.ProgressUpdated += new EventHandler(state_ProgressUpdated);
+            state.ScanStarted += new EventHandler(state_ScanStarted);
+            state.ScanFinished += new EventHandler(state_ScanFinished);
 
             UpdateFilterTextBox();
         }
 
+        /// <summary>
+        /// Updates the filter textbox to show the "Enter filter text" message.
+        /// </summary>
         private void UpdateFilterTextBox() {
-            if (tbFilter.Text == "" || tbFilter.Text == EMPTY_FILTER_TEXT) {
+            if (tbFilter.Text.Length == 0 || tbFilter.Text == EMPTY_FILTER_TEXT) {
                 tbFilter.Text = EMPTY_FILTER_TEXT;
                 tbFilter.ForeColor = Color.Gray;
                 tbFilter.Font = new Font(tbFilter.Font, FontStyle.Italic);
@@ -50,7 +61,10 @@ namespace KickassUndelete {
             }
         }
 
-        void state_ScanStarted() {
+        /// <summary>
+        /// Handles a scan starting.
+        /// </summary>
+        void state_ScanStarted(object sender, EventArgs ea) {
             m_Scanning = true;
             try {
                 this.Invoke(new Action(() => {
@@ -60,7 +74,10 @@ namespace KickassUndelete {
             } catch (InvalidOperationException) { }
         }
 
-        void state_ScanFinished() {
+        /// <summary>
+        /// Handles a scan finishing.
+        /// </summary>
+        void state_ScanFinished(object sender, EventArgs ea) {
             try {
                 this.Invoke(new Action(() => {
                     SetScanButtonFinished();
@@ -71,7 +88,10 @@ namespace KickassUndelete {
             } catch (InvalidOperationException) { }
         }
 
-        void state_ProgressUpdated() {
+        /// <summary>
+        /// Handles a progress report from the underlying ScanState.
+        /// </summary>
+        void state_ProgressUpdated(object sender, EventArgs ea) {
             try {
                 this.BeginInvoke(new Action(() => {
                     SetProgress(m_ScanState.Progress);
@@ -79,17 +99,18 @@ namespace KickassUndelete {
             } catch (InvalidOperationException) { }
         }
 
-        public void EnableScanButton() {
-            bScan.Enabled = true;
-            bScan.Text = "Scan";
-        }
-
+        /// <summary>
+        /// Disables the scan button and shows the progress bar.
+        /// </summary>
         public void SetScanButtonScanning() {
             bScan.Enabled = false;
             bScan.Text = "Scanning...";
             progressBar.Show();
         }
 
+        /// <summary>
+        /// Hides the progress bar and sets the scan button to "Finished".
+        /// </summary>
         public void SetScanButtonFinished() {
             bScan.Enabled = false;
             bScan.Text = "Finished Scanning!";
@@ -101,18 +122,29 @@ namespace KickassUndelete {
             m_ScanState.StartScan();
         }
 
-        private ListViewItem[] MakeListItems(List<INodeMetadata> metadatas) {
+        /// <summary>
+        /// Constructs a list of ListViewItems based on the files retrieved by the
+        /// underlying ScanState. Only creates list items that match the filter.
+        /// </summary>
+        /// <param name="metadatas">A list of the metadata for each deleted file found.</param>
+        /// <returns>An array of ListViewItems.</returns>
+        private ListViewItem[] MakeListItems(IList<INodeMetadata> metadatas) {
             List<ListViewItem> items = new List<ListViewItem>(metadatas.Count);
             for (int i = 0; i < metadatas.Count; i++) {
                 ListViewItem item = MakeListItem(metadatas[i]);
-                if (item.Text.ToLower().Contains(m_Filter)) {
+                if (item.Text.ToUpperInvariant().Contains(m_Filter)) {
                     items.Add(item);
                 }
             }
             return items.ToArray();
         }
 
-        private ListViewItem MakeListItem(INodeMetadata metadata) {
+        /// <summary>
+        /// Constructs a ListViewItem from an underlying INodeMetadata model.
+        /// </summary>
+        /// <param name="metadata">The metadata to create a view for.</param>
+        /// <returns>The constructed ListViewItem.</returns>
+        private static ListViewItem MakeListItem(INodeMetadata metadata) {
             FileSystemNode node = metadata.GetFileSystemNode();
             ListViewItem lvi = new ListViewItem(new string[] {
                 metadata.Name,
@@ -123,13 +155,22 @@ namespace KickassUndelete {
             return lvi;
         }
 
+        /// <summary>
+        /// Sets the progress of the scan progress bar.
+        /// </summary>
+        /// <param name="progress"></param>
         private void SetProgress(double progress) {
             progressBar.Value = (int)(progress * progressBar.Maximum);
         }
 
+        /// <summary>
+        /// Filter the ListView by a filter string.
+        /// </summary>
+        /// <param name="filter">The string to filter by.</param>
         private void FilterBy(string filter) {
-            if (m_Filter != filter.ToLower()) {
-                m_Filter = filter.ToLower();
+            string upperFilter = filter.ToUpperInvariant();
+            if (m_Filter != upperFilter) {
+                m_Filter = upperFilter;
 
                 fileView.Items.Clear();
                 ListViewItem[] items = MakeListItems(m_ScanState.DeletedFiles);
@@ -170,6 +211,7 @@ namespace KickassUndelete {
                         menu.Show(fileView, e.Location);
                     }
                 } else if (fileView.SelectedItems.Count > 1) {
+                    // We need slightly different behaviour to save multiple files.
                     ContextMenu menu = new ContextMenu();
                     MenuItem recoverFiles = new MenuItem("Recover Files...", new EventHandler(delegate(object o, EventArgs ea) {
                         FolderBrowserDialog folderDialog = new FolderBrowserDialog();
@@ -192,12 +234,18 @@ namespace KickassUndelete {
             }
         }
 
-        private void SaveFile(FileSystemNode node, string fileName) {
+        /// <summary>
+        /// Recovers a single file to the specified filepath.
+        /// </summary>
+        /// <param name="node">The file to recover.</param>
+        /// <param name="filePath">The path to save the file to.</param>
+        private void SaveFile(FileSystemNode node, string filePath) {
+            m_Saving = true;
             SaveProgressDialog progressBar = new SaveProgressDialog();
             progressBar.Show(this);
-            string file = Path.GetFileName(fileName);
+            string file = Path.GetFileName(filePath);
             Thread t = new Thread(delegate() {
-                using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
+                using (BinaryWriter bw = new BinaryWriter(new FileStream(filePath, FileMode.Create))) {
                     ulong BLOCK_SIZE = 1024 * 1024; // 1MB
                     ulong offset = 0;
                     while (offset < node.StreamLength) {
@@ -213,6 +261,7 @@ namespace KickassUndelete {
                     }
                     this.BeginInvoke(new Action(delegate() {
                         progressBar.Close();
+                        m_Saving = false;
                     }));
                 }
             });
@@ -220,7 +269,13 @@ namespace KickassUndelete {
             t.Start();
         }
 
+        /// <summary>
+        /// Recovers multiple files into the specified folder.
+        /// </summary>
+        /// <param name="nodes">The files to recover.</param>
+        /// <param name="folderPath">The folder in which to save the recovered files.</param>
         private void SaveFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
+            m_Saving = true;
             SaveProgressDialog progressBar = new SaveProgressDialog();
             progressBar.Show(this);
 
@@ -247,6 +302,7 @@ namespace KickassUndelete {
                 this.BeginInvoke(new Action(delegate() {
                     progressBar.Close();
                     UpdateRestoreButton();
+                    m_Saving = false;
                 }));
             });
 
@@ -273,7 +329,7 @@ namespace KickassUndelete {
         }
 
         private void tbFilter_Enter(object sender, EventArgs e) {
-            if (tbFilter.Text == "" || tbFilter.Text == EMPTY_FILTER_TEXT) {
+            if (tbFilter.Text.Length == 0 || tbFilter.Text == EMPTY_FILTER_TEXT) {
                 tbFilter.Text = "";
                 tbFilter.ForeColor = Color.Black;
                 tbFilter.Font = new Font(tbFilter.Font, FontStyle.Regular);
@@ -285,7 +341,7 @@ namespace KickassUndelete {
         }
 
         private void tbFilter_TextChanged(object sender, EventArgs e) {
-            if (tbFilter.Text != "" && tbFilter.Text != EMPTY_FILTER_TEXT) {
+            if (tbFilter.Text.Length == 0 && tbFilter.Text != EMPTY_FILTER_TEXT) {
                 FilterBy(tbFilter.Text);
             } else {
                 FilterBy("");
@@ -309,6 +365,9 @@ namespace KickassUndelete {
             }
         }
 
+        /// <summary>
+        /// Sets the restore button to be enabled if there are list items checked.
+        /// </summary>
         private void UpdateRestoreButton() {
             if (!m_Scanning && !m_Saving) {
                 bRestoreFiles.Enabled = fileView.CheckedItems.Count > 0;
