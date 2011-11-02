@@ -234,6 +234,10 @@ namespace FileSystems.FileSystem.NTFS {
             get { return m_record.BytesPerSector; }
         }
 
+        public override long Identifier {
+            get { return (long)m_record.MFTRecordNumber; }
+        }
+
         private void loadChildrenIndexRoot() {
             NTFSFileStream stream = m_indexRoot;
             m_rootEntries = new List<IndexEntry>();

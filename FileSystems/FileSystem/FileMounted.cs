@@ -19,6 +19,10 @@ namespace FileSystems.FileSystem {
             Name = i.Name;
         }
 
+        public override long Identifier {
+            get { return 0; /* no-op */ }
+        }
+
         public override byte GetByte(ulong offset) {
             if (m_Stream != null) {
                 m_Stream.Seek((long) offset, SeekOrigin.Begin);

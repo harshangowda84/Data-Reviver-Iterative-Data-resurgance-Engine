@@ -18,6 +18,10 @@ namespace FileSystems.FileSystem {
             Name = m_Info.Name;
         }
 
+        public override long Identifier {
+            get { return 0; /* no-op */ }
+        }
+
         public override IEnumerable<FileSystemNode> GetChildren() {
             foreach (FileSystemInfo entry in m_Info.GetFileSystemInfos()) {
                 if ((entry.Attributes & FileAttributes.Directory) != 0) {

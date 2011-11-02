@@ -7,6 +7,7 @@ using FileSystems.FileSystem;
 
 namespace FileSystems.FileSystem {
     public abstract class FileSystemNode : IDataStream, INodeMetadata {
+        public abstract long Identifier { get; }
         public string Name { get; protected set; }
         public ulong Size {
             get { return StreamLength; }

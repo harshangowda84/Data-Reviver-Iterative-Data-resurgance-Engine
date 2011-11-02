@@ -13,7 +13,6 @@ namespace KickassUndelete {
     /// </summary>
     public class ScanState {
         private List<INodeMetadata> m_DeletedFiles = new List<INodeMetadata>();
-        private DeletedFileViewer m_Viewer;
         private double m_Progress;
         private Thread m_Thread;
         private bool m_ScanCancelled;
@@ -25,7 +24,6 @@ namespace KickassUndelete {
         /// <param name="fileSystem">The filesystem to scan.</param>
         public ScanState(FileSystem fileSystem) {
             m_FileSystem = fileSystem;
-            m_Viewer = new DeletedFileViewer(this);
         }
 
         /// <summary>
@@ -35,13 +33,6 @@ namespace KickassUndelete {
 			lock (m_DeletedFiles) { 
 				return new List<INodeMetadata>(m_DeletedFiles); 
 			}
-        }
-
-        /// <summary>
-        /// Gets the viewer for this ScanState.
-        /// </summary>
-        public DeletedFileViewer Viewer {
-            get { return m_Viewer; }
         }
 
         /// <summary>

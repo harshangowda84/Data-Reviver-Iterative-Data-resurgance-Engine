@@ -11,6 +11,9 @@ namespace FileSystems.FileSystem.FAT {
 
         public FileAttributesFAT Attributes { get; private set; }
         public long FirstCluster { get; private set; }
+        public override long Identifier {
+            get { return FirstCluster; }
+        }
         public new FileSystemFAT FileSystem {
             get {
                 return (FileSystemFAT)base.FileSystem;

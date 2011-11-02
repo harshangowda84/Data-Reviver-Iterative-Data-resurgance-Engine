@@ -19,6 +19,12 @@ namespace FileSystems.FileSystem.NTFS {
             }
         }
 
+        public override long Identifier {
+            // TODO: This needs rethinking, since it'll have the same identifier as its base stream.
+            // Not a problem until Identifier starts actually being used in NTFS searches.
+            get { return (long)m_record.MFTRecordNumber; }
+        }
+
         public List<AttributeRecord> GetHiddenDataStreams() {
             return GetHiddenDataStreams(m_record);
         }

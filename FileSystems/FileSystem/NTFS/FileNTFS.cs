@@ -30,6 +30,10 @@ namespace FileSystems.FileSystem.NTFS {
             Deleted = m_record.Deleted;
         }
 
+        public override long Identifier {
+            get { return (long)m_record.MFTRecordNumber; }
+        }
+
         public override byte GetByte(ulong offset) {
             return m_stream.GetByte(offset);
         }

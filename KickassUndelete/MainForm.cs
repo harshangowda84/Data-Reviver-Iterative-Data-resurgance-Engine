@@ -18,7 +18,8 @@ namespace KickassUndelete {
     /// </summary>
     public partial class MainForm : Form {
         FileSystem m_FileSystem;
-        Dictionary<FileSystem, ScanState> m_ScanState = new Dictionary<FileSystem, ScanState>();
+        Dictionary<FileSystem, ScanState> m_ScanStates = new Dictionary<FileSystem, ScanState>();
+        Dictionary<FileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<FileSystem, DeletedFileViewer>();
 
         /// <summary>
         /// Constructs the main form.
@@ -51,15 +52,16 @@ namespace KickassUndelete {
 
         private void SetFileSystem(LogicalDisk logicalDisk) {
             if (logicalDisk.FS != null) {
-                if (!m_ScanState.ContainsKey(logicalDisk.FS)) {
-                    m_ScanState[logicalDisk.FS] = new ScanState(logicalDisk.FS);
-                    AddDeletedFileViewer(m_ScanState[logicalDisk.FS].Viewer);
+                if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
+                    m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.FS);
+                    m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_ScanStates[logicalDisk.FS]);
+                    AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
                 }
-                if (m_FileSystem != null && m_ScanState.ContainsKey(m_FileSystem)) {
-                    m_ScanState[m_FileSystem].Viewer.Hide();
+                if (m_FileSystem != null && m_ScanStates.ContainsKey(m_FileSystem)) {
+                    m_DeletedViewers[logicalDisk.FS].Hide();
                 }
                 m_FileSystem = logicalDisk.FS;
-                m_ScanState[m_FileSystem].Viewer.Show();
+                m_DeletedViewers[logicalDisk.FS].Show();
             }
         }
 
@@ -73,7 +75,7 @@ namespace KickassUndelete {
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {
-            foreach (ScanState state in m_ScanState.Values) {
+            foreach (ScanState state in m_ScanStates.Values) {
                 state.CancelScan();
             }
         }

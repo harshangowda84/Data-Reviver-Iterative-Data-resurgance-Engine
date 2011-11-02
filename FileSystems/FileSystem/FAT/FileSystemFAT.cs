@@ -184,7 +184,7 @@ namespace FileSystems.FileSystem.FAT {
             if (!string.IsNullOrEmpty(searchPath)) {
                 searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
             }
-            Visit(callback, searchRoot);
+            Visit(callback, searchRoot, new HashSet<long>());
         }
 
         public void SearchByCluster(FileSystem.NodeVisitCallback callback, string searchPath) {
@@ -216,13 +216,16 @@ namespace FileSystems.FileSystem.FAT {
             }
         }
 
-        private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node) {
+        private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node, HashSet<long> visitedClusters) {
             if (!callback((INodeMetadata)node, 0, 1)) {
                 return;
             }
             if (node is Folder) {  //No zip support yet
                 foreach (FileSystemNode child in node.GetChildren()) {
-                    Visit(callback, child);
+                    if (!visitedClusters.Contains(child.Identifier)) {
+                        visitedClusters.Add(child.Identifier);
+                        Visit(callback, child, visitedClusters);
+                    }
                 }
             }
         }

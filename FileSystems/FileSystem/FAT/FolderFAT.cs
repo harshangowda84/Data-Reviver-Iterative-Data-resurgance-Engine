@@ -90,9 +90,10 @@ namespace FileSystems.FileSystem.FAT {
                 int dayOfMonth = (bytes[0] & 31); // the low 5 bits
                 int month = ((bytes[0] & 224) >> 5) + ((bytes[1] & 0x1) << 3);
                 int year = 1980 + ((bytes[1] & 254) >> 1);
-                try {
+                if (1 <= year && year <= 9999 && 1 <= month && month <= 12 && 1 <= dayOfMonth
+                        && dayOfMonth <= DateTime.DaysInMonth(year, month)) {
                     return new DateTime(year, month, dayOfMonth);
-                } catch {
+                } else {
                     return DateTime.MinValue;
                 }
             }
@@ -146,6 +147,9 @@ namespace FileSystems.FileSystem.FAT {
 
         public FileAttributesFAT Attributes { get; private set; }
         public long FirstCluster { get; private set; }
+        public override long Identifier {
+            get { return FirstCluster; }
+        }
         public new FileSystemFAT FileSystem {
             get {
                 return (FileSystemFAT)base.FileSystem;
@@ -183,12 +187,11 @@ namespace FileSystems.FileSystem.FAT {
             List<FileSystemNode> res = new List<FileSystemNode>();
             foreach (DirectoryEntry entry in GetDirectoryEntries()) {
                 if (entry.FileName.Replace(".", "") != ""
-                    && (entry.Attributes & FATDirectoryAttributes.ATTR_VOLUME_ID) == 0) {
+                    && (entry.Attributes & FATDirectoryAttributes.ATTR_VOLUME_ID) == 0
+                    && entry.ClusterNum != FirstCluster) {
                     if ((entry.Attributes & FATDirectoryAttributes.ATTR_DIRECTORY) != 0) {
-                        //yield return new FolderFAT(FileSystem, entry, Path);
                         res.Add(new FolderFAT(FileSystem, entry, Path));
                     } else {
-                        //yield return new FileFAT(FileSystem, entry, Path);
                         res.Add(new FileFAT(FileSystem, entry, Path));
                     }
                 }
