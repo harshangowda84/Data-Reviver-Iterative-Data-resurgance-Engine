@@ -343,7 +343,7 @@ namespace KickassUndelete {
         }
 
         private void tbFilter_TextChanged(object sender, EventArgs e) {
-            if (tbFilter.Text.Length == 0 && tbFilter.Text != EMPTY_FILTER_TEXT) {
+            if (tbFilter.Text.Length > 0 && tbFilter.Text != EMPTY_FILTER_TEXT) {
                 FilterBy(tbFilter.Text);
             } else {
                 FilterBy("");

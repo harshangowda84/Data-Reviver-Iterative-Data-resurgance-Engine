@@ -44,8 +44,6 @@ namespace KickassUndelete {
             }
         }
 
-        
-
         private void diskTree_AfterSelect(object sender, TreeViewEventArgs e) {
             SetFileSystem((LogicalDisk)e.Node.Tag);
         }
@@ -58,7 +56,7 @@ namespace KickassUndelete {
                     AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
                 }
                 if (m_FileSystem != null && m_ScanStates.ContainsKey(m_FileSystem)) {
-                    m_DeletedViewers[logicalDisk.FS].Hide();
+                    m_DeletedViewers[m_FileSystem].Hide();
                 }
                 m_FileSystem = logicalDisk.FS;
                 m_DeletedViewers[logicalDisk.FS].Show();
