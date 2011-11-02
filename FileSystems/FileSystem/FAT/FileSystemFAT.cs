@@ -35,7 +35,7 @@ namespace FileSystems.FileSystem.FAT {
         private void LoadBPB() {
             byte[] bpb = new byte[BPB_SIZE];
             for (int i = 0; i < BPB_SIZE; i++) {
-                bpb[i] = Store.GetByte((ulong) i);
+                bpb[i] = Store.GetByte((ulong)i);
             }
             BS_OEMName = ASCIIEncoding.ASCII.GetString(bpb, 3, 8);
             BPB_BytsPerSec = BitConverter.ToUInt16(bpb, 11);
@@ -184,7 +184,7 @@ namespace FileSystems.FileSystem.FAT {
             if (!string.IsNullOrEmpty(searchPath)) {
                 searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
             }
-            Visit(callback, searchRoot, new HashSet<long>());
+            Visit(callback, searchRoot, new HashSet<long>(), 0, 1);
         }
 
         public void SearchByCluster(FileSystem.NodeVisitCallback callback, string searchPath) {
@@ -216,15 +216,18 @@ namespace FileSystems.FileSystem.FAT {
             }
         }
 
-        private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node, HashSet<long> visitedClusters) {
-            if (!callback((INodeMetadata)node, 0, 1)) {
-                return;
-            }
+        private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node, HashSet<long> visitedClusters, double currentProgress, double outerProgress) {
             if (node is Folder) {  //No zip support yet
-                foreach (FileSystemNode child in node.GetChildren()) {
+                List<FileSystemNode> children = new List<FileSystemNode>(node.GetChildren());
+                for (int i = 0; i < children.Count; i++) {
+                    double progress = currentProgress + outerProgress * ((double)i / (double)children.Count);
+                    FileSystemNode child = children[i];
+                    if (!callback(child, (ulong)(progress * 1000), 1000)) {
+                        break;
+                    }
                     if (!visitedClusters.Contains(child.Identifier)) {
                         visitedClusters.Add(child.Identifier);
-                        Visit(callback, child, visitedClusters);
+                        Visit(callback, child, visitedClusters, progress, outerProgress / (double)children.Count);
                     }
                 }
             }
