@@ -172,16 +172,19 @@ namespace KickassUndelete {
                 m_Filter = upperFilter;
 
                 fileView.Items.Clear();
-                ListViewItem[] items = MakeListItems(m_ScanState.DeletedFiles);
+				IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
+                ListViewItem[] items = MakeListItems(deletedFiles);
                 fileView.Items.AddRange(items);
-                m_NumFilesShown = m_ScanState.DeletedFiles.Count;
+                m_NumFilesShown = deletedFiles.Count;
             }
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {
-            int fileCount = m_ScanState.DeletedFiles.Count;
+			IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
+            int fileCount = deletedFiles.Count;
             if (fileCount > m_NumFilesShown) {
-                ListViewItem[] items = MakeListItems(m_ScanState.DeletedFiles.GetRange(m_NumFilesShown, fileCount - m_NumFilesShown));
+				ListViewItem[] items;
+				items = MakeListItems(deletedFiles.GetRange(m_NumFilesShown, fileCount - m_NumFilesShown));
                 fileView.Items.AddRange(items);
                 m_NumFilesShown = fileCount;
             }

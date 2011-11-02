@@ -31,8 +31,10 @@ namespace KickassUndelete {
         /// <summary>
         /// Gets the deleted files found by the scan.
         /// </summary>
-        public IList<INodeMetadata> DeletedFiles {
-            get { return m_DeletedFiles.AsReadOnly(); }
+        public IList<INodeMetadata> GetDeletedFiles() {
+			lock (m_DeletedFiles) { 
+				return new List<INodeMetadata>(m_DeletedFiles); 
+			}
         }
 
         /// <summary>
@@ -81,7 +83,9 @@ namespace KickassUndelete {
                     && !node.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
                     && !node.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)
                     && node.GetFileSystemNode().Size > 0 ) {
-                    m_DeletedFiles.Add(node);
+					lock (m_DeletedFiles) {
+						m_DeletedFiles.Add(node);
+					}
                 }
 
                 if (current % 100 == 0) {

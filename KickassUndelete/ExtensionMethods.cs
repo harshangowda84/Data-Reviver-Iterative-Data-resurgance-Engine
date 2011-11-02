@@ -12,7 +12,7 @@ namespace KickassUndelete {
         /// Retrieve a range of items from a generic IList.
         /// </summary>
         public static IList<T> GetRange<T>(this IList<T> list, int startIndex, int length) {
-            return new List<T>(list.Where((item, index) => index >= startIndex && index < startIndex + length).ToList());
+            return list.Where((item, index) => index >= startIndex && index < startIndex + length).ToList();
         }
     }
 }
