@@ -11,6 +11,9 @@ using System.Threading;
 using KFA.DataStream;
 using System.IO;
 using GuiComponents;
+using System.Globalization;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace KickassUndelete {
     /// <summary>
@@ -18,6 +21,66 @@ namespace KickassUndelete {
     /// Acts as the View to a ScanState object.
     /// </summary>
     public partial class DeletedFileViewer : UserControl {
+        private class ExtensionInfo {
+            public Icon Image { get; private set; }
+            public string SystemName { get; private set; }
+            public string FriendlyName { get; private set; }
+            public ExtensionInfo(string extension) {
+                SystemName = extension;
+                FriendlyName = extension;
+                if (!string.IsNullOrEmpty(extension)) {
+                    RegistryKey rkRoot = Registry.ClassesRoot;
+                    RegistryKey extkey = rkRoot.OpenSubKey(extension);
+                    if (extkey != null) {
+                        object keyPath = extkey.GetValue("");
+                        if (keyPath != null) {
+                            RegistryKey rkFriendlyName = rkRoot.OpenSubKey(keyPath.ToString());
+                            if (rkFriendlyName != null) {
+                                object friendlyName = rkFriendlyName.GetValue("");
+                                if (friendlyName != null) {
+                                    FriendlyName = friendlyName.ToString();
+                                }
+                                rkFriendlyName.Close();
+                            }
+
+                            string defaultIcon = keyPath.ToString() + "\\DefaultIcon";
+                            RegistryKey rkFileIcon = rkRoot.OpenSubKey(defaultIcon);
+                            if (rkFileIcon != null) {
+                                object iconPath = rkFileIcon.GetValue("");
+                                if (iconPath != null) {
+                                    string fileParam = iconPath.ToString().Replace("\"", "");
+                                    Image = ExtractIconFromFile(fileParam);
+                                }
+                                rkFileIcon.Close();
+                            }
+                        }
+                        extkey.Close();
+                    }
+                    rkRoot.Close();
+                }
+            }
+
+            [DllImport("shell32.dll", EntryPoint = "ExtractIconA",
+                CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+            private static extern IntPtr ExtractIcon
+                (int hInst, string lpszExeFileName, int nIconIndex);
+
+            public static Icon ExtractIconFromFile(string fileAndParam) {
+                try {
+                    int commaIndex = fileAndParam.IndexOf(",");
+                    if (commaIndex > 0) {
+                        string filename = fileAndParam.Substring(0, commaIndex);
+                        int index = int.Parse(fileAndParam.Substring(commaIndex + 1));
+                        //Gets the handle of the icon.
+                        IntPtr lIcon = ExtractIcon(0, filename, index);
+
+                        //Gets the real icon.
+                        return Icon.FromHandle(lIcon);
+                    }
+                } catch (Exception exc) {}
+                return null;
+            }
+        }
         private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
 
         private ScanState m_ScanState;
@@ -28,6 +91,9 @@ namespace KickassUndelete {
 
         private ListViewColumnSorter lvwColumnSorter;
 
+        private Dictionary<string, ExtensionInfo> m_ExtensionMap;
+        private ImageList m_ImageList;
+
         /// <summary>
         /// Constructs a DeletedFileViewer, using a given ScanState.
         /// </summary>
@@ -37,6 +103,9 @@ namespace KickassUndelete {
 
             lvwColumnSorter = new ListViewColumnSorter();
             fileView.ListViewItemSorter = lvwColumnSorter;
+            m_ExtensionMap = new Dictionary<string, ExtensionInfo>();
+            m_ImageList = new ImageList();
+            fileView.SmallImageList = m_ImageList;
 
             m_ScanState = state;
             state.ProgressUpdated += new EventHandler(state_ProgressUpdated);
@@ -66,7 +135,8 @@ namespace KickassUndelete {
         void state_ScanStarted(object sender, EventArgs ea) {
             m_Scanning = true;
             try {
-                this.Invoke(new Action(() => {
+                this.Invoke(new Action(() =>
+                {
                     SetScanButtonScanning();
                     UpdateTimer.Start();
                 }));
@@ -78,7 +148,8 @@ namespace KickassUndelete {
         /// </summary>
         void state_ScanFinished(object sender, EventArgs ea) {
             try {
-                this.Invoke(new Action(() => {
+                this.Invoke(new Action(() =>
+                {
                     SetScanButtonFinished();
                     UpdateTimer.Stop();
                     UpdateTimer_Tick(null, null);
@@ -92,7 +163,8 @@ namespace KickassUndelete {
         /// </summary>
         void state_ProgressUpdated(object sender, EventArgs ea) {
             try {
-                this.BeginInvoke(new Action(() => {
+                this.BeginInvoke(new Action(() =>
+                {
                     SetProgress(m_ScanState.Progress);
                 }));
             } catch (InvalidOperationException) { }
@@ -143,13 +215,25 @@ namespace KickassUndelete {
         /// </summary>
         /// <param name="metadata">The metadata to create a view for.</param>
         /// <returns>The constructed ListViewItem.</returns>
-        private static ListViewItem MakeListItem(INodeMetadata metadata) {
+        private ListViewItem MakeListItem(INodeMetadata metadata) {
             FileSystemNode node = metadata.GetFileSystemNode();
+            string ext = Path.GetExtension(metadata.Name);
+            if (!m_ExtensionMap.ContainsKey(ext)) {
+                m_ExtensionMap[ext] = new ExtensionInfo(ext);
+            }
+            ExtensionInfo extInfo = m_ExtensionMap[ext];
+            if (extInfo.Image != null) {
+                if (!m_ImageList.Images.ContainsKey(ext)) {
+                    m_ImageList.Images.Add(ext, extInfo.Image);
+                }
+            }
             ListViewItem lvi = new ListViewItem(new string[] {
                 metadata.Name,
-                Path.GetExtension(metadata.Name),
-                Util.ByteFormat(node.Size)
+                extInfo.FriendlyName,
+                Util.ByteFormat(node.Size),
+                metadata.LastModified.ToString(CultureInfo.CurrentCulture)
             });
+            lvi.ImageKey = ext;
             lvi.Tag = metadata;
             return lvi;
         }
@@ -172,7 +256,7 @@ namespace KickassUndelete {
                 m_Filter = upperFilter;
 
                 fileView.Items.Clear();
-				IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
+                IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
                 ListViewItem[] items = MakeListItems(deletedFiles);
                 fileView.Items.AddRange(items);
                 m_NumFilesShown = deletedFiles.Count;
@@ -180,11 +264,11 @@ namespace KickassUndelete {
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {
-			IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
+            IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
             int fileCount = deletedFiles.Count;
             if (fileCount > m_NumFilesShown) {
-				ListViewItem[] items;
-				items = MakeListItems(deletedFiles.GetRange(m_NumFilesShown, fileCount - m_NumFilesShown));
+                ListViewItem[] items;
+                items = MakeListItems(deletedFiles.GetRange(m_NumFilesShown, fileCount - m_NumFilesShown));
                 fileView.Items.AddRange(items);
                 m_NumFilesShown = fileCount;
             }

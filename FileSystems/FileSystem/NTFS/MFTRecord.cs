@@ -179,7 +179,7 @@ namespace FileSystems.FileSystem.NTFS {
         public UInt32 MFTRecordNumber;
 
         public UInt64 ParentDirectory;
-        public DateTime fileCreationTime, fileLataDataChangeTime, fileLastMFTChangeTime, fileLastAccessTime;
+        public DateTime fileCreationTime, fileLastDataChangeTime, fileLastMFTChangeTime, fileLastAccessTime;
         public UInt64 AllocatedSize, ActualSize;
         public Int32 _Attributes;
         public Int32 _Attributes2;
@@ -277,6 +277,12 @@ namespace FileSystems.FileSystem.NTFS {
         public bool Deleted {
             get {
                 return (Flags & (ushort)RecordFlags.InUse) == 0;
+            }
+        }
+
+        public DateTime LastModified {
+            get {
+                return fileLastDataChangeTime;
             }
         }
 
@@ -448,7 +454,7 @@ namespace FileSystems.FileSystem.NTFS {
 
         private void LoadStandardAttributes(IDataStream stream, ulong startOffset) {
             fileCreationTime = fromNTFS(Util.GetUInt64(stream, startOffset));
-            fileLataDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 8));
+            fileLastDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 8));
             fileLastMFTChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 16));
             fileLastAccessTime = fromNTFS(Util.GetUInt64(stream, startOffset + 24));
             _Attributes = Util.GetInt32(stream, startOffset + 32);
@@ -457,7 +463,7 @@ namespace FileSystems.FileSystem.NTFS {
         private void LoadNameAttributes(IDataStream stream, ulong startOffset) {
             ParentDirectory = Util.GetUInt64(stream, (ulong)(startOffset));
             fileCreationTime = fromNTFS(Util.GetUInt64(stream, startOffset + 8));
-            fileLataDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 16));
+            fileLastDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 16));
             fileLastMFTChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 24));
             fileLastAccessTime = fromNTFS(Util.GetUInt64(stream, startOffset + 32));
             AllocatedSize = Util.GetUInt64(stream, startOffset + 40);

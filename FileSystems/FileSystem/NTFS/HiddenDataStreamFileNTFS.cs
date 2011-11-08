@@ -19,6 +19,10 @@ namespace FileSystems.FileSystem.NTFS {
             }
         }
 
+        public override DateTime LastModified {
+            get { return m_record.fileLastDataChangeTime; }
+        }
+
         public override long Identifier {
             // TODO: This needs rethinking, since it'll have the same identifier as its base stream.
             // Not a problem until Identifier starts actually being used in NTFS searches.

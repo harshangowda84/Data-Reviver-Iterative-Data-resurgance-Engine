@@ -9,14 +9,19 @@ namespace FileSystems.FileSystem {
     public class FileMounted : File {
         private FileStream m_Stream = null;
         private IDataStream m_Parent = null;
+        private FileInfo m_Info;
         private string m_Path;
 
         public FileMounted(string filePath, IDataStream parent) {
             m_Path = filePath;
             m_Parent = parent;
             Open();
-            FileInfo i = new FileInfo(filePath);
-            Name = i.Name;
+            m_Info = new FileInfo(filePath);
+            Name = m_Info.Name;
+        }
+
+        public override DateTime LastModified {
+            get { return m_Info.LastWriteTime; }
         }
 
         public override long Identifier {

@@ -14,6 +14,7 @@ namespace FileSystems.FileSystem {
         }
         public string Path { get; protected set; }
         public bool Deleted { get; protected set; }
+        public abstract DateTime LastModified { get; }
         public FileSystem FileSystem { get; protected set; }
         public abstract IEnumerable<FileSystemNode> GetChildren();
         public bool Loaded { get; set; }

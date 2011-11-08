@@ -10,6 +10,9 @@ namespace FileSystems.FileSystem.FAT {
         private long m_Length;
 
         public FileAttributesFAT Attributes { get; private set; }
+        public override DateTime LastModified {
+            get { return Attributes.LastModified; }
+        }
         public long FirstCluster { get; private set; }
         public override long Identifier {
             get { return FirstCluster; }

@@ -33,6 +33,7 @@
             this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.tbFilter = new System.Windows.Forms.TextBox();
             this.bRestoreFiles = new System.Windows.Forms.Button();
+            this.colModified = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // progressBar
@@ -54,7 +55,8 @@
             this.fileView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName,
             this.colType,
-            this.colSize});
+            this.colSize,
+            this.colModified});
             this.fileView.Location = new System.Drawing.Point(0, 124);
             this.fileView.Margin = new System.Windows.Forms.Padding(10);
             this.fileView.Name = "fileView";
@@ -70,7 +72,7 @@
             // colName
             // 
             this.colName.Text = "Name";
-            this.colName.Width = 500;
+            this.colName.Width = 432;
             // 
             // colType
             // 
@@ -124,6 +126,11 @@
             this.bRestoreFiles.Visible = false;
             this.bRestoreFiles.Click += new System.EventHandler(this.bRestoreFiles_Click);
             // 
+            // colModified
+            // 
+            this.colModified.Text = "Last Modified";
+            this.colModified.Width = 89;
+            // 
             // DeletedFileViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -151,6 +158,7 @@
         private System.Windows.Forms.ColumnHeader colType;
         private System.Windows.Forms.TextBox tbFilter;
         private System.Windows.Forms.Button bRestoreFiles;
+        private System.Windows.Forms.ColumnHeader colModified;
 
     }
 }

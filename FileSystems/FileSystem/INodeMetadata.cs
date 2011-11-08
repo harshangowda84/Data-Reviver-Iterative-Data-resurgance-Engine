@@ -8,6 +8,7 @@ namespace FileSystems.FileSystem {
     public interface INodeMetadata {
         string Name { get; }
         ulong Size { get; }
+        DateTime LastModified { get; }
         bool Deleted { get; }
         FileSystemNode GetFileSystemNode();
     }

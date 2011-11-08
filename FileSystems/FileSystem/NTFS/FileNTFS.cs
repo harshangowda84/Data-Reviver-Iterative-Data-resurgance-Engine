@@ -72,8 +72,8 @@ namespace FileSystems.FileSystem.NTFS {
             get { return m_record.fileLastAccessTime; }
         }
 
-        public DateTime LastModified {
-            get { return m_record.fileLataDataChangeTime; }
+        public override DateTime LastModified {
+            get { return m_record.fileLastDataChangeTime; }
         }
 
         public DateTime LastModifiedMFT {

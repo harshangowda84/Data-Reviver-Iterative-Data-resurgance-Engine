@@ -18,6 +18,10 @@ namespace FileSystems.FileSystem {
             Name = m_Info.Name;
         }
 
+        public override DateTime LastModified {
+            get { return m_Info.LastWriteTime; }
+        }
+
         public override long Identifier {
             get { return 0; /* no-op */ }
         }
