@@ -92,7 +92,7 @@ namespace KickassUndelete {
                         //Gets the real icon.
                         return Icon.FromHandle(lIcon);
                     }
-                } catch (Exception exc) {}
+                } catch (Exception exc) { }
                 return null;
             }
         }
@@ -402,7 +402,7 @@ namespace KickassUndelete {
                 }
                 this.BeginInvoke(new Action(delegate() {
                     progressBar.Close();
-                    UpdateRestoreButton();
+                    UpdateRestoreButton(0);
                     m_Saving = false;
                 }));
             });
@@ -450,7 +450,21 @@ namespace KickassUndelete {
         }
 
         private void bRestoreFiles_Click(object sender, EventArgs e) {
-            if (fileView.CheckedItems.Count > 1) {
+            if (fileView.CheckedItems.Count == 1) {
+                INodeMetadata metadata = fileView.CheckedItems[0].Tag as INodeMetadata;
+                if (metadata != null) {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.OverwritePrompt = true;
+                    saveFileDialog.FileName = metadata.Name;
+                    saveFileDialog.Filter = "Any Files|*.*";
+                    saveFileDialog.Title = "Select a Location";
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+                        FileSystemNode node = metadata.GetFileSystemNode();
+                        SaveFile(node, saveFileDialog.FileName);
+                    }
+                }
+            } else if (fileView.CheckedItems.Count > 1) {
                 FolderBrowserDialog folderDialog = new FolderBrowserDialog();
 
                 if (folderDialog.ShowDialog() == DialogResult.OK) {
@@ -469,14 +483,14 @@ namespace KickassUndelete {
         /// <summary>
         /// Sets the restore button to be enabled if there are list items checked.
         /// </summary>
-        private void UpdateRestoreButton() {
+        private void UpdateRestoreButton(int change) {
             if (!m_Scanning && !m_Saving) {
-                bRestoreFiles.Enabled = fileView.CheckedItems.Count > 0;
+                bRestoreFiles.Enabled = fileView.CheckedItems.Count + change > 0;
             }
         }
 
         private void fileView_ItemCheck(object sender, ItemCheckEventArgs e) {
-            UpdateRestoreButton();
+            UpdateRestoreButton(e.NewValue == CheckState.Checked ? 1 : -1);
         }
     }
 }
