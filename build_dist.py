@@ -5,6 +5,7 @@ import shutil
 import sys
 
 VERSION = "1.1 beta"
+EXE_NAME = "KickassUndelete_{0}.exe".format(VERSION.replace(' ','_'))
 ZIP_NAME = "KickassUndelete_{0}.zip".format(VERSION.replace(' ','_'))
 
 MSBUILD = "C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\msbuild.exe"
@@ -93,6 +94,7 @@ if buildSolution():
     if not os.path.exists(TEMP_DIR):
         os.mkdir(TEMP_DIR)
     if mergeAssemblies(assemblies, TEMP_DIR + mainassembly):
+        shutil.copy(TEMP_DIR + mainassembly, PUBLISH_FOLDER + EXE_NAME)
         shutil.copy(RELEASE_NOTES, TEMP_DIR + RELEASE_NOTES)
         os.chdir(TEMP_DIR)
         zipdest = "../" + PUBLISH_FOLDER + ZIP_NAME
