@@ -22,7 +22,13 @@ using FileSystems.FileSystem;
 
 namespace FileSystems.FileSystem {
     public abstract class FileSystemNode : IDataStream, INodeMetadata {
+        public enum NodeType {
+            File,
+            Folder
+        }
+
         public abstract long Identifier { get; }
+        public abstract NodeType Type { get; }
         public string Name { get; protected set; }
         public ulong Size {
             get { return StreamLength; }
@@ -75,6 +81,14 @@ namespace FileSystems.FileSystem {
                 }
             }
             return res;
+        }
+
+        /// <summary>
+        /// Gets the chance of fully recovering this file (if deleted).
+        /// </summary>
+        /// <returns>A number between 0 and 1 indicating the chance of recovery.</returns>
+        public virtual double GetChanceOfRecovery() {
+            return 1;
         }
 
         private bool Matches(string expression, string s) {

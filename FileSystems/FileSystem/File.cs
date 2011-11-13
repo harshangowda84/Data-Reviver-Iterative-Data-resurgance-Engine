@@ -53,5 +53,9 @@ namespace FileSystems.FileSystem {
         public override string ToString() {
             return Name;
         }
+
+        public override FileSystemNode.NodeType Type {
+            get { return NodeType.File; }
+        }
     }
 }

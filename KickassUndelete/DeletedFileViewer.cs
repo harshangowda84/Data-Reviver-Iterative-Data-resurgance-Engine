@@ -218,7 +218,7 @@ namespace KickassUndelete {
             List<ListViewItem> items = new List<ListViewItem>(metadatas.Count);
             for (int i = 0; i < metadatas.Count; i++) {
                 ListViewItem item = MakeListItem(metadatas[i]);
-                if (item.Text.ToUpperInvariant().Contains(m_Filter)) {
+                if (FilterMatches(item)) {
                     items.Add(item);
                 }
             }
@@ -276,6 +276,16 @@ namespace KickassUndelete {
                 fileView.Items.AddRange(items);
                 m_NumFilesShown = deletedFiles.Count;
             }
+        }
+
+        /// <summary>
+        /// Returns whether the current filter text matches a list view item.
+        /// </summary>
+        /// <param name="item">The list item to check.</param>
+        /// <returns>Whether this list item matches the filter text.</returns>
+        private bool FilterMatches(ListViewItem item) {
+            return item.SubItems[0].Text.ToUpperInvariant().Contains(m_Filter)
+                || item.SubItems[1].Text.ToUpperInvariant().Contains(m_Filter);
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {

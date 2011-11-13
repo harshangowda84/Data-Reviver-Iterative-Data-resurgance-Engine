@@ -83,15 +83,17 @@ namespace KickassUndelete {
 
             // TODO: Replace me with a search strategy selected from a text box!
             ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
-            strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata node, ulong current, ulong total) {
-                if (node.Deleted && node.Name != null
-                    && !node.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
-                    && !node.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
-                    && !node.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)
-                    && node.GetFileSystemNode().Size > 0 ) {
-					lock (m_DeletedFiles) {
-						m_DeletedFiles.Add(node);
-					}
+            strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
+                if (metadata.Deleted && metadata.Name != null
+                    && !metadata.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
+                    && !metadata.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
+                    && !metadata.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)) {
+                    FileSystemNode node = metadata.GetFileSystemNode();
+                    if (node.Type == FileSystemNode.NodeType.File && node.Size > 0) {
+                        lock (m_DeletedFiles) {
+                            m_DeletedFiles.Add(metadata);
+                        }
+                    }
                 }
 
                 if (current % 100 == 0) {
