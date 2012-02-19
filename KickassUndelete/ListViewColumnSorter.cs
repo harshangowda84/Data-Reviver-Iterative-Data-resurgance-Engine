@@ -71,6 +71,8 @@ namespace KickassUndelete {
                 compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).GetFileSystemNode().Size, ((INodeMetadata)listviewY.Tag).GetFileSystemNode().Size);
             } else if (ColumnToSort == 3) {
                 compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).LastModified, ((INodeMetadata)listviewY.Tag).LastModified);
+            } else if (ColumnToSort == 4) {
+                compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).GetChanceOfRecovery(), ((INodeMetadata)listviewY.Tag).GetChanceOfRecovery());
             } else {
                 compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
             }

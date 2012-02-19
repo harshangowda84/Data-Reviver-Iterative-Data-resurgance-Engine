@@ -97,6 +97,20 @@ namespace KickassUndelete {
             }
         }
         private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
+        private Dictionary<FileRecoveryStatus, string> m_RecoveryDescriptions =
+            new Dictionary<FileRecoveryStatus, string>() {
+                {FileRecoveryStatus.Unknown,""},
+                {FileRecoveryStatus.Overwritten,"Impossible"},
+                {FileRecoveryStatus.Recoverable,"Recoverable"},
+                {FileRecoveryStatus.ProbablyRecoverable,"Probably recoverable"},
+                {FileRecoveryStatus.PartiallyRecoverable,"Partially recoverable (may be corrupt)"}};
+        private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
+            new Dictionary<FileRecoveryStatus, Color>() {
+                {FileRecoveryStatus.Unknown,Color.White},
+                {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)},
+                {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)},
+                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(190,255,181)},
+                {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}};
 
         private ScanState m_ScanState;
         private int m_NumFilesShown;
@@ -246,8 +260,11 @@ namespace KickassUndelete {
                 metadata.Name,
                 extInfo.FriendlyName,
                 Util.ByteFormat(node.Size),
-                metadata.LastModified.ToString(CultureInfo.CurrentCulture)
+                metadata.LastModified.ToString(CultureInfo.CurrentCulture),
+                m_RecoveryDescriptions[metadata.GetChanceOfRecovery()]
             });
+            lvi.BackColor = m_RecoveryColors[metadata.GetChanceOfRecovery()];
+
             lvi.ImageKey = ext;
             lvi.Tag = metadata;
             return lvi;

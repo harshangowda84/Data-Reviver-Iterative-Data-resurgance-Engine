@@ -44,11 +44,12 @@ namespace KickassUndelete {
             this.colName = new System.Windows.Forms.ColumnHeader();
             this.colType = new System.Windows.Forms.ColumnHeader();
             this.colSize = new System.Windows.Forms.ColumnHeader();
+            this.colModified = new System.Windows.Forms.ColumnHeader();
             this.bScan = new System.Windows.Forms.Button();
             this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.tbFilter = new System.Windows.Forms.TextBox();
             this.bRestoreFiles = new System.Windows.Forms.Button();
-            this.colModified = new System.Windows.Forms.ColumnHeader();
+            this.colRecovery = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // progressBar
@@ -71,7 +72,8 @@ namespace KickassUndelete {
             this.colName,
             this.colType,
             this.colSize,
-            this.colModified});
+            this.colModified,
+            this.colRecovery});
             this.fileView.Location = new System.Drawing.Point(0, 124);
             this.fileView.Margin = new System.Windows.Forms.Padding(10);
             this.fileView.Name = "fileView";
@@ -87,7 +89,7 @@ namespace KickassUndelete {
             // colName
             // 
             this.colName.Text = "Name";
-            this.colName.Width = 432;
+            this.colName.Width = 293;
             // 
             // colType
             // 
@@ -97,6 +99,11 @@ namespace KickassUndelete {
             // 
             this.colSize.Text = "Size";
             this.colSize.Width = 100;
+            // 
+            // colModified
+            // 
+            this.colModified.Text = "Last Modified";
+            this.colModified.Width = 89;
             // 
             // bScan
             // 
@@ -141,10 +148,10 @@ namespace KickassUndelete {
             this.bRestoreFiles.Visible = false;
             this.bRestoreFiles.Click += new System.EventHandler(this.bRestoreFiles_Click);
             // 
-            // colModified
+            // colRecovery
             // 
-            this.colModified.Text = "Last Modified";
-            this.colModified.Width = 89;
+            this.colRecovery.Text = "Chance of Recovery";
+            this.colRecovery.Width = 122;
             // 
             // DeletedFileViewer
             // 
@@ -174,6 +181,7 @@ namespace KickassUndelete {
         private System.Windows.Forms.TextBox tbFilter;
         private System.Windows.Forms.Button bRestoreFiles;
         private System.Windows.Forms.ColumnHeader colModified;
+        private System.Windows.Forms.ColumnHeader colRecovery;
 
     }
 }
