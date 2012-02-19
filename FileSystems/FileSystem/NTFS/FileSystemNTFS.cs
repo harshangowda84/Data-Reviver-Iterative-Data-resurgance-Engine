@@ -75,13 +75,50 @@ namespace FileSystems.FileSystem.NTFS {
         }
 
         public override SectorStatus GetSectorStatus(ulong sectorNum) {
-            ulong bitNum = sectorNum / (ulong)(BPB_SecPerClus);
-            Byte b = m_bitmapFile.GetByte(bitNum / 8);
-            Byte mask = (byte)(0x1 << (int)(bitNum % 8));
+            ulong lcn = sectorNum / (ulong)(BPB_SecPerClus);
+            return GetClusterStatus(lcn);
+        }
+
+        private SectorStatus GetClusterStatus(ulong lcn) {
+            Byte b = m_bitmapFile.GetByte(lcn / 8);
+            Byte mask = (byte)(0x1 << (int)(lcn % 8));
             if ((b & mask) > 0) {
                 return SectorStatus.NTFSUsed;
             } else {
                 return SectorStatus.NTFSFree;
+            }
+        }
+
+        public override FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
+            FileNTFS file = node as FileNTFS;
+            if (file == null) {
+                return FileRecoveryStatus.Unknown;
+            } else {
+                IEnumerable<Run> runs = file.GetRuns();
+                if (runs == null) {
+                    // The data stream is resident, so recovery is trivial.
+                    return FileRecoveryStatus.Recoverable;
+                } else {
+                    ulong totalClusters = 0;
+                    ulong usedClusters = 0;
+                    // Check the status of each cluster in the runs.
+                    foreach (Run run in runs) {
+                        totalClusters += run.Length;
+                        for (ulong i = run.LCN; i < run.Length; i++) {
+                            if (GetClusterStatus(run.LCN + i) == SectorStatus.NTFSUsed
+                                || GetClusterStatus(run.LCN + i) == SectorStatus.NTFSBad) {
+                                usedClusters++;
+                            }
+                        }
+                    }
+                    if (usedClusters == 0) {
+                        return FileRecoveryStatus.ProbablyRecoverable;
+                    } else if (usedClusters < totalClusters) {
+                        return FileRecoveryStatus.PartiallyRecoverable;
+                    } else {
+                        return FileRecoveryStatus.Overwritten;
+                    }
+                }
             }
         }
 

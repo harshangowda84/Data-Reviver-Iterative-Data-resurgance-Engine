@@ -17,6 +17,7 @@ using System;
 using System.Text;
 using KFA.DataStream;
 using KFA.Disks;
+using System.Collections.Generic;
 
 namespace FileSystems.FileSystem.NTFS {
     public class FileNTFS : File, IDescribable {
@@ -43,6 +44,13 @@ namespace FileSystems.FileSystem.NTFS {
             Path = path + Name;
             FileSystem = record.FileSystem;
             Deleted = m_record.Deleted;
+        }
+
+        /// <summary>
+        /// Gets a list of the on-disk runs of this NTFSFile. Returns null if resident.
+        /// </summary>
+        public IEnumerable<Run> GetRuns() {
+            return ((NTFSFileStream)m_stream).GetRuns();
         }
 
         public override long Identifier {

@@ -23,6 +23,13 @@ using FileSystems.FileSystem.NTFS;
 using FileSystems.FileSystem;
 
 namespace FileSystems.FileSystem {
+    public enum FileRecoveryStatus {
+        Unknown = 0,
+        Recoverable = 1,
+        ProbablyRecoverable = 2,
+        PartiallyRecoverable = 3,
+        Overwritten = 4
+    }
     public abstract class FileSystem {
         public delegate bool NodeVisitCallback(INodeMetadata node, ulong current, ulong total);
 
@@ -115,6 +122,10 @@ namespace FileSystems.FileSystem {
 
         public virtual SectorStatus GetSectorStatus(ulong sectorNum) {
             return SectorStatus.Unknown;
+        }
+
+        public virtual FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
+            return FileRecoveryStatus.Unknown;
         }
 
         public abstract List<ISearchStrategy> GetSearchStrategies();

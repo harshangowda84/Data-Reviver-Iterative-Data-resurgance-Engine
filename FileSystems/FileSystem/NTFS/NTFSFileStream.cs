@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using KFA.DataStream;
+using System.Collections.ObjectModel;
 
 namespace FileSystems.FileSystem.NTFS {
     class NTFSFileStream : IDataStream {
@@ -43,6 +44,13 @@ namespace FileSystems.FileSystem.NTFS {
 
         public NTFSFileStream(IDataStream partition, MFTRecord record, String attrName) :
             this(partition, record, record.GetAttribute(attrName)) { }
+
+        /// <summary>
+        /// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
+        /// </summary>
+        public IEnumerable<Run> GetRuns() {
+            return m_nonResident ? new ReadOnlyCollection<Run>(m_runs) : null;
+        }
 
         public byte GetByte(ulong offset) {
             if (offset >= m_length) {
