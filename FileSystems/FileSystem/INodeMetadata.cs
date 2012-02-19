@@ -26,5 +26,6 @@ namespace FileSystems.FileSystem {
         DateTime LastModified { get; }
         bool Deleted { get; }
         FileSystemNode GetFileSystemNode();
+        FileRecoveryStatus GetChanceOfRecovery();
     }
 }

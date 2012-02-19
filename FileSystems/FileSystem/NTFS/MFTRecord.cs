@@ -571,6 +571,10 @@ namespace FileSystems.FileSystem.NTFS {
             }
         }
 
+        public FileRecoveryStatus GetChanceOfRecovery() {
+            return GetFileSystemNode().GetChanceOfRecovery();
+        }
+
         #endregion
     }
 }

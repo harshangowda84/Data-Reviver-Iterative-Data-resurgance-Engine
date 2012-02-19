@@ -83,20 +83,20 @@ namespace FileSystems.FileSystem {
             return res;
         }
 
-        /// <summary>
-        /// Gets the chance of fully recovering this file (if deleted).
-        /// </summary>
-        /// <returns>A number between 0 and 1 indicating the chance of recovery.</returns>
-        public virtual double GetChanceOfRecovery() {
-            return 1;
-        }
-
         private bool Matches(string expression, string s) {
             if (s == null) return false;
             expression = expression.ToLower();
             s = s.ToLower();
             // This could use Regexes in future
             return expression == "*" || expression == s;
+        }
+
+        private FileRecoveryStatus m_RecoveryStatus = FileRecoveryStatus.Unknown;
+        public FileRecoveryStatus GetChanceOfRecovery() {
+            if (m_RecoveryStatus == FileRecoveryStatus.Unknown) {
+                return FileSystem.GetChanceOfRecovery(this);
+            }
+            return m_RecoveryStatus;
         }
 
         #region IDataStream Members
