@@ -42,9 +42,11 @@ namespace KickassUndelete {
 		}
 
 		static void RelaunchAsAdmin() {
-			ProcessStartInfo psi = new ProcessStartInfo(Application.ExecutablePath);
-			psi.Verb = "runas";
-			Process.Start(psi);
+            try {
+                ProcessStartInfo psi = new ProcessStartInfo(Application.ExecutablePath);
+                psi.Verb = "runas";
+                Process.Start(psi);
+            } catch { }
 
 			Environment.Exit(0);
 		}
