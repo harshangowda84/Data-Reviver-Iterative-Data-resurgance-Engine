@@ -40,9 +40,11 @@ namespace KickassUndelete {
             public Icon Image { get; private set; }
             public string SystemName { get; private set; }
             public string FriendlyName { get; private set; }
+            public bool UnrecognisedExtension { get; private set; }
             public ExtensionInfo(string extension) {
                 SystemName = extension;
                 FriendlyName = extension;
+                UnrecognisedExtension = true;
                 if (!string.IsNullOrEmpty(extension)) {
                     RegistryKey rkRoot = Registry.ClassesRoot;
                     RegistryKey extkey = rkRoot.OpenSubKey(extension);
@@ -54,6 +56,7 @@ namespace KickassUndelete {
                                 object friendlyName = rkFriendlyName.GetValue("");
                                 if (friendlyName != null) {
                                     FriendlyName = friendlyName.ToString();
+                                    UnrecognisedExtension = false;
                                 }
                                 rkFriendlyName.Close();
                             }
@@ -112,9 +115,13 @@ namespace KickassUndelete {
                 {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(190,255,181)},
                 {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}};
 
+        private HashSet<string> m_SystemFileExtensions =
+            new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML" };
+
         private ScanState m_ScanState;
         private int m_NumFilesShown;
         private string m_Filter = "";
+        private bool m_MatchUnknownFileTypes = false;
         private bool m_Scanning;
         private bool m_Saving;
 
@@ -164,8 +171,7 @@ namespace KickassUndelete {
         void state_ScanStarted(object sender, EventArgs ea) {
             m_Scanning = true;
             try {
-                this.Invoke(new Action(() =>
-                {
+                this.Invoke(new Action(() => {
                     SetScanButtonScanning();
                     UpdateTimer.Start();
                 }));
@@ -177,8 +183,7 @@ namespace KickassUndelete {
         /// </summary>
         void state_ScanFinished(object sender, EventArgs ea) {
             try {
-                this.Invoke(new Action(() =>
-                {
+                this.Invoke(new Action(() => {
                     SetScanButtonFinished();
                     UpdateTimer.Stop();
                     UpdateTimer_Tick(null, null);
@@ -192,8 +197,7 @@ namespace KickassUndelete {
         /// </summary>
         void state_ProgressUpdated(object sender, EventArgs ea) {
             try {
-                this.BeginInvoke(new Action(() =>
-                {
+                this.BeginInvoke(new Action(() => {
                     SetProgress(m_ScanState.Progress);
                 }));
             } catch (InvalidOperationException) { }
@@ -282,10 +286,13 @@ namespace KickassUndelete {
         /// Filter the ListView by a filter string.
         /// </summary>
         /// <param name="filter">The string to filter by.</param>
-        private void FilterBy(string filter) {
+        /// <param name="showUnknownFileTypes">Whether to show unknown file types.</param>
+        private void FilterBy(string filter, bool showUnknownFileTypes) {
             string upperFilter = filter.ToUpperInvariant();
-            if (m_Filter != upperFilter) {
+            if (m_Filter != upperFilter
+                || showUnknownFileTypes != m_MatchUnknownFileTypes) {
                 m_Filter = upperFilter;
+                m_MatchUnknownFileTypes = showUnknownFileTypes;
 
                 fileView.Items.Clear();
                 IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
@@ -301,8 +308,17 @@ namespace KickassUndelete {
         /// <param name="item">The list item to check.</param>
         /// <returns>Whether this list item matches the filter text.</returns>
         private bool FilterMatches(ListViewItem item) {
-            return item.SubItems[0].Text.ToUpperInvariant().Contains(m_Filter)
-                || item.SubItems[1].Text.ToUpperInvariant().Contains(m_Filter);
+            return (item.SubItems[0].Text.ToUpperInvariant().Contains(m_Filter)
+                    || item.SubItems[1].Text.ToUpperInvariant().Contains(m_Filter))
+                && (m_MatchUnknownFileTypes
+                    || !IsSystemOrUnknownFile(item));
+        }
+
+        private bool IsSystemOrUnknownFile(ListViewItem item) {
+            string ext = Path.GetExtension(item.SubItems[0].Text);
+            return !m_ExtensionMap.ContainsKey(ext)
+                || m_ExtensionMap[ext].UnrecognisedExtension
+                || m_SystemFileExtensions.Contains(ext.ToUpper());
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {
@@ -468,12 +484,20 @@ namespace KickassUndelete {
             UpdateFilterTextBox();
         }
 
-        private void tbFilter_TextChanged(object sender, EventArgs e) {
+        private void Filter() {
             if (tbFilter.Text.Length > 0 && tbFilter.Text != EMPTY_FILTER_TEXT) {
-                FilterBy(tbFilter.Text);
+                FilterBy(tbFilter.Text, cbShowUnknownFiles.Checked);
             } else {
-                FilterBy("");
+                FilterBy("", cbShowUnknownFiles.Checked);
             }
+        }
+
+        private void tbFilter_TextChanged(object sender, EventArgs e) {
+            Filter();
+        }
+
+        private void cbShowUnknownFiles_CheckedChanged(object sender, EventArgs e) {
+            Filter();
         }
 
         private void bRestoreFiles_Click(object sender, EventArgs e) {

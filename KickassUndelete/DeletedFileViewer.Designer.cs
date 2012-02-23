@@ -45,11 +45,12 @@ namespace KickassUndelete {
             this.colType = new System.Windows.Forms.ColumnHeader();
             this.colSize = new System.Windows.Forms.ColumnHeader();
             this.colModified = new System.Windows.Forms.ColumnHeader();
+            this.colRecovery = new System.Windows.Forms.ColumnHeader();
             this.bScan = new System.Windows.Forms.Button();
             this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.tbFilter = new System.Windows.Forms.TextBox();
             this.bRestoreFiles = new System.Windows.Forms.Button();
-            this.colRecovery = new System.Windows.Forms.ColumnHeader();
+            this.cbShowUnknownFiles = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // progressBar
@@ -105,6 +106,11 @@ namespace KickassUndelete {
             this.colModified.Text = "Last Modified";
             this.colModified.Width = 89;
             // 
+            // colRecovery
+            // 
+            this.colRecovery.Text = "Chance of Recovery";
+            this.colRecovery.Width = 122;
+            // 
             // bScan
             // 
             this.bScan.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -129,7 +135,7 @@ namespace KickassUndelete {
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFilter.Location = new System.Drawing.Point(0, 100);
             this.tbFilter.Name = "tbFilter";
-            this.tbFilter.Size = new System.Drawing.Size(702, 20);
+            this.tbFilter.Size = new System.Drawing.Size(475, 20);
             this.tbFilter.TabIndex = 6;
             this.tbFilter.TextChanged += new System.EventHandler(this.tbFilter_TextChanged);
             this.tbFilter.Leave += new System.EventHandler(this.tbFilter_Leave);
@@ -148,15 +154,23 @@ namespace KickassUndelete {
             this.bRestoreFiles.Visible = false;
             this.bRestoreFiles.Click += new System.EventHandler(this.bRestoreFiles_Click);
             // 
-            // colRecovery
+            // cbShowUnknownFiles
             // 
-            this.colRecovery.Text = "Chance of Recovery";
-            this.colRecovery.Width = 122;
+            this.cbShowUnknownFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbShowUnknownFiles.AutoSize = true;
+            this.cbShowUnknownFiles.Location = new System.Drawing.Point(481, 102);
+            this.cbShowUnknownFiles.Name = "cbShowUnknownFiles";
+            this.cbShowUnknownFiles.Size = new System.Drawing.Size(221, 17);
+            this.cbShowUnknownFiles.TabIndex = 7;
+            this.cbShowUnknownFiles.Text = "Show system files and unknown file types";
+            this.cbShowUnknownFiles.UseVisualStyleBackColor = true;
+            this.cbShowUnknownFiles.CheckedChanged += new System.EventHandler(this.cbShowUnknownFiles_CheckedChanged);
             // 
             // DeletedFileViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.cbShowUnknownFiles);
             this.Controls.Add(this.fileView);
             this.Controls.Add(this.bRestoreFiles);
             this.Controls.Add(this.tbFilter);
@@ -182,6 +196,7 @@ namespace KickassUndelete {
         private System.Windows.Forms.Button bRestoreFiles;
         private System.Windows.Forms.ColumnHeader colModified;
         private System.Windows.Forms.ColumnHeader colRecovery;
+        private System.Windows.Forms.CheckBox cbShowUnknownFiles;
 
     }
 }
