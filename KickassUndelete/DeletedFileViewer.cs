@@ -102,21 +102,21 @@ namespace KickassUndelete {
         private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
         private Dictionary<FileRecoveryStatus, string> m_RecoveryDescriptions =
             new Dictionary<FileRecoveryStatus, string>() {
-                {FileRecoveryStatus.Unknown,""},
+                {FileRecoveryStatus.Unknown,"Unknown"},
                 {FileRecoveryStatus.Overwritten,"Impossible"},
                 {FileRecoveryStatus.Recoverable,"Recoverable"},
                 {FileRecoveryStatus.ProbablyRecoverable,"Probably recoverable"},
                 {FileRecoveryStatus.PartiallyRecoverable,"Partially recoverable (may be corrupt)"}};
         private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
             new Dictionary<FileRecoveryStatus, Color>() {
-                {FileRecoveryStatus.Unknown,Color.White},
-                {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)},
-                {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)},
-                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(190,255,181)},
-                {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}};
+                {FileRecoveryStatus.Unknown,Color.FromArgb(255,222,168)}, // Orange
+                {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)}, // Red
+                {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)}, // Green
+                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(190,255,180)}, // Green
+                {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}}; // Orange
 
         private HashSet<string> m_SystemFileExtensions =
-            new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML" };
+            new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
         private ScanState m_ScanState;
         private int m_NumFilesShown;
@@ -250,7 +250,10 @@ namespace KickassUndelete {
         /// <returns>The constructed ListViewItem.</returns>
         private ListViewItem MakeListItem(INodeMetadata metadata) {
             FileSystemNode node = metadata.GetFileSystemNode();
-            string ext = Path.GetExtension(metadata.Name);
+            string ext = "";
+            try {
+                ext = Path.GetExtension(metadata.Name);
+            } catch (ArgumentException) { }
             if (!m_ExtensionMap.ContainsKey(ext)) {
                 m_ExtensionMap[ext] = new ExtensionInfo(ext);
             }
@@ -315,10 +318,14 @@ namespace KickassUndelete {
         }
 
         private bool IsSystemOrUnknownFile(ListViewItem item) {
-            string ext = Path.GetExtension(item.SubItems[0].Text);
-            return !m_ExtensionMap.ContainsKey(ext)
-                || m_ExtensionMap[ext].UnrecognisedExtension
-                || m_SystemFileExtensions.Contains(ext.ToUpper());
+            try {
+                string ext = Path.GetExtension(item.SubItems[0].Text);
+                return !m_ExtensionMap.ContainsKey(ext)
+                    || m_ExtensionMap[ext].UnrecognisedExtension
+                    || m_SystemFileExtensions.Contains(ext.ToUpper());
+            } catch (ArgumentException) {
+                return true;
+            }
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e) {
@@ -506,6 +513,7 @@ namespace KickassUndelete {
                 if (metadata != null) {
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
                     saveFileDialog.OverwritePrompt = true;
+                    saveFileDialog.InitialDirectory = Environment.ExpandEnvironmentVariables("%SystemDrive");
                     saveFileDialog.FileName = metadata.Name;
                     saveFileDialog.Filter = "Any Files|*.*";
                     saveFileDialog.Title = "Select a Location";
