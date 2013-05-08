@@ -17,7 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+#if !KFS_LEAN_AND_MEAN
 using Ionic.Zip;
+#endif
 using System.IO;
 using KFA.DataStream;
 
@@ -28,16 +30,23 @@ namespace FileSystems.FileSystem {
 
         public bool IsZip {
             get {
+#if KFS_LEAN_AND_MEAN
+                return false;
+#else
                 if (!m_Known) {
                     //m_Known = ZipFile.IsZipFile(new ForensicsAppStream(this), false);
                     m_IsZip = Name.Trim().ToLower().EndsWith("zip");
                     m_Known = true;
                 }
                 return m_IsZip;
+#endif
             }
         }
 
         public override IEnumerable<FileSystemNode> GetChildren() {
+#if KFS_LEAN_AND_MEAN
+            return new List<FileSystemNode>();
+#else
             if (IsZip) {
                 ZipFile f = ZipFile.Read(new ForensicsAppStream(this));
                 string tempDir = Util.CreateTemporaryDirectory();
@@ -48,6 +57,7 @@ namespace FileSystems.FileSystem {
             } else {
                 return new List<FileSystemNode>();
             }
+#endif
         }
 
         public override string ToString() {

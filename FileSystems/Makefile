@@ -1,5 +1,8 @@
 SOURCES=DiskLoader.cs WinDiskLoader.cs Linux/LinDiskLoader.cs DataStream/SubStream.cs Properties/AssemblyInfo.cs Exceptions/InvalidFILERecordException.cs Exceptions/FileSystemException.cs Exceptions/NTFSException.cs FileSystem/File.cs FileSystem/FileSystem.cs FileSystem/INodeMetadata.cs FileSystem/FileMounted.cs FileSystem/ISearchStrategy.cs FileSystem/FolderMounted.cs FileSystem/NTFS/FolderNTFS.cs FileSystem/NTFS/FileSystemNTFS.cs FileSystem/NTFS/MFTRecord.cs FileSystem/NTFS/FixupStream.cs FileSystem/NTFS/FileNTFS.cs FileSystem/NTFS/HiddenDataStreamFileNTFS.cs FileSystem/NTFS/NTFSFileStream.cs FileSystem/FAT/FileSystemFAT.cs FileSystem/FAT/FileFAT.cs FileSystem/FAT/FolderFAT.cs FileSystem/FileSystemNode.cs FileSystem/FileAttributes.cs FileSystem/SearchStrategy.cs FileSystem/Folder.cs DataStream/IDataStream.cs DataStream/FixupStream.cs DataStream/Util.cs DataStream/FileDataStream.cs DataStream/SectorStream.cs DataStream/ForensicsAppStream.cs Disks/PhysicalDiskPartitionAttributes.cs Disks/IDescribable.cs Disks/UnallocatedDiskAreaAttributes.cs Disks/Disk.cs Disks/IHasSectors.cs Disks/IImageable.cs Disks/Attributes.cs Disks/IFileSystemStore.cs Disks/UnallocatedDiskArea.cs Disks/PhysicalDiskPartition.cs Disks/PhysicalDiskSection.cs Disks/MasterBootRecordAttributes.cs Disks/LogicalDiskAttributes.cs Disks/LogicalDisk.cs Disks/Image.cs Disks/PhysicalDiskAttributes.cs Disks/PhysicalDisk.cs Disks/Win32.cs Disks/MasterBootRecord.cs Disks/WinDisk.cs Linux/LinDisk.cs Linux/LinLogicalDisk.cs Linux/LinLogicalDiskAttributes.cs
-jFA.FileSystems.dll: ${SOURCES}
+all: KFA.FileSystems.Lite.dll KFA.FileSystems.dll
+KFA.FileSystems.Lite.dll: ${SOURCES}
+	mcs -d:KFS_LEAN_AND_MEAN -o KFA.FileSystems.Lite.dll -t:library -r:System.Drawing.dll -r:System.Management.dll -r:System.Data.dll -r:Mono.Posix ${SOURCES}
+KFA.FileSystems.dll: ${SOURCES}
 	mcs -o KFA.FileSystems.dll -t:library -r:Ionic.Zip.dll -r:System.Drawing.dll -r:System.Management.dll -r:System.Data.dll -r:Mono.Posix ${SOURCES}
 clean:
-	rm KFA.FileSystems.dll
+	rm KFA.FileSystems.dll KFA.FileSystems.Lite.dll
