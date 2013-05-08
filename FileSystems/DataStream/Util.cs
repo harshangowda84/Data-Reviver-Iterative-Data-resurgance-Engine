@@ -224,11 +224,23 @@ namespace KFA.DataStream {
 		}
 
 		public static string DetectFSType(IDataStream stream) {
-			var bootsig = stream.GetBytes(3, 4);
-			if (bootsig[0] == 'N' && bootsig[1] == 'T' && bootsig[2] == 'F' && bootsig[3] == 'S')
+			var ntfsSig = stream.GetBytes(3, 4);
+			if (ntfsSig[0] == 'N' && ntfsSig[1] == 'T' && ntfsSig[2] == 'F' && ntfsSig[3] == 'S')
 				return "NTFS";
-			else
-				return "Unknown";
+
+			var fatSig = stream.GetBytes(0x36, 5);
+			if (fatSig[0] == 'F' && fatSig[1] == 'A' && fatSig[2] == 'T'
+					&& fatSig[3] == '1' && fatSig[4] == '6') {
+				return "FAT16";
+			}
+
+			fatSig = stream.GetBytes(0x52, 5);
+			if (fatSig[0] == 'F' && fatSig[1] == 'A' && fatSig[2] == 'T'
+					&& fatSig[3] == '3' && fatSig[4] == '2') {
+				return "FAT16";
+			}
+
+			return "Unknown";
 		}
 	}
 }
