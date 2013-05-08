@@ -35,7 +35,7 @@ namespace KFA.Disks {
 				throw new Exception("Linux Bug!");
 			m_Size = (ulong)Handle.Length;
 			Attributes = new LinLogicalDiskAttributes();
-			Attributes.FileSystem = "NTFS";// TODO // dev == "./FAT32.img" ? "FAT32" : "NTFS";
+			Attributes.FileSystem = Util.DetectFSType(this);
 			m_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
 		}
 

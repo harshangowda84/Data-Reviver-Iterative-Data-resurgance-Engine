@@ -30,7 +30,7 @@ namespace FileSystems {
 		}
 
 		protected override List<Disk> LoadLogicalVolumesInternal() {
-			var files = new string[] {/* "./FAT32.img",*/ "./NTFS.img"/* "/dev/sdb5" */ };
+			var files = new string[] { "./FAT32.img", "./NTFS.img"/* "/dev/sdb5" */ };
 			var disks = new List<Disk>();
 			foreach (var file in files) {
 				var disk  = new LinLogicalDisk(file);
