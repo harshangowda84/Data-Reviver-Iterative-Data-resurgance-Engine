@@ -20,7 +20,7 @@ using KFA.DataStream;
 using FileSystems.FileSystem;
 
 namespace KFA.Disks {
-    public class LogicalDisk : Disk, IFileSystemStore, IDescribable {
+    public class LogicalDisk : WinDisk, IFileSystemStore, IDescribable {
         public LogicalDiskAttributes Attributes { get; private set; }
 
         private ulong m_Size;

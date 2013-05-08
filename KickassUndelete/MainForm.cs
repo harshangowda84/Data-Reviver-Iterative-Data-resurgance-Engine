@@ -48,11 +48,12 @@ namespace KickassUndelete {
         }
 
         private void LoadLogicalDisks() {
-            foreach (LogicalDisk disk in DiskLoader.LoadLogicalVolumes()) {
+            foreach (Disk disk in DiskLoader.GetNativeLoader().LoadLogicalVolumes()) {
                 TreeNode node = new TreeNode(disk.ToString());
+								Console.WriteLine("Added disk: " + disk.ToString());
                 node.Tag = disk;
                 node.ImageKey = "HDD";
-                if (disk.FS == null) {
+                if (((IFileSystemStore)disk).FS == null) {
                     node.ForeColor = Color.Gray;
                 }
                 diskTree.Nodes.Add(node);
@@ -60,10 +61,10 @@ namespace KickassUndelete {
         }
 
         private void diskTree_AfterSelect(object sender, TreeViewEventArgs e) {
-            SetFileSystem((LogicalDisk)e.Node.Tag);
+            SetFileSystem((IFileSystemStore)e.Node.Tag);
         }
 
-        private void SetFileSystem(LogicalDisk logicalDisk) {
+        private void SetFileSystem(IFileSystemStore logicalDisk) {
             if (logicalDisk.FS != null) {
                 if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
                     m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.FS);

@@ -14,28 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using KFA.Disks;
 using System.Management;
+using System.Xml.Serialization;
 
-namespace FileSystems {
-	public abstract class DiskLoader {
-		public static DiskLoader GetNativeLoader() {
-		  if (IsWindows())
-				return new WinDiskLoader();
-			else
-				return new LinDiskLoader();
-		}
-
-		static bool IsWindows() {
-			int p = (int)Environment.OSVersion.Platform;
-			return ((p != 4) && (p != 6) && (p != 128));
-		}
-
-		public abstract List<Disk> LoadDisks();
-
-		public abstract List<Disk> LoadLogicalVolumes();
-	}
+namespace KFA.Disks {
+    public class LinLogicalDiskAttributes : LogicalDiskAttributes, IDescribable {
+        public LinLogicalDiskAttributes() { }
+        public LinLogicalDiskAttributes(LinLogicalDisk disk) {
+        }
+    }
 }

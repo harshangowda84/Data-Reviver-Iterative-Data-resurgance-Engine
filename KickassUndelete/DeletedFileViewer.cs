@@ -45,7 +45,7 @@ namespace KickassUndelete {
                 SystemName = extension;
                 FriendlyName = extension;
                 UnrecognisedExtension = true;
-                if (!string.IsNullOrEmpty(extension)) {
+                /*if (!string.IsNullOrEmpty(extension)) {
                     RegistryKey rkRoot = Registry.ClassesRoot;
                     RegistryKey extkey = rkRoot.OpenSubKey(extension);
                     if (extkey != null) {
@@ -75,16 +75,16 @@ namespace KickassUndelete {
                         extkey.Close();
                     }
                     rkRoot.Close();
-                }
+                }*/
             }
 
-            [DllImport("shell32.dll", EntryPoint = "ExtractIconA",
+            /*[DllImport("shell32.dll", EntryPoint = "ExtractIconA",
                 CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
             private static extern IntPtr ExtractIcon
-                (int hInst, string lpszExeFileName, int nIconIndex);
+                (int hInst, string lpszExeFileName, int nIconIndex);*/
 
             public static Icon ExtractIconFromFile(string fileAndParam) {
-                try {
+                /*try {
                     int commaIndex = fileAndParam.IndexOf(",");
                     if (commaIndex > 0) {
                         string filename = fileAndParam.Substring(0, commaIndex);
@@ -95,7 +95,7 @@ namespace KickassUndelete {
                         //Gets the real icon.
                         return Icon.FromHandle(lIcon);
                     }
-                } catch (Exception exc) { }
+                } catch (Exception exc) { Console.WriteLine(exc); }*/
                 return null;
             }
         }
@@ -105,14 +105,14 @@ namespace KickassUndelete {
                 {FileRecoveryStatus.Unknown,"Unknown"},
                 {FileRecoveryStatus.Overwritten,"Impossible"},
                 {FileRecoveryStatus.Recoverable,"Recoverable"},
-                {FileRecoveryStatus.ProbablyRecoverable,"Probably recoverable"},
+                {FileRecoveryStatus.ProbablyRecoverable,"Possibly recoverable"},
                 {FileRecoveryStatus.PartiallyRecoverable,"Partially recoverable (may be corrupt)"}};
         private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
             new Dictionary<FileRecoveryStatus, Color>() {
                 {FileRecoveryStatus.Unknown,Color.FromArgb(255,222,168)}, // Orange
                 {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)}, // Red
                 {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)}, // Green
-                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(190,255,180)}, // Green
+                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(255,222,168)}, // Green
                 {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}}; // Orange
 
         private HashSet<string> m_SystemFileExtensions =
@@ -175,7 +175,7 @@ namespace KickassUndelete {
                     SetScanButtonScanning();
                     UpdateTimer.Start();
                 }));
-            } catch (InvalidOperationException) { }
+            } catch (InvalidOperationException exc) { Console.WriteLine(exc); }
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace KickassUndelete {
                     UpdateTimer_Tick(null, null);
                 }));
                 m_Scanning = false;
-            } catch (InvalidOperationException) { }
+            } catch (InvalidOperationException exc) { Console.WriteLine(exc); }
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace KickassUndelete {
                 this.BeginInvoke(new Action(() => {
                     SetProgress(m_ScanState.Progress);
                 }));
-            } catch (InvalidOperationException) { }
+            } catch (InvalidOperationException exc) { Console.WriteLine(exc); }
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace KickassUndelete {
             string ext = "";
             try {
                 ext = Path.GetExtension(metadata.Name);
-            } catch (ArgumentException) { }
+            } catch (ArgumentException exc) { Console.WriteLine(exc); }
             if (!m_ExtensionMap.ContainsKey(ext)) {
                 m_ExtensionMap[ext] = new ExtensionInfo(ext);
             }
@@ -301,6 +301,7 @@ namespace KickassUndelete {
                 IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
                 ListViewItem[] items = MakeListItems(deletedFiles);
                 fileView.Items.AddRange(items);
+								fileView.Invalidate();
                 m_NumFilesShown = deletedFiles.Count;
             }
         }

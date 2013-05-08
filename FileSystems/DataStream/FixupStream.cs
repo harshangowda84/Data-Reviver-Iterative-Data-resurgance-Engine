@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ForensicsApp.DataStream {
+namespace KFA.DataStream {
     public class FixupStream : SubStream {
         ushort m_Number;
         ushort[] m_Array;

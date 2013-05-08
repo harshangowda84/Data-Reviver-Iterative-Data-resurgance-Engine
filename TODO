@@ -1,0 +1,6 @@
+ - Check it still works on Windows
+   - Either fix UnixSymbolicLinkInfo or make it optional somehow...
+ o Implement linux disk system
+ - Do actual file system checking on stream, rather than trusting partition id
+ - Fix linux GUI bugs
+ - Regression tests

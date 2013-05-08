@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 using KFA.DataStream;
 
 namespace KFA.Disks {
-    public class PhysicalDisk : Disk, IImageable, IDescribable {
+    public class PhysicalDisk : WinDisk, IImageable, IDescribable {
         public PhysicalDiskAttributes Attributes { get; private set; }
 
         private ulong m_Size;
