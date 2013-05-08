@@ -3,6 +3,11 @@
 	 - Make a single binary for all platforms if possible.
  o Implement linux disk system
  o Remove dependency on Ionic.Zip
- - Do actual file system checking on stream, rather than trusting partition id
+ o Do actual file system checking on stream, rather than trusting partition id
+   o Implement for NTFS
+	 - Implement for FAT32
  - Fix linux GUI bugs
+ - CLI interface improvements
+   - Write error messages to stderr, not stdout
  - Regression tests
+

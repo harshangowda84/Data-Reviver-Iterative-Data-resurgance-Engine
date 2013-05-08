@@ -36,6 +36,14 @@ namespace KickassUndelete {
 			Application.Run(new MainForm());
 		}
 
+		static void PrintUsage() {
+			Console.WriteLine("Usage: KickassUndelete {\n" +
+			                  "         -listdisks: Show all attached disks, and their filesystems.\n" +
+												"         -listfiles <FS>: List deleted files on the disk with name <FS>.\n" +
+												"         -dumpfile <FS> <File>: Write the contents of file <File> on disk <FS> to stdout.\n" +
+												"}");
+		}
+
 		static void ParseArgs(string[] args) {
 			for (var i = 0; i < args.Count(); i++) {
 				if (string.Equals(args[i], "-listdisks", StringComparison.OrdinalIgnoreCase)) {
@@ -43,6 +51,7 @@ namespace KickassUndelete {
 					Environment.Exit(0);
 				} else if (string.Equals(args[i], "-listfiles", StringComparison.OrdinalIgnoreCase)) {
 					if (i + 1 >= args.Count()) {
+						PrintUsage();
 						Console.WriteLine("Expected: Disk name");
 						Environment.Exit(1);
 					} 
@@ -51,6 +60,7 @@ namespace KickassUndelete {
 					Environment.Exit(0);
 				} else if (string.Equals(args[i], "-dumpfile", StringComparison.OrdinalIgnoreCase)) {
 					if (i + 2 >= args.Count()) {
+						PrintUsage();
 						Console.WriteLine("Expected: Disk name and file name.");
 						Environment.Exit(1);
 					}
@@ -59,8 +69,8 @@ namespace KickassUndelete {
 					ConsoleCommands.DumpFile(disk, file);
 					Environment.Exit(0);
 				}else {
+					PrintUsage();
 					Console.WriteLine("Unknown parameter: " + args[i]);
-					Console.WriteLine("Usage: KickassUndelete [-listdisks|-listfiles]");
 					Environment.Exit(1);
 				}
 			}
