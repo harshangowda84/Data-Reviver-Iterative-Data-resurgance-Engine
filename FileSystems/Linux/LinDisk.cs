@@ -12,7 +12,7 @@ namespace KFA.Disks {
 						Handle.Position = (long)offset;
 						int bytes_read = Handle.Read(result, 0, (int)length);
 						if (bytes_read != (int)length)
-							throw new Exception("IO Error. Bug in Linux version.");
+							throw new Exception("IO Error. Bug in Linux version: Tried to read O:" + offset + ", L:" + length);
 
 						return result;
 				}

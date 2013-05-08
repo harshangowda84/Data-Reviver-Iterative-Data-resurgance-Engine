@@ -9,5 +9,7 @@
  - Fix linux GUI bugs
  - CLI interface improvements
    - Write error messages to stderr, not stdout
+ - Linux backend issues
+   - Don't read extended partitions.
  - Regression tests
 

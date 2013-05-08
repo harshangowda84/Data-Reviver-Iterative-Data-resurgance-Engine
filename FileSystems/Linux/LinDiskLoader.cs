@@ -30,18 +30,17 @@ namespace FileSystems {
 		}
 
 		protected override List<Disk> LoadLogicalVolumesInternal() {
-			var files = new string[] { "./FAT32.img", "./NTFS.img"/* "/dev/sdb5" */ };
-			var disks = new List<Disk>();
+			//var files = new string[] { "./FAT16.img", "./FAT32.img", "./NTFS.img"/* "/dev/sdb5" */ };
+			/*var disks = new List<Disk>();
 			foreach (var file in files) {
 				var disk  = new LinLogicalDisk(file);
 				disks.Add(disk);
 			}
-			return disks;
+			return disks;*/
 			
-			/*var disks = new List<Disk>();
+			var disks = new List<Disk>();
 			foreach (var file in Directory.GetFiles("/dev/disk/by-path")) {
 				var actual_path = new UnixSymbolicLinkInfo(file).GetContents().FullName;
-				Console.WriteLine(actual_path);
 				try {
 					var disk  = new LinLogicalDisk(actual_path);
 					disks.Add(disk);
@@ -49,7 +48,7 @@ namespace FileSystems {
 					Console.WriteLine(e);
 				}
 			}
-			return disks;*/
+			return disks;
 		}
 	}
 }
