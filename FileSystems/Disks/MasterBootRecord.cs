@@ -74,7 +74,6 @@ namespace KFA.Disks {
 
 						m_PartitionEntries = new List<PartitionEntry>();
 
-						long filePtr;
 						try {
 								m_Data = disk.GetBytes(0, MBR_SIZE);
 						} catch (Exception e) {

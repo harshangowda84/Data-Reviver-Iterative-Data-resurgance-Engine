@@ -21,7 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\FileSystems.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -78,6 +79,7 @@
     <Compile Include="Disks\UnallocatedDiskArea.cs" />
     <Compile Include="Disks\UnallocatedDiskAreaAttributes.cs" />
     <Compile Include="Disks\Win32.cs" />
+    <Compile Include="Disks\WinDisk.cs" />
     <Compile Include="Exceptions\FileSystemException.cs" />
     <Compile Include="Exceptions\InvalidFILERecordException.cs" />
     <Compile Include="Exceptions\NTFSException.cs" />
@@ -101,7 +103,15 @@
     <Compile Include="FileSystem\NTFS\NTFSFileStream.cs" />
     <Compile Include="FileSystem\ISearchStrategy.cs" />
     <Compile Include="FileSystem\SearchStrategy.cs" />
+    <Compile Include="Linux\LinDisk.cs" />
+    <Compile Include="Linux\LinDiskLoader.cs" />
+    <Compile Include="Linux\LinLogicalDisk.cs" />
+    <Compile Include="Linux\LinLogicalDiskAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WinDiskLoader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="COPYING.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -17,7 +17,9 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+#if MONO
 using Mono.Unix;
+#endif
 
 using KFA.Disks;
 
