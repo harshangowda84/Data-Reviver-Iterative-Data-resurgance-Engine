@@ -23,10 +23,11 @@ using System.Management;
 namespace FileSystems {
 	public abstract class DiskLoader {
 		public static DiskLoader GetNativeLoader() {
-		  if (IsWindows())
+			if (IsWindows()) {
 				return new WinDiskLoader();
-			else
+			} else {
 				return new LinDiskLoader();
+			}
 		}
 
 		static bool IsWindows() {
@@ -34,8 +35,16 @@ namespace FileSystems {
 			return ((p != 4) && (p != 6) && (p != 128));
 		}
 
-		public abstract List<Disk> LoadDisks();
+		public static List<Disk> LoadDisks() {
+			return GetNativeLoader().LoadDisksInternal();
+		}
 
-		public abstract List<Disk> LoadLogicalVolumes();
+		public static List<Disk> LoadLogicalVolumes() {
+			return GetNativeLoader().LoadLogicalVolumesInternal();
+		}
+
+		protected abstract List<Disk> LoadDisksInternal();
+
+		protected abstract List<Disk> LoadLogicalVolumesInternal();
 	}
 }

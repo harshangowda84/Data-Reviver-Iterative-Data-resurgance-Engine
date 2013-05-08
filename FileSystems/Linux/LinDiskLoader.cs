@@ -25,11 +25,11 @@ using KFA.Disks;
 
 namespace FileSystems {
 	public class LinDiskLoader : DiskLoader {
-		public override List<Disk> LoadDisks() {
+		protected override List<Disk> LoadDisksInternal() {
 			throw new NotImplementedException();
 		}
 
-		public override List<Disk> LoadLogicalVolumes() {
+		protected override List<Disk> LoadLogicalVolumesInternal() {
 			var files = new string[] {/* "./FAT32.img",*/ "./NTFS.img"/* "/dev/sdb5" */ };
 			var disks = new List<Disk>();
 			foreach (var file in files) {

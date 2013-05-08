@@ -48,7 +48,7 @@ namespace KickassUndelete {
         }
 
         private void LoadLogicalDisks() {
-            foreach (Disk disk in DiskLoader.GetNativeLoader().LoadLogicalVolumes()) {
+            foreach (Disk disk in DiskLoader.LoadLogicalVolumes()) {
                 TreeNode node = new TreeNode(disk.ToString());
 								Console.WriteLine("Added disk: " + disk.ToString());
                 node.Tag = disk;

@@ -21,39 +21,39 @@ using KFA.Disks;
 using System.Management;
 
 namespace FileSystems {
-    public class WinDiskLoader : DiskLoader {
-        public override List<Disk> LoadDisks() {
-            List<Disk> res = new List<Disk>();
-            try {
-                ManagementScope ms = new ManagementScope();
-                ObjectQuery oq = new ObjectQuery("SELECT * FROM Win32_DiskDrive");
-                ManagementObjectSearcher mos = new ManagementObjectSearcher(ms, oq);
-                ManagementObjectCollection moc = mos.Get();
-                foreach (ManagementObject mo in moc) {
-                    PhysicalDisk disk = new PhysicalDisk(mo);
-                    res.Add(disk);
-                }
-                
-            } catch (Exception e) { Console.WriteLine(e.ToString()); }
-            return res;
-        }
+	public class WinDiskLoader : DiskLoader {
+		protected override List<Disk> LoadDisksInternal() {
+			List<Disk> res = new List<Disk>();
+			try {
+				ManagementScope ms = new ManagementScope();
+				ObjectQuery oq = new ObjectQuery("SELECT * FROM Win32_DiskDrive");
+				ManagementObjectSearcher mos = new ManagementObjectSearcher(ms, oq);
+				ManagementObjectCollection moc = mos.Get();
+				foreach (ManagementObject mo in moc) {
+					PhysicalDisk disk = new PhysicalDisk(mo);
+					res.Add(disk);
+				}
 
-        public override List<Disk> LoadLogicalVolumes() {
-					// TODO: Why not Environment.GetLogicalVolumes? Only mounted?
-            List<Disk> res = new List<Disk>();
-            try {
-                ManagementScope ms = new ManagementScope();
-                ObjectQuery oq = new ObjectQuery("SELECT * FROM Win32_LogicalDisk");
-                ManagementObjectSearcher mos = new ManagementObjectSearcher(ms, oq);
-                ManagementObjectCollection moc = mos.Get();
-                foreach (ManagementObject mo in moc) {
-                    try {
-                        LogicalDisk disk = new LogicalDisk(mo);
-                        res.Add(disk);
-                    } catch { }
-                }
-            } catch (Exception e) { Console.WriteLine(e.ToString()); }
-            return res;
-        }
-    }
+			} catch (Exception e) { Console.WriteLine(e.ToString()); }
+			return res;
+		}
+
+		protected override List<Disk> LoadLogicalVolumesInternal() {
+			// TODO: Why not Environment.GetLogicalVolumes? Only mounted?
+			List<Disk> res = new List<Disk>();
+			try {
+				ManagementScope ms = new ManagementScope();
+				ObjectQuery oq = new ObjectQuery("SELECT * FROM Win32_LogicalDisk");
+				ManagementObjectSearcher mos = new ManagementObjectSearcher(ms, oq);
+				ManagementObjectCollection moc = mos.Get();
+				foreach (ManagementObject mo in moc) {
+					try {
+						LogicalDisk disk = new LogicalDisk(mo);
+						res.Add(disk);
+					} catch { }
+				}
+			} catch (Exception e) { Console.WriteLine(e.ToString()); }
+			return res;
+		}
+	}
 }

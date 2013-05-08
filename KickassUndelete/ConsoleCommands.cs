@@ -25,13 +25,13 @@ namespace KickassUndelete
 	public class ConsoleCommands {
 		public static void ListDisks() {
 			Console.WriteLine("Logical Disks:\n==============\n");
-			foreach (var disk in DiskLoader.GetNativeLoader().LoadLogicalVolumes()) {
+			foreach (var disk in DiskLoader.LoadLogicalVolumes()) {
 				Console.WriteLine(disk + ": " + ((IFileSystemStore)disk).FS);
 			}
 		}
 
 		public static void ListFiles(string dev) {
-			var volumes = DiskLoader.GetNativeLoader().LoadLogicalVolumes();
+			var volumes = DiskLoader.LoadLogicalVolumes();
 			var volume = volumes.FirstOrDefault(x => x.ToString().Contains(dev));
 			if (volume == null) {
 				Console.WriteLine("Disk not found: " + dev);
@@ -60,7 +60,7 @@ namespace KickassUndelete
 		}
 
 		public static void DumpFile(string dev, string filename) {
-			var volumes = DiskLoader.GetNativeLoader().LoadLogicalVolumes();
+			var volumes = DiskLoader.LoadLogicalVolumes();
 			var volume = volumes.FirstOrDefault(x => x.ToString().Contains(dev));
 			if (volume == null) {
 				Console.WriteLine("Disk not found: " + dev);

@@ -30,22 +30,21 @@ namespace KFA.Disks {
 		private ulong current_cache_line = ulong.MaxValue;
 		private byte[] cache = null;
 		public byte[] GetBytes(ulong offset, ulong length) {
-			if (length > 0) {
-			//	  return ForceReadBytes(offset, length);
-			}
 			byte[] result = new byte[length];
-			ulong bytes_read = 0;
-			while (bytes_read < length) {
-				ulong cache_line = offset / CACHE_LINE_SIZE;
-				lock (padlock) {
-					if (current_cache_line != cache_line) {
-						LoadCacheLine(cache_line);
+			if (length > 0) {
+				ulong bytes_read = 0;
+				while (bytes_read < length) {
+					ulong cache_line = offset / CACHE_LINE_SIZE;
+					lock (padlock) {
+						if (current_cache_line != cache_line) {
+							LoadCacheLine(cache_line);
+						}
+						ulong offset_in_cache_line = offset % CACHE_LINE_SIZE;
+						ulong num_to_read = Math.Min(CACHE_LINE_SIZE - offset_in_cache_line, length - bytes_read);
+						Array.Copy(cache, (int)offset_in_cache_line, result, (int)bytes_read, (int)num_to_read);
+						bytes_read += num_to_read;
+						offset += num_to_read;
 					}
-					ulong offset_in_cache_line = offset % CACHE_LINE_SIZE;
-					ulong num_to_read = Math.Min(CACHE_LINE_SIZE - offset_in_cache_line, length - bytes_read);
-					Array.Copy(cache, (int)offset_in_cache_line, result, (int)bytes_read, (int)num_to_read);
-					bytes_read += num_to_read;
-					offset += num_to_read;
 				}
 			}
 			return result;
