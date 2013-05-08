@@ -160,6 +160,13 @@ namespace FileSystems.FileSystem.FAT {
         public override FileSystemNode GetRoot() {
             return m_Root;
         }
+				public override string FileSystemType { 
+					get {
+						return Type == PartitionType.FAT32 ? "FAT32" :
+						       Type == PartitionType.FAT16 ? "FAT16" :
+									 "Unknown";
+					}
+				}
         public long TotalSectors {
             get { return BPB_TotSec16 == 0 ? BPB_TotSec32 : BPB_TotSec16; }
         }

@@ -24,9 +24,10 @@ namespace KickassUndelete
 {
 	public class ConsoleCommands {
 		public static void ListDisks() {
-			Console.WriteLine("Logical Disks:\n==============\n");
+			Console.Error.WriteLine("Logical Disks:\n==============\n");
 			foreach (var disk in DiskLoader.LoadLogicalVolumes()) {
-				Console.WriteLine(disk + ": " + ((IFileSystemStore)disk).FS);
+				var fs = ((IFileSystemStore)disk).FS;
+				Console.WriteLine(disk + ": " + (fs == null ? "None" : fs.FileSystemType));
 			}
 		}
 
@@ -34,19 +35,19 @@ namespace KickassUndelete
 			var volumes = DiskLoader.LoadLogicalVolumes();
 			var volume = volumes.FirstOrDefault(x => x.ToString().Contains(dev));
 			if (volume == null) {
-				Console.WriteLine("Disk not found: " + dev);
+				Console.Error.WriteLine("Disk not found: " + dev);
 				return;
 			}
 			dev = volume.ToString();
 
 			var fs = ((IFileSystemStore)volume).FS;
 			if (fs == null) {
-				Console.WriteLine("Disk " + dev + " contains no readable FS.");
+				Console.Error.WriteLine("Disk " + dev + " contains no readable FS.");
 				return;
 			}
 
-			Console.WriteLine("Deleted files on " + dev);
-			Console.WriteLine("=================" + new String('=', dev.Length));
+			Console.Error.WriteLine("Deleted files on " + dev);
+			Console.Error.WriteLine("=================" + new String('=', dev.Length));
 			var scan_state = new ScanState(fs);
 			scan_state.ScanFinished += new EventHandler(ScanFinished);
 			scan_state.StartScan();
@@ -63,14 +64,14 @@ namespace KickassUndelete
 			var volumes = DiskLoader.LoadLogicalVolumes();
 			var volume = volumes.FirstOrDefault(x => x.ToString().Contains(dev));
 			if (volume == null) {
-				Console.WriteLine("Disk not found: " + dev);
+				Console.Error.WriteLine("Disk not found: " + dev);
 				return;
 			}
 			dev = volume.ToString();
 
 			var fs = ((IFileSystemStore)volume).FS;
 			if (fs == null) {
-				Console.WriteLine("Disk " + dev + " contains no readable FS.");
+				Console.Error.WriteLine("Disk " + dev + " contains no readable FS.");
 				return;
 			}
 
@@ -84,7 +85,7 @@ namespace KickassUndelete
 			var files = scan_state.GetDeletedFiles();
 			var file = files.FirstOrDefault(x => x.Name == filename);
 			if (file == null) {
-				Console.WriteLine("File " + filename + " not found on device " + dev);
+				Console.Error.WriteLine("File " + filename + " not found on device " + dev);
 				return;
 			}
 

@@ -74,6 +74,12 @@ namespace FileSystems.FileSystem.NTFS {
             return m_Root;
         }
 
+				public override string FileSystemType {
+					get {
+						return "NTFS";
+					}
+				}
+
         public override SectorStatus GetSectorStatus(ulong sectorNum) {
             ulong lcn = sectorNum / (ulong)(BPB_SecPerClus);
             return GetClusterStatus(lcn);

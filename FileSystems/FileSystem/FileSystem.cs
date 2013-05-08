@@ -112,6 +112,8 @@ namespace FileSystems.FileSystem {
             }
         }
 
+				public abstract string FileSystemType { get; }
+
         public FileSystemNode GetFirstFile(string path) {
             IEnumerator<FileSystemNode> en = this.GetFile(path).GetEnumerator();
             if (en.MoveNext()) {

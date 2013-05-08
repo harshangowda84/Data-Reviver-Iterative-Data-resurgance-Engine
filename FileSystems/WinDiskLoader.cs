@@ -34,7 +34,7 @@ namespace FileSystems {
 					res.Add(disk);
 				}
 
-			} catch (Exception e) { Console.WriteLine(e.ToString()); }
+			} catch (Exception e) { Console.Error.WriteLine(e); }
 			return res;
 		}
 
@@ -52,7 +52,7 @@ namespace FileSystems {
 						res.Add(disk);
 					} catch { }
 				}
-			} catch (Exception e) { Console.WriteLine(e.ToString()); }
+			} catch (Exception e) { Console.Error.WriteLine(e); }
 			return res;
 		}
 	}

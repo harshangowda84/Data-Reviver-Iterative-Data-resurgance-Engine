@@ -45,7 +45,8 @@ namespace FileSystems {
 					var disk  = new LinLogicalDisk(actual_path);
 					disks.Add(disk);
 				} catch (Exception e) {
-					Console.WriteLine(e);
+					Console.Error.WriteLine("Could not read device: " + actual_path);
+					//Console.Error.WriteLine(e);
 				}
 			}
 			return disks;

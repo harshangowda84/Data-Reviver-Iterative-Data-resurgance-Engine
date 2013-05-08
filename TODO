@@ -5,11 +5,13 @@
  o Remove dependency on Ionic.Zip
  o Do actual file system checking on stream, rather than trusting partition id
    o Implement for NTFS
-	 - Implement for FAT32
+	 o Implement for FAT16/FAT32
  - Fix linux GUI bugs
  - CLI interface improvements
-   - Write error messages to stderr, not stdout
+   o Write error messages to stderr, not stdout
  - Linux backend issues
    - Don't read extended partitions.
+
  - Regression tests
+ - Test on a variety of images/computers
 
