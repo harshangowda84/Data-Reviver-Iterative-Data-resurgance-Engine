@@ -62,9 +62,9 @@ namespace FileSystems.FileSystem.NTFS {
             }
         }
 
-        public override IDataStream Parent {
+        public override IDataStream ParentStream {
             get {
-                return base.Parent.Parent;
+                return base.ParentStream.ParentStream;
             }
         }
     }

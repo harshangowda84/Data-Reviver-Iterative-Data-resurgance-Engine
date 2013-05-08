@@ -54,7 +54,7 @@ namespace KFA.DataStream {
             get { return "Substream of " + m_stream.StreamName; }
         }
 
-        public virtual IDataStream Parent {
+        public virtual IDataStream ParentStream {
             get { return m_stream; }
         }
 

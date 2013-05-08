@@ -268,6 +268,7 @@ namespace KickassUndelete {
                 extInfo.FriendlyName,
                 Util.ByteFormat(node.Size),
                 metadata.LastModified.ToString(CultureInfo.CurrentCulture),
+								node.Path,
                 m_RecoveryDescriptions[metadata.GetChanceOfRecovery()]
             });
             lvi.BackColor = m_RecoveryColors[metadata.GetChanceOfRecovery()];

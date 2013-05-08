@@ -87,7 +87,7 @@ namespace FileSystems.FileSystem.NTFS {
             get { return "NTFS file w/ hidden streams"; }
         }
 
-        public override IDataStream Parent { 
+        public override IDataStream ParentStream { 
             get { return m_record.PartitionStream; }
         }
 

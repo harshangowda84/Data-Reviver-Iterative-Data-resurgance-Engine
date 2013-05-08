@@ -71,7 +71,7 @@ namespace FileSystems.FileSystem {
             get { return "Temporary Folder " + Name; }
         }
 
-        public override IDataStream Parent {
+        public override IDataStream ParentStream {
             get { return m_Parent; }
         }
 

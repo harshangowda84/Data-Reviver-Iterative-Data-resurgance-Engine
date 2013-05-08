@@ -112,7 +112,7 @@ namespace KFA.Disks {
             get { return Name; }
         }
 
-        public virtual IDataStream Parent {
+        public virtual IDataStream ParentStream {
             get { return null; }
         }
 

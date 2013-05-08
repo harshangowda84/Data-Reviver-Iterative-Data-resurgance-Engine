@@ -46,12 +46,12 @@ namespace KFA.Disks {
             get { return "Physical Disk Section"; }
         }
 
-        public virtual IDataStream Parent {
+        public virtual IDataStream ParentStream {
             get { return PhysicalDisk; }
         }
 
         public ulong DeviceOffset {
-            get { return Parent.DeviceOffset + Offset; }
+            get { return ParentStream.DeviceOffset + Offset; }
         }
 
         public void Open() { }

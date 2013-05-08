@@ -73,7 +73,7 @@ namespace FileSystems.FileSystem.NTFS {
             get { return "NTFS File - " + m_record.FileName; }
         }
 
-        public override IDataStream Parent {
+        public override IDataStream ParentStream {
             get { return m_record.PartitionStream; }
         }
 

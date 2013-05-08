@@ -111,7 +111,7 @@ namespace FileSystems.FileSystem {
 
         public abstract String StreamName { get; }
 
-        public abstract IDataStream Parent { get; }
+        public abstract IDataStream ParentStream { get; }
 
         public abstract void Open();
 

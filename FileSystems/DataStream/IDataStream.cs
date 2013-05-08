@@ -22,7 +22,7 @@ namespace KFA.DataStream {
         ulong DeviceOffset { get; }
         ulong StreamLength { get; }
         String StreamName { get; }
-        IDataStream Parent { get; }
+        IDataStream ParentStream { get; }
         void Open();
         void Close();
     }

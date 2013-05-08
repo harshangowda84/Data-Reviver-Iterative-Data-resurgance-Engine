@@ -69,7 +69,7 @@ namespace KFA.Disks {
 			get;
 		}
 
-		public IDataStream Parent {
+		public IDataStream ParentStream {
 			get { return null; }
 		}
 

@@ -61,7 +61,7 @@ namespace KFA.DataStream {
             get { return "Local File"; }
         }
 
-        public IDataStream Parent {
+        public IDataStream ParentStream {
             get { return null; }
         }
 

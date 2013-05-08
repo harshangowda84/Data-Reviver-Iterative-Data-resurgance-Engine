@@ -117,7 +117,7 @@ namespace FileSystems.FileSystem.NTFS {
             get { return "NTFS File " + m_record.FileName; }
         }
 
-        public IDataStream Parent {
+        public IDataStream ParentStream {
             get { return m_record.PartitionStream; }
         }
 

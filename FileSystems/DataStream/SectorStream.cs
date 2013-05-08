@@ -29,7 +29,7 @@ namespace KFA.DataStream {
         }
 
         public override String StreamName {
-            get { return string.Concat("Sector ", m_sectorNum, " of ", Parent.StreamName); }
+            get { return string.Concat("Sector ", m_sectorNum, " of ", ParentStream.StreamName); }
         }
     }
 }

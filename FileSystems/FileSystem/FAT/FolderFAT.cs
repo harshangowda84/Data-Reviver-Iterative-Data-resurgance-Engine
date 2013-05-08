@@ -375,7 +375,7 @@ namespace FileSystems.FileSystem.FAT {
             get { return "FAT Folder"; }
         }
 
-        public override IDataStream Parent {
+        public override IDataStream ParentStream {
             get { return this.FileSystem.Store; }
         }
 
