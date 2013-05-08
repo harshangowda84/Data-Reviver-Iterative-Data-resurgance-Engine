@@ -9,6 +9,7 @@
  - Fix linux GUI bugs
  - CLI interface improvements
    o Write error messages to stderr, not stdout
+	 - Tidy up Program.cs and ConsoleCommands.cs
  - Linux backend issues
    - Don't read extended partitions.
 

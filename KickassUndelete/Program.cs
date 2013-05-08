@@ -28,7 +28,9 @@ namespace KickassUndelete {
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
+#if !MONO
 			AttachConsole(-1);
+#endif
 			ParseArgs(args);
 
 			EnsureUserIsAdmin();
