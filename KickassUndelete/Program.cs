@@ -31,6 +31,10 @@ namespace KickassUndelete {
 
 			EnsureUserIsAdmin();
 
+#if MONO
+			PrintUsage();
+			Environment.Exit(0);
+#endif
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm());
@@ -68,7 +72,7 @@ namespace KickassUndelete {
 					var file = args[i + 2];
 					ConsoleCommands.DumpFile(disk, file);
 					Environment.Exit(0);
-				}else {
+				} else {
 					PrintUsage();
 					Console.WriteLine("Unknown parameter: " + args[i]);
 					Environment.Exit(1);
