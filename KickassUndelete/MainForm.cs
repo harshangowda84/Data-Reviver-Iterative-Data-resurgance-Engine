@@ -67,7 +67,7 @@ namespace KickassUndelete {
         private void SetFileSystem(IFileSystemStore logicalDisk) {
             if (logicalDisk.FS != null) {
                 if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
-                    m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.FS);
+                    m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.ToString(), logicalDisk.FS);
                     m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_ScanStates[logicalDisk.FS]);
                     AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
                 }

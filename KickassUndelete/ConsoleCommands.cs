@@ -48,7 +48,7 @@ namespace KickassUndelete
 
 			Console.Error.WriteLine("Deleted files on " + dev);
 			Console.Error.WriteLine("=================" + new String('=', dev.Length));
-			var scan_state = new ScanState(fs);
+			var scan_state = new ScanState(dev, fs);
 			scan_state.ScanFinished += new EventHandler(ScanFinished);
 			scan_state.StartScan();
 			while (!scan_finished) {
@@ -75,7 +75,7 @@ namespace KickassUndelete
 				return;
 			}
 
-			var scan_state = new ScanState(fs);
+			var scan_state = new ScanState(dev, fs);
 			scan_state.ScanFinished += new EventHandler(ScanFinished);
 			scan_state.StartScan();
 			while (!scan_finished) {

@@ -28,6 +28,7 @@ using System.IO;
 using GuiComponents;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Collections;
 
 namespace KickassUndelete {
 	/// <summary>
@@ -300,16 +301,7 @@ namespace KickassUndelete {
 					if (metadata != null) {
 						ContextMenu menu = new ContextMenu();
 						MenuItem recoverFile = new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
-							SaveFileDialog saveFileDialog = new SaveFileDialog();
-							saveFileDialog.OverwritePrompt = true;
-							saveFileDialog.FileName = metadata.Name;
-							saveFileDialog.Filter = "Any Files|*.*";
-							saveFileDialog.Title = "Select a Location";
-
-							if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-								FileSystemNode node = metadata.GetFileSystemNode();
-								SaveFile(node, saveFileDialog.FileName);
-							}
+							PromptUserToSaveFile(metadata);
 						}));
 						recoverFile.Enabled = !m_Scanning && !m_Saving;
 						menu.MenuItems.Add(recoverFile);
@@ -319,22 +311,35 @@ namespace KickassUndelete {
 					// We need slightly different behaviour to save multiple files.
 					ContextMenu menu = new ContextMenu();
 					MenuItem recoverFiles = new MenuItem("Recover Files...", new EventHandler(delegate(object o, EventArgs ea) {
-						FolderBrowserDialog folderDialog = new FolderBrowserDialog();
-
-						if (folderDialog.ShowDialog() == DialogResult.OK) {
-							List<FileSystemNode> nodes = new List<FileSystemNode>();
-							foreach (ListViewItem item in fileView.SelectedItems) {
-								INodeMetadata metadata = item.Tag as INodeMetadata;
-								if (metadata != null) {
-									nodes.Add(metadata.GetFileSystemNode());
-								}
-							}
-							SaveFiles(nodes, folderDialog.SelectedPath);
-						}
+						PromptUserToSaveFiles(fileView.SelectedItems);
 					}));
 					recoverFiles.Enabled = !m_Scanning && !m_Saving;
 					menu.MenuItems.Add(recoverFiles);
 					menu.Show(fileView, e.Location);
+				}
+			}
+		}
+
+		private void PromptUserToSaveFile(INodeMetadata metadata) {
+			if (metadata != null) {
+				SaveFileDialog saveFileDialog = new SaveFileDialog();
+				saveFileDialog.OverwritePrompt = true;
+				saveFileDialog.InitialDirectory = Environment.ExpandEnvironmentVariables("%SystemDrive");
+				saveFileDialog.FileName = metadata.Name;
+				saveFileDialog.Filter = "Any Files|*.*";
+				saveFileDialog.Title = "Select a Location";
+
+				if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+					// Check that the drive isn't the same as the drive being copied from.
+					if (saveFileDialog.FileName[0] != m_ScanState.DiskName[0]
+						|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
+						"trying to recover from. This may cause recovery to fail, and overwrite your data " +
+						"permanently! Are you sure you wish to continue?", "Warning!",
+						MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+
+						FileSystemNode node = metadata.GetFileSystemNode();
+						SaveFile(node, saveFileDialog.FileName);
+					}
 				}
 			}
 		}
@@ -372,6 +377,21 @@ namespace KickassUndelete {
 			});
 
 			t.Start();
+		}
+
+		private void PromptUserToSaveFiles(IEnumerable items) {
+			FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+
+			if (folderDialog.ShowDialog() == DialogResult.OK) {
+				List<FileSystemNode> nodes = new List<FileSystemNode>();
+				foreach (ListViewItem item in items) {
+					INodeMetadata metadata = item.Tag as INodeMetadata;
+					if (metadata != null) {
+						nodes.Add(metadata.GetFileSystemNode());
+					}
+				}
+				SaveFiles(nodes, folderDialog.SelectedPath);
+			}
 		}
 
 		/// <summary>
@@ -463,33 +483,9 @@ namespace KickassUndelete {
 
 		private void bRestoreFiles_Click(object sender, EventArgs e) {
 			if (fileView.CheckedItems.Count == 1) {
-				INodeMetadata metadata = fileView.CheckedItems[0].Tag as INodeMetadata;
-				if (metadata != null) {
-					SaveFileDialog saveFileDialog = new SaveFileDialog();
-					saveFileDialog.OverwritePrompt = true;
-					saveFileDialog.InitialDirectory = Environment.ExpandEnvironmentVariables("%SystemDrive");
-					saveFileDialog.FileName = metadata.Name;
-					saveFileDialog.Filter = "Any Files|*.*";
-					saveFileDialog.Title = "Select a Location";
-
-					if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-						FileSystemNode node = metadata.GetFileSystemNode();
-						SaveFile(node, saveFileDialog.FileName);
-					}
-				}
+				PromptUserToSaveFile(fileView.CheckedItems[0].Tag as INodeMetadata);
 			} else if (fileView.CheckedItems.Count > 1) {
-				FolderBrowserDialog folderDialog = new FolderBrowserDialog();
-
-				if (folderDialog.ShowDialog() == DialogResult.OK) {
-					List<FileSystemNode> nodes = new List<FileSystemNode>();
-					foreach (ListViewItem item in fileView.CheckedItems) {
-						INodeMetadata metadata = item.Tag as INodeMetadata;
-						if (metadata != null) {
-							nodes.Add(metadata.GetFileSystemNode());
-						}
-					}
-					SaveFiles(nodes, folderDialog.SelectedPath);
-				}
+				PromptUserToSaveFiles(fileView.CheckedItems);
 			}
 		}
 

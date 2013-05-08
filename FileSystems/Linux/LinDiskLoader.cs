@@ -39,6 +39,7 @@ namespace FileSystems {
 			return disks;*/
 			
 			var disks = new List<Disk>();
+#if MONO
 			foreach (var file in Directory.GetFiles("/dev/disk/by-path")) {
 				var actual_path = new UnixSymbolicLinkInfo(file).GetContents().FullName;
 				try {
@@ -49,6 +50,7 @@ namespace FileSystems {
 					//Console.Error.WriteLine(e);
 				}
 			}
+#endif
 			return disks;
 		}
 	}

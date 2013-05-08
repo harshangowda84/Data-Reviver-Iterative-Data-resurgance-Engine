@@ -19,6 +19,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Security.Principal;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace KickassUndelete {
 	static class Program {
@@ -27,6 +28,7 @@ namespace KickassUndelete {
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
+			AttachConsole(-1);
 			ParseArgs(args);
 
 			EnsureUserIsAdmin();
@@ -39,6 +41,9 @@ namespace KickassUndelete {
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm());
 		}
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		static extern bool AttachConsole(int dwProcessId);
 
 		static void PrintUsage() {
 			Console.Error.WriteLine("Usage: KickassUndelete {\n" +

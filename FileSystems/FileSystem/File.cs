@@ -25,8 +25,10 @@ using KFA.DataStream;
 
 namespace FileSystems.FileSystem {
     public abstract class File : FileSystemNode {
+#if !KFS_LEAN_AND_MEAN
         private bool m_IsZip = false;
         private bool m_Known = false;
+#endif
 
         public bool IsZip {
             get {
