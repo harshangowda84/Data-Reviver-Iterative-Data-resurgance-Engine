@@ -73,6 +73,7 @@
     <Compile Include="DeletedFileViewer.Designer.cs">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExtensionInfo.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="MainForm.cs">
