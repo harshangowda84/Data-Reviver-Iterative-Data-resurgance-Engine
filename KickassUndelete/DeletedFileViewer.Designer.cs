@@ -40,7 +40,7 @@ namespace KickassUndelete {
         private void InitializeComponent() {
 					this.components = new System.ComponentModel.Container();
 					this.progressBar = new System.Windows.Forms.ProgressBar();
-					this.fileView = new System.Windows.Forms.ListView();
+					this.fileView = new KickassUndelete.ListViewNoFlicker();
 					this.colName = new System.Windows.Forms.ColumnHeader();
 					this.colType = new System.Windows.Forms.ColumnHeader();
 					this.colSize = new System.Windows.Forms.ColumnHeader();

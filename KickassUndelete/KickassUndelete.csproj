@@ -76,6 +76,9 @@
     <Compile Include="ExtensionInfo.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
+    <Compile Include="ListViewNoFlicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
