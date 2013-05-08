@@ -26,19 +26,19 @@ namespace KFA.DataStream {
 		public static string ByteFormat(ulong count) {
 			double val = count;
 			string units = " bytes";
-			if (val > 1024) {
+			if (val >= 1024) {
 				val /= 1024.0;
 				units = "KB";
 			}
-			if (val > 1024) {
+			if (val >= 1024) {
 				val /= 1024.0;
 				units = "MB";
 			}
-			if (val > 1024) {
+			if (val >= 1024) {
 				val /= 1024.0;
 				units = "GB";
 			}
-			if (val > 1024) {
+			if (val >= 1024) {
 				val /= 1024.0;
 				units = "TB";
 			}

@@ -55,11 +55,12 @@ namespace KickassUndelete {
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
 		private ScanState m_ScanState;
-		private int m_NumFilesShown;
 		private string m_Filter = "";
 		private bool m_MatchUnknownFileTypes = false;
 		private bool m_Scanning;
 		private bool m_Saving;
+
+		private List<ListViewItem> m_Files = new List<ListViewItem>();
 
 		private ListViewColumnSorter lvwColumnSorter;
 
@@ -168,15 +169,13 @@ namespace KickassUndelete {
 		/// </summary>
 		/// <param name="metadatas">A list of the metadata for each deleted file found.</param>
 		/// <returns>An array of ListViewItems.</returns>
-		private ListViewItem[] MakeListItems(IList<INodeMetadata> metadatas) {
+		private List<ListViewItem> MakeListItems(IList<INodeMetadata> metadatas) {
 			List<ListViewItem> items = new List<ListViewItem>(metadatas.Count);
 			for (int i = 0; i < metadatas.Count; i++) {
 				ListViewItem item = MakeListItem(metadatas[i]);
-				if (FilterMatches(item)) {
-					items.Add(item);
-				}
+				items.Add(item);
 			}
-			return items.ToArray();
+			return items;
 		}
 
 		/// <summary>
@@ -231,15 +230,31 @@ namespace KickassUndelete {
 			string upperFilter = filter.ToUpperInvariant();
 			if (m_Filter != upperFilter
 					|| showUnknownFileTypes != m_MatchUnknownFileTypes) {
-				m_Filter = upperFilter;
-				m_MatchUnknownFileTypes = showUnknownFileTypes;
+				// Check whether the new filter is more restrictive than the old filter.
+				// If so, only iterate over the displayed list items and remove the ones that don't match.
+				if (upperFilter.StartsWith(m_Filter) && (showUnknownFileTypes == m_MatchUnknownFileTypes || !showUnknownFileTypes)) {
+					m_Filter = upperFilter;
+					m_MatchUnknownFileTypes = showUnknownFileTypes;
 
-				fileView.Items.Clear();
-				IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
-				ListViewItem[] items = MakeListItems(deletedFiles);
-				fileView.Items.AddRange(items);
-				fileView.Invalidate();
-				m_NumFilesShown = deletedFiles.Count;
+					fileView.BeginUpdate();
+					// THis is premature optimization
+					for (int i = 0; i < fileView.Items.Count; i++) {
+						if (!FilterMatches(fileView.Items[i])) {
+							fileView.Items.RemoveAt(i);
+							i--;
+						}
+					}
+					fileView.EndUpdate();
+				} else {
+
+					m_Filter = upperFilter;
+					m_MatchUnknownFileTypes = showUnknownFileTypes;
+
+					fileView.BeginUpdate();
+					fileView.Items.Clear();
+					fileView.Items.AddRange(m_Files.Where(FilterMatches).ToArray());
+					fileView.EndUpdate();
+				}
 			}
 		}
 
@@ -269,11 +284,12 @@ namespace KickassUndelete {
 		private void UpdateTimer_Tick(object sender, EventArgs e) {
 			IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
 			int fileCount = deletedFiles.Count;
-			if (fileCount > m_NumFilesShown) {
-				ListViewItem[] items;
-				items = MakeListItems(deletedFiles.GetRange(m_NumFilesShown, fileCount - m_NumFilesShown));
-				fileView.Items.AddRange(items);
-				m_NumFilesShown = fileCount;
+			if (fileCount > m_Files.Count) {
+				var items = MakeListItems(deletedFiles.GetRange(m_Files.Count, fileCount - m_Files.Count));
+				m_Files.AddRange(items);
+				fileView.BeginUpdate();
+				fileView.Items.AddRange(items.Where(FilterMatches).ToArray());
+				fileView.EndUpdate();
 			}
 		}
 

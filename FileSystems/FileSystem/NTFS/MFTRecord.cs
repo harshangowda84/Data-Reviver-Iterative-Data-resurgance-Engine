@@ -323,12 +323,15 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		public FileSystemNode GetFileSystemNode() {
-			MFTRecord parent = GetParentRecord();
-			string path = "";
-			if (parent != null) {
-				path = parent.GetPath();
+			if (m_Node == null) {
+				MFTRecord parent = GetParentRecord();
+				string path = "";
+				if (parent != null) {
+					path = parent.GetPath() + "\\";
+				}
+				return GetFileSystemNode(path);
 			}
-			return GetFileSystemNode(path);
+			return m_Node;
 		}
 
 		public FileSystemNode GetFileSystemNode(String path) {
