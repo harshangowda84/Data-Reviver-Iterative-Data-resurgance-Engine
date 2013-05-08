@@ -29,6 +29,7 @@ using GuiComponents;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Collections;
+using System.Diagnostics;
 
 namespace KickassUndelete {
 	/// <summary>
@@ -369,6 +370,7 @@ namespace KickassUndelete {
 						}), (double)offset / (double)node.StreamLength);
 						offset += BLOCK_SIZE;
 					}
+					Process.Start("explorer.exe", "/select, \"" + filePath + '"');
 					this.BeginInvoke(new Action(delegate() {
 						progressBar.Close();
 						m_Saving = false;
@@ -383,14 +385,22 @@ namespace KickassUndelete {
 			FolderBrowserDialog folderDialog = new FolderBrowserDialog();
 
 			if (folderDialog.ShowDialog() == DialogResult.OK) {
-				List<FileSystemNode> nodes = new List<FileSystemNode>();
-				foreach (ListViewItem item in items) {
-					INodeMetadata metadata = item.Tag as INodeMetadata;
-					if (metadata != null) {
-						nodes.Add(metadata.GetFileSystemNode());
+				// Check that the drive isn't the same as the drive being copied from.
+				if (folderDialog.SelectedPath[0] != m_ScanState.DiskName[0]
+					|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
+					"trying to recover from. This may cause recovery to fail, and overwrite your data " +
+					"permanently! Are you sure you wish to continue?", "Warning!",
+					MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+
+					List<FileSystemNode> nodes = new List<FileSystemNode>();
+					foreach (ListViewItem item in items) {
+						INodeMetadata metadata = item.Tag as INodeMetadata;
+						if (metadata != null) {
+							nodes.Add(metadata.GetFileSystemNode());
+						}
 					}
+					SaveFiles(nodes, folderDialog.SelectedPath);
 				}
-				SaveFiles(nodes, folderDialog.SelectedPath);
 			}
 		}
 
@@ -424,6 +434,7 @@ namespace KickassUndelete {
 						}
 					}
 				}
+				Process.Start("explorer.exe", '"' + folderPath + '"');
 				this.BeginInvoke(new Action(delegate() {
 					progressBar.Close();
 					UpdateRestoreButton(0);

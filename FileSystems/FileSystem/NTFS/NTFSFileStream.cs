@@ -19,122 +19,127 @@ using KFA.DataStream;
 using System.Collections.ObjectModel;
 
 namespace FileSystems.FileSystem.NTFS {
-    class NTFSFileStream : IDataStream {
+	class NTFSFileStream : IDataStream {
 
-        private IDataStream m_partitionStream, m_residentStream;
-        private ulong m_length;
-        private MFTRecord m_record;
-        private List<Run> m_runs;
-        private bool m_nonResident;
+		private IDataStream m_partitionStream, m_residentStream;
+		private ulong m_length;
+		private MFTRecord m_record;
+		private List<Run> m_runs;
+		private bool m_nonResident;
 
-        public NTFSFileStream(IDataStream partition, MFTRecord record, AttributeRecord attr) {
-            if (attr != null) {
-                m_nonResident = attr.NonResident;
-                if (m_nonResident) {
-                    m_runs = attr.Runs;
-                    m_length = attr.DataSize;
-                } else {
-                    m_residentStream = attr.value;
-                    m_length = attr.value.StreamLength;
-                }
-            }
-            m_record = record;
-            m_partitionStream = partition;
-        }
+		public NTFSFileStream(IDataStream partition, MFTRecord record, AttributeRecord attr) {
+			if (attr != null) {
+				m_nonResident = attr.NonResident;
+				if (m_nonResident) {
+					m_runs = attr.Runs;
+					m_length = attr.DataSize;
+				} else {
+					m_residentStream = attr.value;
+					m_length = attr.value.StreamLength;
+				}
+			}
+			m_record = record;
+			m_partitionStream = partition;
+		}
 
-        public NTFSFileStream(IDataStream partition, MFTRecord record, String attrName) :
-            this(partition, record, record.GetAttribute(attrName)) { }
+		public NTFSFileStream(IDataStream partition, MFTRecord record, String attrName) :
+			this(partition, record, record.GetAttribute(attrName)) { }
 
-        /// <summary>
-        /// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
-        /// </summary>
-        public IEnumerable<Run> GetRuns() {
-            return m_nonResident ? new ReadOnlyCollection<Run>(m_runs) : null;
-        }
+		/// <summary>
+		/// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
+		/// </summary>
+		public IEnumerable<Run> GetRuns() {
+			return m_nonResident ? new ReadOnlyCollection<Run>(m_runs) : null;
+		}
 
-        public byte GetByte(ulong offset) {
-            if (offset >= m_length) {
-                throw new Exception("Offset was off the end of the file!");
-            }
-            if (m_nonResident) {
-                ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
-                ulong clusterNum = offset / bytesPerCluster;
-                foreach (Run run in m_runs) {
-                    if (clusterNum >= run.VCN && clusterNum < run.VCN + run.Length) {
-                        return run.GetByte(offset - run.VCN * bytesPerCluster);
-                    }
-                }
-                //throw new Exception("No run contained the requested offset!");
-                return 0;
-            } else {
-                return m_residentStream.GetByte(offset);
-            }
-        }
+		public byte GetByte(ulong offset) {
+			if (offset >= m_length) {
+				throw new Exception("Offset was off the end of the file!");
+			}
+			if (m_nonResident) {
+				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
+				ulong clusterNum = offset / bytesPerCluster;
+				foreach (Run run in m_runs) {
+					if (clusterNum >= run.VCN && clusterNum < run.VCN + run.Length) {
+						return run.GetByte(offset - run.VCN * bytesPerCluster);
+					}
+				}
+				//throw new Exception("No run contained the requested offset!");
+				return 0;
+			} else {
+				return m_residentStream.GetByte(offset);
+			}
+		}
 
-        public byte[] GetBytes(ulong offset, ulong length) {
-            if (offset + length > m_length) {
-                throw new Exception("Offset was off the end of the file!");
-            }
-            if (m_nonResident) {
-                byte[] res = new byte[length];
-                ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
-                ulong firstCluster = offset / bytesPerCluster;
-                ulong lastCluster = (offset + length - 1) / bytesPerCluster;
-                foreach (Run run in m_runs) {
-                    if (!(run.VCN > lastCluster || run.VCN + run.Length <= firstCluster)) {
-                        ulong runStart, resStart, copyLength;
+		public byte[] GetBytes(ulong offset, ulong length) {
+			if (offset + length > m_length) {
+				throw new ArgumentOutOfRangeException(string.Format("Tried to read off the end of the file! offset = {0}, length = {1}, file length = {2}", offset, length, m_length));
+			}
+			if (m_nonResident) {
+				byte[] res = new byte[length];
+				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
+				ulong firstCluster = offset / bytesPerCluster;
+				ulong lastCluster = (offset + length - 1) / bytesPerCluster;
+				foreach (Run run in m_runs) {
+					// If this run doesn't overlap the cluster range we want, skip it.
+					if (run.VCN + run.Length <= firstCluster || run.VCN > lastCluster) {
+						continue;
+					}
+					ulong offsetInRun, bytesRead, copyLength;
 
-                        if (run.Contains(firstCluster)) {
-                            resStart = 0;
-                            runStart = offset - run.VCN * bytesPerCluster;
-                        } else {
-                            runStart = 0;
-                            resStart = run.VCN * bytesPerCluster - offset;
-                        }
+					if (run.Contains(firstCluster)) {
+						bytesRead = 0;
+						offsetInRun = offset - run.VCN * bytesPerCluster;
+					} else {
+						offsetInRun = 0;
+						bytesRead = run.VCN * bytesPerCluster - offset;
+					}
+					ulong bytesLeftToRead = length - bytesRead;
+					ulong bytesLeftInRun = run.Length * bytesPerCluster - offsetInRun;
 
-                        copyLength = Math.Min((run.VCN + run.Length) * bytesPerCluster - runStart, length - resStart);
+					copyLength = Math.Min(bytesLeftToRead, bytesLeftInRun);
 
-                        Array.Copy(run.GetBytes(runStart, copyLength), 0, res, (int)resStart, (int)copyLength);
-                    }
-                }
-                return res;
-            } else {
-                return m_residentStream.GetBytes(offset, length);
-            }
-        }
+					Array.Copy(run.GetBytes(offsetInRun, copyLength), 0, res, (int)bytesRead, (int)copyLength);
 
-        public ulong DeviceOffset {
-            get { return 0; }
-        }
+				}
+				return res;
+			} else {
+				return m_residentStream.GetBytes(offset, length);
+			}
+		}
 
-        public ulong StreamLength {
-            get {
-                return m_length;
-            }
-        }
+		public ulong DeviceOffset {
+			get { return 0; }
+		}
 
-        public String StreamName {
-            get { return "NTFS File " + m_record.FileName; }
-        }
+		public ulong StreamLength {
+			get {
+				return m_length;
+			}
+		}
 
-        public IDataStream ParentStream {
-            get { return m_record.PartitionStream; }
-        }
+		public String StreamName {
+			get { return "NTFS File " + m_record.FileName; }
+		}
 
-        public void Open() {
-            if (m_nonResident) {
-                m_partitionStream.Open();
-            } else {
-                m_residentStream.Open();
-            }
-        }
+		public IDataStream ParentStream {
+			get { return m_record.PartitionStream; }
+		}
 
-        public void Close() {
-            if (m_nonResident) {
-                m_partitionStream.Close();
-            } else {
-                m_residentStream.Close();
-            }
-        }
-    }
+		public void Open() {
+			if (m_nonResident) {
+				m_partitionStream.Open();
+			} else {
+				m_residentStream.Open();
+			}
+		}
+
+		public void Close() {
+			if (m_nonResident) {
+				m_partitionStream.Close();
+			} else {
+				m_residentStream.Close();
+			}
+		}
+	}
 }
