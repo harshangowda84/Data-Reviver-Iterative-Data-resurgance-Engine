@@ -17,6 +17,7 @@ using System;
 using KFA.Disks;
 using System.Collections.Generic;
 using System.Collections;
+using System.IO;
 
 namespace FileSystems.FileSystem.NTFS {
 	public class FileSystemNTFS : FileSystem {
@@ -57,6 +58,10 @@ namespace FileSystems.FileSystem.NTFS {
 		private FileNTFS m_MFT = null;
 		private UInt64 m_mftSector;
 		private FileNTFS m_bitmapFile;
+
+		Dictionary<ulong, ulong> m_ParentLinks = new Dictionary<ulong, ulong>();
+		Dictionary<ulong, string> m_RecordNames = new Dictionary<ulong, string>();
+		Dictionary<ulong, string> m_RecordPaths = new Dictionary<ulong, string>();
 
 		public FileSystemNTFS(IFileSystemStore store) {
 			Store = store;
@@ -178,14 +183,43 @@ namespace FileSystems.FileSystem.NTFS {
 
 		private void MftScan(FileSystem.NodeVisitCallback callback) {
 			ulong numFiles = m_MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
+			ulong totalReads = numFiles * 2;
+
+			// First step: iterate over all MFT records and build index of parent IDs
 			for (ulong i = 0; i < numFiles; i++) {
-				MFTRecord record = MFTRecord.Create(i, this, false);
+				MFTRecord record = MFTRecord.Create(i, this, false, true);
+				m_ParentLinks[record.RecordNum] = record.ParentDirectory;
+				m_RecordNames[record.RecordNum] = record.Name;
+				if (!callback(null, i, totalReads)) {
+					break;
+				}
+			}
+
+			// Then do a second pass and connect the dots.
+			for (ulong i = 0; i < numFiles; i++) {
+				string path = Path.GetDirectoryName(GetPathOfMftRecord(i)) + "\\";
+				MFTRecord record = MFTRecord.Create(i, this, false, false, path);
+
 				if (record != null) {
-					if (!callback(record, i, numFiles)) {
+					if (!callback(record, numFiles + i, totalReads)) {
 						break;
 					}
 				}
 			}
+		}
+
+		private string GetPathOfMftRecord(ulong recordNum) {
+			// Work out the path here by traversing up the MFT records.
+			if (!m_RecordPaths.ContainsKey(recordNum)) {
+				ulong parent;
+				if (!m_ParentLinks.ContainsKey(recordNum)
+					|| (parent = m_ParentLinks[recordNum]) == 0 || parent == recordNum) {
+					m_RecordPaths[recordNum] = m_RecordNames[recordNum];
+				} else {
+					m_RecordPaths[recordNum] = GetPathOfMftRecord(parent) + "\\" + m_RecordNames[recordNum];
+				}
+			}
+			return m_RecordPaths[recordNum];
 		}
 
 		private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node) {

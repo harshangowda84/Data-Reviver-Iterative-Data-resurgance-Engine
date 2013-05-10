@@ -90,7 +90,7 @@ namespace KickassUndelete {
 			// TODO: Replace me with a search strategy selected from a text box!
 			ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
-				if (metadata.Deleted && metadata.Name != null
+				if (metadata != null && metadata.Deleted && metadata.Name != null
 						&& !metadata.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
 						&& !metadata.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
 						&& !metadata.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)) {

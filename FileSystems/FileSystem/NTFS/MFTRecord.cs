@@ -193,7 +193,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public UInt16 Reserved;
 		public UInt32 MFTRecordNumber;
 
-		public UInt64 ParentDirectory = UInt64.MaxValue;
+		public UInt64 ParentDirectory = 0;
 		public DateTime fileCreationTime, fileLastDataChangeTime, fileLastMFTChangeTime, fileLastAccessTime;
 		public UInt64 AllocatedSize, ActualSize;
 		public Int32 _Attributes;
@@ -215,12 +215,17 @@ namespace FileSystems.FileSystem.NTFS {
 		private FileSystemNode m_Node = null;
 		private IDataStream m_Stream = null;
 		private bool m_DataLoaded = false;
+		private string m_Path = "";
 
 		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem) {
-			return Create(recordNum, fileSystem, true);
+			return Create(recordNum, fileSystem, true, false);
 		}
 
-		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, bool loadData) {
+		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, bool loadData, bool loadOnlyParentName) {
+			return Create(recordNum, fileSystem, loadData, loadOnlyParentName, "");
+		}
+
+		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, bool loadAllData, bool loadOnlyParentName, string path) {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
 
 			IDataStream stream;
@@ -237,10 +242,12 @@ namespace FileSystems.FileSystem.NTFS {
 				return null;
 			}
 
-			return new MFTRecord(recordNum, fileSystem, stream, loadData);
+			return new MFTRecord(recordNum, fileSystem, stream, loadAllData, loadOnlyParentName, path);
 		}
 
-		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem, IDataStream stream, bool loadData) {
+		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem,
+				IDataStream stream, bool loadAllData, bool loadOnlyParentName,
+				string path) {
 			this.RecordNum = recordNum;
 			this.FileSystem = fileSystem;
 			this.BytesPerSector = fileSystem.BytesPerSector;
@@ -248,19 +255,26 @@ namespace FileSystems.FileSystem.NTFS {
 			this.PartitionStream = fileSystem.Store;
 
 			m_Stream = stream;
+			m_Path = path;
 
 			Flags = Util.GetUInt16(m_Stream, 22);
 
-			if (loadData) {
-				LoadData();
+			if (loadAllData || loadOnlyParentName) {
+				LoadData(loadOnlyParentName);
 			}
 		}
 
 		private void LoadData() {
+			LoadData(false);
+		}
+
+		private void LoadData(bool loadOnlyParentName) {
 			if (m_DataLoaded) {
 				return;
 			}
-			m_DataLoaded = true;
+			if (!loadOnlyParentName) {
+				m_DataLoaded = true;
+			}
 
 			ushort updateSequenceOffset = Util.GetUInt16(m_Stream, 0x04);
 			ushort updateSequenceLength = Util.GetUInt16(m_Stream, 0x06);
@@ -276,7 +290,7 @@ namespace FileSystems.FileSystem.NTFS {
 			FixupStream fixedStream = new FixupStream(m_Stream, 0, m_Stream.StreamLength, updateSequenceNumber, updateSequenceArray, (ulong)BytesPerSector);
 
 			LoadHeader(fixedStream);
-			LoadAttributes(fixedStream, AttributeOffset);
+			LoadAttributes(fixedStream, AttributeOffset, loadOnlyParentName);
 
 			if (Attributes.Count == 0) {
 				//throw new InvalidFILERecordException(FileSystem, fixedStream.DeviceOffset, "MFT record had no attributes.");
@@ -325,11 +339,12 @@ namespace FileSystems.FileSystem.NTFS {
 		public FileSystemNode GetFileSystemNode() {
 			if (m_Node == null) {
 				MFTRecord parent = GetParentRecord();
-				string path = "";
-				if (parent != null) {
-					path = parent.GetPath() + "\\";
+				if (m_Path == "") {
+					if (parent != null) {
+						m_Path = parent.GetPath() + "\\";
+					}
 				}
-				return GetFileSystemNode(path);
+				return GetFileSystemNode(m_Path);
 			}
 			return m_Node;
 		}
@@ -378,7 +393,7 @@ namespace FileSystems.FileSystem.NTFS {
 			MFTRecordNumber = Util.GetUInt32(stream, 44);
 		}
 
-		private void LoadAttributes(IDataStream stream, ulong startOffset) {
+		private void LoadAttributes(IDataStream stream, ulong startOffset, bool loadOnlyNameAttr) {
 			Attributes = new List<AttributeRecord>();
 			while (true) {
 				//Align to 8 byte boundary
@@ -394,6 +409,10 @@ namespace FileSystems.FileSystem.NTFS {
 				AttributeRecord attr = new AttributeRecord();
 				attr.type = (AttributeType)Util.GetUInt32(stream, startOffset + 0);
 				attr.Length = Util.GetUInt16(stream, startOffset + 4);
+				if (loadOnlyNameAttr && (AttributeType)attr.type != AttributeType.FileName) {
+					startOffset += attr.Length;
+					continue;
+				}
 				attr.NonResident = stream.GetByte(startOffset + 8) > 0;
 				attr.NameLength = stream.GetByte(startOffset + 9);
 				attr.NameOffset = Util.GetUInt16(stream, startOffset + 10);
@@ -588,7 +607,9 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public string Name {
 			get {
-				LoadData();
+				if (string.IsNullOrEmpty(FileName)) {
+					LoadData(true);
+				}
 				return FileName;
 			}
 		}
