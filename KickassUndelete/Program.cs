@@ -49,10 +49,10 @@ namespace KickassUndelete {
 
 		static void PrintUsage() {
 			Console.Error.WriteLine("Usage: KickassUndelete {\n" +
-			                        "         -listdisks: Show all attached disks, and their filesystems.\n" +
-											      	"         -listfiles <FS>: List deleted files on the disk with name <FS>.\n" +
-												      "         -dumpfile <FS> <File>: Write the contents of file <File> on disk <FS> to stdout.\n" +
-												      "}");
+															"         -listdisks: Show all attached disks, and their filesystems.\n" +
+															"         -listfiles <FS>: List deleted files on the disk with name <FS>.\n" +
+															"         -dumpfile <FS> <File>: Write the contents of file <File> on disk <FS> to stdout.\n" +
+															"}");
 		}
 
 		static void ParseArgs(string[] args) {
@@ -65,7 +65,7 @@ namespace KickassUndelete {
 						PrintUsage();
 						Console.Error.WriteLine("Expected: Disk name");
 						Environment.Exit(1);
-					} 
+					}
 					var disk = args[i + 1];
 					ConsoleCommands.ListFiles(disk);
 					Environment.Exit(0);
@@ -95,7 +95,15 @@ namespace KickassUndelete {
 		static void EnsureUserIsAdmin() {
 			if (IsWindows()) {
 				WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-				if (!principal.IsInRole(WindowsBuiltInRole.Administrator)) {
+				if (!principal.IsInRole(WindowsBuiltInRole.Administrator)
+					&& MessageBox.Show(
+					"Warning: You are not currently using an administrator account. " +
+					"This means you will only be able to recover files from external " +
+					"drives, such as flash drives and SD cards. Would you like to run " +
+					"as administrator now? You will need the password for your " +
+					"administrator account.", "Warning", MessageBoxButtons.YesNo,
+					MessageBoxIcon.Warning) == DialogResult.Yes) {
+
 					RelaunchAsAdmin();
 				}
 			}
