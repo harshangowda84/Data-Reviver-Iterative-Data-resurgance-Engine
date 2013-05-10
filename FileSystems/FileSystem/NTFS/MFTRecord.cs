@@ -319,7 +319,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 		private MFTRecord GetParentRecord() {
 			LoadData();
-			if (ParentDirectory != MFTRecordNumber) {
+			if (ParentDirectory != MFTRecordNumber && ParentDirectory != 0) {
 				return MFTRecord.Create(ParentDirectory, FileSystem);
 			} else {
 				return null;

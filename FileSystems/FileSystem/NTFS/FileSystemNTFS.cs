@@ -188,10 +188,12 @@ namespace FileSystems.FileSystem.NTFS {
 			// First step: iterate over all MFT records and build index of parent IDs
 			for (ulong i = 0; i < numFiles; i++) {
 				MFTRecord record = MFTRecord.Create(i, this, false, true);
-				m_ParentLinks[record.RecordNum] = record.ParentDirectory;
-				m_RecordNames[record.RecordNum] = record.Name;
-				if (!callback(null, i, totalReads)) {
-					break;
+				if (record != null) {
+					m_ParentLinks[record.RecordNum] = record.ParentDirectory;
+					m_RecordNames[record.RecordNum] = record.Name;
+					if (!callback(null, i, totalReads)) {
+						break;
+					}
 				}
 			}
 
