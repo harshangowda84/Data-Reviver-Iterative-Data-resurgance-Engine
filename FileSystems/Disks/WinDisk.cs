@@ -22,8 +22,7 @@ namespace KFA.Disks {
 		protected SafeFileHandle Handle { get; set; }
 
 		#region Disk Members
-		protected override byte[] ForceReadBytes(ulong offset, ulong length) {
-			byte[] result = new byte[length];
+		protected override void ForceReadBytes(byte[] result, ulong offset, ulong length) {
 			uint bytes_read = 0;
 
 			long filePtr;
@@ -32,7 +31,6 @@ namespace KFA.Disks {
 			if (!readSuccess) {
 				//throw new Exception("File's screwed!");
 			}
-			return result;
 		}
 		#endregion
 	}

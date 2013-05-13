@@ -58,6 +58,7 @@ namespace FileSystems.FileSystem.NTFS {
 		private FileNTFS m_MFT = null;
 		private UInt64 m_mftSector;
 		private FileNTFS m_bitmapFile;
+		private byte[] m_Bitmap;
 
 		Dictionary<ulong, ulong> m_ParentLinks = new Dictionary<ulong, ulong>();
 		Dictionary<ulong, string> m_RecordNames = new Dictionary<ulong, string>();
@@ -73,6 +74,7 @@ namespace FileSystems.FileSystem.NTFS {
 			m_Root = new FolderNTFS(MFTRecord.Create(5, this), "");
 
 			m_bitmapFile = new FileNTFS(MFTRecord.Create(6, this), "");
+			m_Bitmap = m_bitmapFile.GetBytes(0, m_bitmapFile.StreamLength);
 		}
 
 		public override FileSystemNode GetRoot() {
@@ -91,7 +93,13 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private SectorStatus GetClusterStatus(ulong lcn) {
-			Byte b = m_bitmapFile.GetByte(lcn / 8);
+			if (lcn / 8 >= (ulong)m_Bitmap.Length) {
+				Console.Error.WriteLine(string.Format("ERROR: Tried to read off the end of "+
+					"the $Bitmap file. $Bitmap length = {0}, lcn = {1}, lcn / 8 = {2}",
+					m_Bitmap.Length,lcn,lcn/8));
+				return SectorStatus.Unknown;
+			}
+			Byte b = m_Bitmap[lcn / 8];
 			Byte mask = (byte)(0x1 << (int)(lcn % 8));
 			if ((b & mask) > 0) {
 				return SectorStatus.NTFSUsed;
@@ -114,11 +122,13 @@ namespace FileSystems.FileSystem.NTFS {
 					ulong usedClusters = 0;
 					// Check the status of each cluster in the runs.
 					foreach (Run run in runs) {
-						totalClusters += run.Length;
-						for (ulong i = run.LCN; i < run.Length; i++) {
-							if (GetClusterStatus(run.LCN + i) == SectorStatus.NTFSUsed
-									|| GetClusterStatus(run.LCN + i) == SectorStatus.NTFSBad) {
-								usedClusters++;
+						if (run.HasRealClusters) {
+							totalClusters += run.Length;
+							for (ulong i = run.LCN; i < run.Length; i++) {
+								if (GetClusterStatus(run.LCN + i) == SectorStatus.NTFSUsed
+										|| GetClusterStatus(run.LCN + i) == SectorStatus.NTFSBad) {
+									usedClusters++;
+								}
 							}
 						}
 					}
@@ -147,6 +157,10 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public long SectorsPerMFTRecord {
 			get { return BPB_SectorsPerMFTRecord; }
+		}
+
+		public long BytesPerMFTRecord {
+			get { return BytesPerSector * SectorsPerMFTRecord; }
 		}
 
 		public long SectorsPerCluster {
@@ -199,7 +213,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 			// Then do a second pass and connect the dots.
 			for (ulong i = 0; i < numFiles; i++) {
-				string path = Path.GetDirectoryName(GetPathOfMftRecord(i)) + "\\";
+				string path = GetPathOfMftRecord(i);
 				MFTRecord record = MFTRecord.Create(i, this, false, false, path);
 
 				if (record != null) {
@@ -210,7 +224,7 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private string GetPathOfMftRecord(ulong recordNum) {
+		private string GetFullPathOfMftRecord(ulong recordNum) {
 			// Work out the path here by traversing up the MFT records.
 			if (!m_RecordPaths.ContainsKey(recordNum)) {
 				ulong parent;
@@ -218,10 +232,20 @@ namespace FileSystems.FileSystem.NTFS {
 					|| (parent = m_ParentLinks[recordNum]) == 0 || parent == recordNum) {
 					m_RecordPaths[recordNum] = m_RecordNames[recordNum];
 				} else {
-					m_RecordPaths[recordNum] = GetPathOfMftRecord(parent) + "\\" + m_RecordNames[recordNum];
+					m_RecordPaths[recordNum] = GetFullPathOfMftRecord(parent) + "\\" + m_RecordNames[recordNum];
 				}
 			}
 			return m_RecordPaths[recordNum];
+		}
+
+		private string GetPathOfMftRecord(ulong recordNum) {
+			ulong parent;
+			if (!m_ParentLinks.ContainsKey(recordNum)
+					|| (parent = m_ParentLinks[recordNum]) == 0 || parent == recordNum) {
+				return "\\";
+			} else {
+				return GetFullPathOfMftRecord(parent) + "\\";
+			}
 		}
 
 		private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node) {

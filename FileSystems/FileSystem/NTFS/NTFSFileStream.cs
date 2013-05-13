@@ -76,6 +76,12 @@ namespace FileSystems.FileSystem.NTFS {
 				throw new ArgumentOutOfRangeException(string.Format("Tried to read off the end of the file! offset = {0}, length = {1}, file length = {2}", offset, length, m_length));
 			}
 			if (m_nonResident) {
+				// Special case for only 1 run (by far the most common occurrence).
+				// Avoids the loop logic and Array.Copy.
+				if (m_runs.Count == 1) {
+					return m_runs[0].GetBytes(offset, length);
+				}
+
 				byte[] res = new byte[length];
 				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
 				ulong firstCluster = offset / bytesPerCluster;
@@ -99,7 +105,8 @@ namespace FileSystems.FileSystem.NTFS {
 
 					copyLength = Math.Min(bytesLeftToRead, bytesLeftInRun);
 
-					Array.Copy(run.GetBytes(offsetInRun, copyLength), 0, res, (int)bytesRead, (int)copyLength);
+					byte[] a = run.GetBytes(offsetInRun, copyLength);
+					Array.Copy(a, 0, res, (int)bytesRead, (int)copyLength);
 
 				}
 				return res;

@@ -28,7 +28,7 @@ namespace KFA.Disks {
 		private object padlock = new object();
 		private const ulong CACHE_LINE_SIZE = 4 * 1024; // 4 KB, a typical cluster size
 		private ulong current_cache_line = ulong.MaxValue;
-		private byte[] cache = null;
+		private byte[] cache = new byte[CACHE_LINE_SIZE];
 		public byte[] GetBytes(ulong offset, ulong length) {
 			byte[] result = new byte[length];
 			if (length > 0) {
@@ -52,10 +52,10 @@ namespace KFA.Disks {
 
 		protected void LoadCacheLine(ulong cache_line) {
 			current_cache_line = cache_line;
-			cache = ForceReadBytes(cache_line * CACHE_LINE_SIZE, CACHE_LINE_SIZE);
+			ForceReadBytes(cache, cache_line * CACHE_LINE_SIZE, CACHE_LINE_SIZE);
 		}
 
-		protected abstract byte[] ForceReadBytes(ulong offset, ulong length);
+		protected abstract void ForceReadBytes(byte[] buffer, ulong offset, ulong length);
 
 		public abstract ulong StreamLength {
 			get;

@@ -50,7 +50,9 @@ namespace FileSystems {
 					try {
 						LogicalDisk disk = new LogicalDisk(mo);
 						res.Add(disk);
-					} catch { }
+					} catch (Exception e) {
+						Console.Error.WriteLine(e); 
+					}
 				}
 			} catch (Exception e) { Console.Error.WriteLine(e); }
 			return res;
