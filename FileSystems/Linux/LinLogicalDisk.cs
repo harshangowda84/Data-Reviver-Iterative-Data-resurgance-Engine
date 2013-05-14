@@ -31,8 +31,9 @@ namespace KFA.Disks {
 		public LinLogicalDisk(string dev) {
 			m_DevName = dev;
 			Handle = System.IO.File.Open(dev, FileMode.Open, FileAccess.Read);
-			if (Handle == null)
+			if (Handle == null) {
 				throw new Exception("Linux Bug!");
+			}
 			m_Size = (ulong)Handle.Length;
 			Attributes = new LinLogicalDiskAttributes();
 			Attributes.FileSystem = Util.DetectFSType(this);

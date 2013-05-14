@@ -29,6 +29,7 @@ namespace KickassUndelete {
 	public class ScanState {
 		private List<INodeMetadata> m_DeletedFiles = new List<INodeMetadata>();
 		private double m_Progress;
+		private DateTime m_StartTime;
 		private Thread m_Thread;
 		private bool m_ScanCancelled;
 		private FileSystem m_FileSystem;
@@ -89,6 +90,10 @@ namespace KickassUndelete {
 
 			// TODO: Replace me with a search strategy selected from a text box!
 			ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
+
+			Console.WriteLine("Beginning scan...");
+			m_StartTime = DateTime.Now;
+
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
 				if (metadata != null && metadata.Deleted && metadata.Name != null
 						&& !metadata.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
@@ -109,10 +114,14 @@ namespace KickassUndelete {
 				return !m_ScanCancelled;
 			}));
 
+			TimeSpan timeTaken = DateTime.Now - m_StartTime;
 			if (!m_ScanCancelled) {
+				Console.WriteLine("Scan complete! Time taken: {0}", timeTaken);
 				m_Progress = 1;
 				OnProgressUpdated();
 				OnScanFinished();
+			} else {
+				Console.WriteLine("Scan cancelled! Time taken: {0}", timeTaken);
 			}
 		}
 
