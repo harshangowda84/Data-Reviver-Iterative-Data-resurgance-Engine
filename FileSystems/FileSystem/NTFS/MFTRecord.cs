@@ -289,8 +289,15 @@ namespace FileSystems.FileSystem.NTFS {
 				read++;
 			}
 
+			// Apply fixups to both the stream and the in-memory array
 			m_Stream = new FixupStream(m_Stream, 0, m_Stream.StreamLength, updateSequenceNumber, updateSequenceArray, (ulong)BytesPerSector);
-			FixupStream.FixArray(m_Data, updateSequenceNumber, updateSequenceArray, (int)BytesPerSector);
+			try {
+				FixupStream.FixArray(m_Data, updateSequenceNumber, updateSequenceArray, (int)BytesPerSector);
+			} catch (NTFSFixupException e) {
+				Console.Error.WriteLine(e);
+				// This record is invalid, so don't read any more.
+				return;
+			}
 
 			LoadHeader();
 			LoadAttributes(AttributeOffset, loadOnlyParentName);
@@ -454,7 +461,7 @@ namespace FileSystems.FileSystem.NTFS {
 						LoadVolumeNameAttributes(startOffset + attr.ValueOffset, (int)attr.ValueLength);
 					}
 				} else {
-					success = LoadNonResidentAttribute((ulong)startOffset, attr);
+					success = LoadNonResidentAttribute(startOffset, attr);
 				}
 				if (success) {
 					Attributes.Add(attr);
@@ -471,33 +478,34 @@ namespace FileSystems.FileSystem.NTFS {
 			attr.value = new SubStream(m_Stream, (ulong)(startOffset + attr.ValueOffset), attr.ValueLength);
 		}
 
-		private bool LoadNonResidentAttribute(ulong startOffset, AttributeRecord attr) {
-			IDataStream stream = m_Stream;
-			attr.lowVCN = Util.GetInt32(stream, startOffset + 16);
-			attr.highVCN = Util.GetInt64(stream, startOffset + 24);
+		private bool LoadNonResidentAttribute(int startOffset, AttributeRecord attr) {
+			attr.lowVCN = BitConverter.ToInt32(m_Data, startOffset + 16);
+			attr.highVCN = BitConverter.ToInt64(m_Data, startOffset + 24);
 
-			attr.MappingPairsOffset = Util.GetUInt16(stream, startOffset + 32);
-			attr.CompressionUnit = stream.GetByte(startOffset + 34);
-			attr.AllocatedSize = Util.GetUInt64(stream, startOffset + 40);
-			attr.DataSize = Util.GetUInt64(stream, startOffset + 48);
-			attr.InitialisedSize = Util.GetUInt64(stream, startOffset + 56);
+			attr.MappingPairsOffset = BitConverter.ToUInt16(m_Data, startOffset + 32);
+			attr.CompressionUnit = m_Data[startOffset + 34];
+			attr.AllocatedSize = BitConverter.ToUInt64(m_Data, startOffset + 40);
+			attr.DataSize = BitConverter.ToUInt64(m_Data, startOffset + 48);
+			attr.InitialisedSize = BitConverter.ToUInt64(m_Data, startOffset + 56);
 			attr.ValueLength = (uint)attr.DataSize;
 			if (attr.CompressionUnit > 0) {
-				attr.CompressedSize = Util.GetUInt64(stream, startOffset + 64);
+				attr.CompressedSize = BitConverter.ToUInt64(m_Data, startOffset + 64);
 				return false;
 			}
 
 			attr.Runs = new List<Run>();
 			ulong cur_vcn = (ulong)attr.lowVCN;
 			ulong lcn = 0;
-			ulong offset = startOffset + attr.MappingPairsOffset;
-			ulong endOffset = startOffset + attr.Length;
+			ulong offset = (ulong)startOffset + attr.MappingPairsOffset;
+			ulong endOffset = (ulong)startOffset + attr.Length;
 
-			while (offset < endOffset && cur_vcn <= (ulong)attr.highVCN && stream.GetByte(offset) > 0) {
+			while (offset < endOffset && cur_vcn <= (ulong)attr.highVCN && m_Data[offset] > 0) {
 				ulong length;
 
-				byte F = (Byte)((stream.GetByte(offset) >> 4) & 0xf);
-				byte L = (Byte)(stream.GetByte(offset) & 0xf);
+				/*byte F = (Byte)((m_Data[offset] >> 4) & 0xf);
+				byte L = (Byte)(m_Data[offset] & 0xf);*/
+				byte F = (Byte)((m_Stream.GetByte(offset) >> 4) & 0xf);
+				byte L = (Byte)(m_Stream.GetByte(offset) & 0xf);
 
 				if (L == 0 || L > 8) {
 					// The length is mandatory and must be at most 8 bytes.
@@ -505,12 +513,11 @@ namespace FileSystems.FileSystem.NTFS {
 					return false;
 				} else {
 					// Read in the length
-					length = Util.GetArbitraryUInt(stream, offset + 1, L);
+					length = Util.GetArbitraryUInt(m_Data, (int)offset + 1, L);
 					if (F > 0 && length + cur_vcn > (ulong)attr.highVCN + 1) {
 						// The run goes too far, so throw an exception
 						ulong recordOffset = MFTRecordNumber * (ulong)FileSystem.SectorsPerMFTRecord * (ulong)FileSystem.BytesPerSector;
 						throw new InvalidFILERecordException(FileSystem, recordOffset + offset + 1, "Error: A data run went longer than the high VCN!");
-						return false;
 					}
 				}
 
@@ -521,7 +528,7 @@ namespace FileSystems.FileSystem.NTFS {
 					//if (vcn + run.length > attr.highVCN) break; // data is corrupt
 
 					try {
-						lcn = (ulong)((long)lcn + Util.GetArbitraryInt(stream, offset + 1 + L, F));
+						lcn = (ulong)((long)lcn + Util.GetArbitraryInt(m_Data, (int)offset + 1 + L, F));
 					} catch {
 						return false;
 					}

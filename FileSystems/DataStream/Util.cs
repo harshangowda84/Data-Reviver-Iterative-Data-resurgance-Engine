@@ -104,35 +104,34 @@ namespace KFA.DataStream {
 			return BitConverter.ToUInt64(stream.GetBytes(offset, 8), 0);
 		}
 
-		public static ulong GetArbitraryUInt(IDataStream stream, ulong offset, ulong intSize) {
+		public static ulong GetArbitraryUInt(byte[] data, int offset, int intSize) {
 			if (intSize > 8) throw new Exception("We can't get numbers bigger than ulongs");
-			//intSize = Math.Min(intSize, 8);
+
 			ulong result = 0;
-			byte[] bytesArb = stream.GetBytes(offset, intSize);
-			for (int b = 0; (ulong)b < intSize; b++) {
-				result += ((ulong)bytesArb[b]) << (b * 8);
+			for (int b = 0; b < intSize; b++) {
+				result += ((ulong)data[b + offset]) << (b * 8);
 			}
 			return result;
 		}
 
-		public static long GetArbitraryInt(IDataStream stream, ulong offset, ulong intSize) {
+		public static long GetArbitraryInt(byte[] data, int offset, int intSize) {
 			if (intSize > 8) {
 				throw new Exception("We can't get numbers bigger than longs");
 			} else if (intSize == 8) {
-				return GetInt64(stream, offset);
+				return BitConverter.ToInt64(data, offset);
 			} else {
 				byte[] bytes64 = new byte[8];
-				byte[] bytesArb = stream.GetBytes(offset, intSize);
-				Array.Copy(bytesArb, bytes64, (int)intSize);
+				Array.Copy(data, offset, bytes64, 0, intSize);
 				long res = BitConverter.ToInt64(bytes64, 0);
+				// Deal with twos complement stuff
 				if ((bytes64[intSize - 1] & 0x80) == 0x80) {
 					res -= ((long)1 << ((int)intSize * 8));
 				}
 
 				if (intSize == 2) {
-					Debug.Assert(GetInt16(stream, offset) == res);
+					Debug.Assert(BitConverter.ToInt16(data, offset) == res);
 				} else if (intSize == 4) {
-					Debug.Assert(GetInt32(stream, offset) == res);
+					Debug.Assert(BitConverter.ToInt32(data, offset) == res);
 				}
 
 				return res;
@@ -173,7 +172,7 @@ namespace KFA.DataStream {
 			BinaryWriter writer = new BinaryWriter(new FileStream(tempFile, FileMode.Create));
 			ulong offset = 0;
 			while (offset < stream.StreamLength) {
-				ulong read = Math.Min(BLOCK_SIZE,stream.StreamLength-offset);
+				ulong read = Math.Min(BLOCK_SIZE, stream.StreamLength - offset);
 				writer.Write(stream.GetBytes(offset, read));
 				offset += read;
 			}

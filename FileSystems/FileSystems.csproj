@@ -89,6 +89,7 @@
     <Compile Include="Exceptions\FileSystemException.cs" />
     <Compile Include="Exceptions\InvalidFILERecordException.cs" />
     <Compile Include="Exceptions\NTFSException.cs" />
+    <Compile Include="Exceptions\NTFSFixupException.cs" />
     <Compile Include="FileSystem\FAT\FileFAT.cs" />
     <Compile Include="FileSystem\FAT\FileSystemFAT.cs" />
     <Compile Include="FileSystem\FAT\FolderFAT.cs" />
