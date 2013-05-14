@@ -401,21 +401,6 @@ namespace FileSystems.FileSystem.NTFS {
 			NextAttrInstance = BitConverter.ToUInt16(m_Data, 40);
 			Reserved = BitConverter.ToUInt16(m_Data, 42);
 			MFTRecordNumber = BitConverter.ToUInt32(m_Data, 44);
-
-			//record_Magic = stream.GetBytes(0, 4);
-			//record_Ofs = Util.GetUInt16(stream, 4);
-			//record_Count = Util.GetUInt16(stream, 6);
-			//LogSequenceNumber = Util.GetUInt64(stream, 8);
-			//SequenceNumber = Util.GetUInt16(stream, 16);
-			//record_NumHardLinks = Util.GetUInt16(stream, 18);
-			//AttributeOffset = Util.GetUInt16(stream, 20);
-			//Flags = Util.GetUInt16(stream, 22);
-			//BytesInUse = Util.GetUInt32(stream, 24);
-			//BytesAllocated = Util.GetUInt32(stream, 28);
-			//BaseMFTRecord = Util.GetUInt64(stream, 32);
-			//NextAttrInstance = Util.GetUInt16(stream, 40);
-			//Reserved = Util.GetUInt16(stream, 42);
-			//MFTRecordNumber = Util.GetUInt32(stream, 44);
 		}
 
 		private void LoadAttributes(int startOffset, bool loadOnlyNameAttr) {
@@ -456,7 +441,7 @@ namespace FileSystems.FileSystem.NTFS {
 					} else if ((AttributeType)attr.type == AttributeType.FileName) {
 						LoadNameAttributes(startOffset + attr.ValueOffset);
 					} else if ((AttributeType)attr.type == AttributeType.AttributeList) {
-						LoadExternalAttributeList(attr.value, attr);
+						LoadExternalAttributeList(startOffset + attr.ValueOffset, attr);
 					} else if ((AttributeType)attr.type == AttributeType.VolumeName) {
 						LoadVolumeNameAttributes(startOffset + attr.ValueOffset, (int)attr.ValueLength);
 					}
@@ -549,12 +534,6 @@ namespace FileSystems.FileSystem.NTFS {
 			fileLastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
 			fileLastAccessTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 24));
 			_Attributes = BitConverter.ToInt32(m_Data, startOffset + 32);
-
-			//fileCreationTime = fromNTFS(Util.GetUInt64(stream, startOffset));
-			//fileLastDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 8));
-			//fileLastMFTChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 16));
-			//fileLastAccessTime = fromNTFS(Util.GetUInt64(stream, startOffset + 24));
-			//_Attributes = Util.GetInt32(stream, startOffset + 32);
 		}
 
 		private void LoadNameAttributes(int startOffset) {
@@ -573,29 +552,14 @@ namespace FileSystems.FileSystem.NTFS {
 			if (FileName == null || FileName.Contains("~")) {
 				FileName = Encoding.Unicode.GetString(m_Data, startOffset + 66, FileNameLength * 2);
 			}
-
-			//ParentDirectory = Util.GetUInt64(stream, (ulong)(startOffset)) & 0xFFFFFF;
-			//fileCreationTime = fromNTFS(Util.GetUInt64(stream, startOffset + 8));
-			//fileLastDataChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 16));
-			//fileLastMFTChangeTime = fromNTFS(Util.GetUInt64(stream, startOffset + 24));
-			//fileLastAccessTime = fromNTFS(Util.GetUInt64(stream, startOffset + 32));
-			//AllocatedSize = Util.GetUInt64(stream, startOffset + 40);
-			//ActualSize = Util.GetUInt64(stream, startOffset + 48);
-			//_Attributes = Util.GetInt32(stream, startOffset + 56);
-			//_Attributes2 = Util.GetInt32(stream, startOffset + 58);
-			//FileNameLength = stream.GetByte(startOffset + 64);
-			//FileNameType = stream.GetByte(startOffset + 65);
-			//if (FileName == null || FileName.Contains("~")) {
-			//	FileName = Util.GetUnicodeString(stream, startOffset + 66, (ulong)(FileNameLength * 2));
-			//}
 		}
 
 		private void LoadVolumeNameAttributes(int startOffset, int length) {
 			VolumeLabel = Encoding.Unicode.GetString(m_Data, startOffset, length);
 		}
 
-		private void LoadExternalAttributeList(IDataStream stream, AttributeRecord attrList) {
-			ulong offset = 0;
+		private void LoadExternalAttributeList(int startOffset, AttributeRecord attrList) {
+			int offset = 0;
 			while (true) {
 				//Align to 8 byte boundary
 				if (offset % 8 != 0) {
@@ -603,18 +567,18 @@ namespace FileSystems.FileSystem.NTFS {
 				}
 
 				//0xFF... marks end of attributes;
-				if (offset == attrList.ValueLength || Util.GetUInt32(stream, offset) == 0xFFFFFFFF) {
+				if (offset == attrList.ValueLength || BitConverter.ToUInt32(m_Data, offset+startOffset) == 0xFFFFFFFF) {
 					break;
 				}
 
 				AttributeRecord attr = new AttributeRecord();
-				attr.type = (AttributeType)Util.GetUInt32(stream, offset + 0x0);
-				attr.Length = Util.GetUInt16(stream, offset + 0x4);
-				attr.NameLength = stream.GetByte(offset + 0x6);
-				attr.Id = Util.GetUInt16(stream, offset + 0x18);
+				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
+				attr.Length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
+				attr.NameLength = m_Data[offset + startOffset + 0x6];
+				attr.Id = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x18);
 
-				ulong vcn = Util.GetUInt64(stream, offset + 0x8);
-				ulong fileRef = (Util.GetUInt64(stream, offset + 0x10) & 0x0000FFFFFFFFFFFF);
+				ulong vcn = BitConverter.ToUInt64(m_Data, offset + startOffset + 0x8);
+				ulong fileRef = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
 				if (fileRef != this.MFTRecordNumber && fileRef != RecordNum) {
 					MFTRecord mftRec = MFTRecord.Create(fileRef, this.FileSystem);
 					foreach (AttributeRecord attr2 in mftRec.Attributes) {
@@ -639,12 +603,12 @@ namespace FileSystems.FileSystem.NTFS {
 					}
 				}
 				if (attr.NameLength > 0) {
-					attr.Name = Util.GetUnicodeString(stream, StartOffset + 0x1A, (ulong)(attr.NameLength * 2));
+					attr.Name = Encoding.Unicode.GetString(m_Data, 0x1A, (attr.NameLength * 2));
 				}
 
 				ulong startByte = vcn * (ulong)FileSystem.BytesPerCluster;
 				attr.value = new SubStream(attrList.value, startByte, startByte + attr.Length);
-				offset += 0x1A + (ulong)(attr.NameLength * 2);
+				offset += 0x1A + (attr.NameLength * 2);
 			}
 		}
 
