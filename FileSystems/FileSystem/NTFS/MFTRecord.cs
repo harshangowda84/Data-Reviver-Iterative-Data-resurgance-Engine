@@ -506,8 +506,10 @@ namespace FileSystems.FileSystem.NTFS {
 				} else {
 					// Read in the length
 					length = Util.GetArbitraryUInt(stream, offset + 1, L);
-					if (F > 0 && length > 100000000000000) { // 100 TB limit for now, this is kind of a hack
-						// The data is corrupt, so ignore this whole attribute
+					if (F > 0 && length + cur_vcn > (ulong)attr.highVCN + 1) {
+						// The run goes too far, so throw an exception
+						ulong recordOffset = MFTRecordNumber * (ulong)FileSystem.SectorsPerMFTRecord * (ulong)FileSystem.BytesPerSector;
+						throw new InvalidFILERecordException(FileSystem, recordOffset + offset + 1, "Error: A data run went longer than the high VCN!");
 						return false;
 					}
 				}

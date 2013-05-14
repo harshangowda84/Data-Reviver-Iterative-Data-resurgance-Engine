@@ -14,16 +14,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using KFA.DataStream;
+using KFA.Exceptions;
 
 namespace FileSystems.FileSystem.NTFS {
 	public class FixupStream : SubStream {
 		// Static method that just works on an array.
 		public static void FixArray(byte[] data, ushort updateSequenceNumber, ushort[] updateSequenceArray, int sectorSize) {
-			// TODO: Add checking to this method for corrupt data
 			int current = sectorSize - 2;
 			while (current < data.Length) {
-				data[current] = (byte)(data[current / sectorSize] & 0xFF);
-				data[current + 1] = (byte)((data[current / sectorSize] >> 8) & 0xFF);
+				// Verify the fixup.
+				ushort check = (ushort)(data[current] + (data[current + 1] << 8));
+				// TODO: I have no idea why check is incorrect so often (mostly 0). I'm assuming there's something
+				// we don't know about the fixup spec.
+				if (check == updateSequenceNumber) {
+					data[current] = (byte)(updateSequenceArray[current / sectorSize] & 0xFF);
+					data[current + 1] = (byte)((updateSequenceArray[current / sectorSize] >> 8) & 0xFF);
+				}/* else {
+					throw new NTFSFixupException((ulong)current, updateSequenceNumber, check);
+				}*/
 				current += sectorSize;
 			}
 		}
