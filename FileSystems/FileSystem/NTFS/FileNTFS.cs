@@ -23,7 +23,7 @@ namespace FileSystems.FileSystem.NTFS {
     public class FileNTFS : File, IDescribable {
 
         private MFTRecord m_record;
-        private IDataStream m_stream;
+        private NTFSFileStream m_stream;
         public DateTime m_CreationTime, m_LastModified, m_LastMFTModified, m_LastAccessTime;
 
         public FileNTFS(MFTRecord record, string path) {
@@ -50,7 +50,7 @@ namespace FileSystems.FileSystem.NTFS {
         /// Gets a list of the on-disk runs of this NTFSFile. Returns null if resident.
         /// </summary>
         public IEnumerable<Run> GetRuns() {
-            return ((NTFSFileStream)m_stream).GetRuns();
+            return m_stream.GetRuns();
         }
 
         public override long Identifier {
