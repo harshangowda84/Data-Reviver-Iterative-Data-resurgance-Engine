@@ -33,7 +33,7 @@ namespace FileSystems.FileSystem {
         public ulong Size {
             get { return StreamLength; }
         }
-        public string Path { get; protected set; }
+        public string Path { get; set; }
         public bool Deleted { get; protected set; }
         public abstract DateTime LastModified { get; }
         public FileSystem FileSystem { get; protected set; }

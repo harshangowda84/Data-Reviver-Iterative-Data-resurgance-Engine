@@ -348,12 +348,13 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public FileSystemNode GetFileSystemNode() {
 			if (m_Node == null) {
-				if (m_Path == "") {
+				/*if (string.IsNullOrEmpty(m_Path)) {
+					m_Path = FileSystem.GetPathOfMftRecord(RecordNum);
 					MFTRecord parent = GetParentRecord();
 					if (parent != null) {
 						m_Path = parent.GetPath() + "\\";
 					}
-				}
+				}*/
 				return GetFileSystemNode(m_Path);
 			}
 			return m_Node;

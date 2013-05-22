@@ -122,10 +122,24 @@ namespace KickassUndelete {
 		/// </summary>
 		void state_ScanFinished(object sender, EventArgs ea) {
 			try {
-				this.Invoke(new Action(() => {
+				// This entire thing will probably block the GUI, I think? Unless it's running in ScanState thread.
+				// In any case, it needs a closer look. 
+				var items = MakeListItems(m_ScanState.GetDeletedFiles());
+				foreach (var item in m_Files.Where(x => x.Checked))
+				{
+					items.First(x => x.Tag == item.Tag).Checked = true;
+				}
+				m_Files = items;
+				
+				this.Invoke(new Action(() =>
+				{
 					SetScanButtonFinished();
 					UpdateTimer.Stop();
 					UpdateTimer_Tick(null, null);
+					fileView.BeginUpdate();
+					fileView.Items.Clear();
+					fileView.Items.AddRange(m_Files.Where(FilterMatches).ToArray());
+					fileView.EndUpdate();
 				}));
 				m_Scanning = false;
 			} catch (InvalidOperationException exc) { Console.WriteLine(exc); }
@@ -167,7 +181,7 @@ namespace KickassUndelete {
 
 		/// <summary>
 		/// Constructs a list of ListViewItems based on the files retrieved by the
-		/// underlying ScanState. Only creates list items that match the filter.
+		/// underlying ScanState.
 		/// </summary>
 		/// <param name="metadatas">A list of the metadata for each deleted file found.</param>
 		/// <returns>An array of ListViewItems.</returns>
@@ -205,7 +219,7 @@ namespace KickassUndelete {
                 extInfo.FriendlyName,
                 Util.ByteFormat(node.Size),
                 metadata.LastModified.ToString(CultureInfo.CurrentCulture),
-								node.Path,
+				node.Path,
                 m_RecoveryDescriptions[metadata.GetChanceOfRecovery()]
             });
 			lvi.BackColor = m_RecoveryColors[metadata.GetChanceOfRecovery()];

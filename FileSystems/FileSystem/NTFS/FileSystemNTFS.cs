@@ -197,54 +197,15 @@ namespace FileSystems.FileSystem.NTFS {
 
 		private void MftScan(FileSystem.NodeVisitCallback callback) {
 			ulong numFiles = m_MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
-			ulong totalReads = numFiles * 2;
 
-			// First step: iterate over all MFT records and build index of parent IDs
 			for (ulong i = 0; i < numFiles; i++) {
 				MFTRecord record = MFTRecord.Create(i, this, false, true);
-				if (record != null) {
-					m_ParentLinks[record.RecordNum] = record.ParentDirectory;
-					m_RecordNames[record.RecordNum] = record.Name;
-					if (!callback(null, i, totalReads)) {
-						break;
-					}
-				}
-			}
-
-			// Then do a second pass and connect the dots.
-			for (ulong i = 0; i < numFiles; i++) {
-				string path = GetPathOfMftRecord(i);
-				MFTRecord record = MFTRecord.Create(i, this, false, false, path);
 
 				if (record != null) {
-					if (!callback(record, numFiles + i, totalReads)) {
-						break;
+					if (!callback(record, i, numFiles)) {
+						return;
 					}
 				}
-			}
-		}
-
-		private string GetFullPathOfMftRecord(ulong recordNum) {
-			// Work out the path here by traversing up the MFT records.
-			if (!m_RecordPaths.ContainsKey(recordNum)) {
-				ulong parent;
-				if (!m_ParentLinks.ContainsKey(recordNum)
-					|| (parent = m_ParentLinks[recordNum]) == 0 || parent == recordNum) {
-					m_RecordPaths[recordNum] = m_RecordNames[recordNum];
-				} else {
-					m_RecordPaths[recordNum] = GetFullPathOfMftRecord(parent) + "\\" + m_RecordNames[recordNum];
-				}
-			}
-			return m_RecordPaths[recordNum];
-		}
-
-		private string GetPathOfMftRecord(ulong recordNum) {
-			ulong parent;
-			if (!m_ParentLinks.ContainsKey(recordNum)
-					|| (parent = m_ParentLinks[recordNum]) == 0 || parent == recordNum) {
-				return "\\";
-			} else {
-				return GetFullPathOfMftRecord(parent) + "\\";
 			}
 		}
 

@@ -21,6 +21,7 @@ using FileSystems.FileSystem;
 using System.Threading;
 using System.Windows.Forms;
 using System.Collections.ObjectModel;
+using FileSystems.FileSystem.NTFS;
 
 namespace KickassUndelete {
 	/// <summary>
@@ -84,6 +85,12 @@ namespace KickassUndelete {
 		/// Runs a scan.
 		/// </summary>
 		private void Run() {
+			// TODO: This could probably be one record[]
+			Dictionary<ulong, ulong> parentLinks = new Dictionary<ulong, ulong>();
+			Dictionary<ulong, string> recordNames = new Dictionary<ulong, string>();
+			
+			ulong numFiles;
+
 			OnScanStarted();
 			m_Progress = 0;
 			OnProgressUpdated();
@@ -91,10 +98,23 @@ namespace KickassUndelete {
 			// TODO: Replace me with a search strategy selected from a text box!
 			ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
 
+			if (m_FileSystem is FileSystemNTFS)
+			{
+				var ntfsFS = m_FileSystem as FileSystemNTFS;
+				numFiles = ntfsFS.MFT.StreamLength / (ulong)(ntfsFS.SectorsPerMFTRecord * ntfsFS.BytesPerSector);
+			}
+
 			Console.WriteLine("Beginning scan...");
 			m_StartTime = DateTime.Now;
 
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
+				var record = metadata as MFTRecord;
+				if (record != null)
+				{
+					parentLinks[record.RecordNum] = record.ParentDirectory;
+					recordNames[record.RecordNum] = record.Name;
+				}
+
 				if (metadata != null && metadata.Deleted && metadata.Name != null
 						&& !metadata.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
 						&& !metadata.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
@@ -114,6 +134,20 @@ namespace KickassUndelete {
 				return !m_ScanCancelled;
 			}));
 
+			if (m_FileSystem is FileSystemNTFS)
+			{
+				List<INodeMetadata> fileList;
+				lock (m_DeletedFiles) {
+					fileList = m_DeletedFiles;
+				}
+				foreach (var file in fileList)
+				{
+					var record = file as MFTRecord;
+					var node = file.GetFileSystemNode();
+					node.Path = GetPathForRecord(parentLinks, recordNames, record.RecordNum);
+				}
+			}
+
 			TimeSpan timeTaken = DateTime.Now - m_StartTime;
 			if (!m_ScanCancelled) {
 				Console.WriteLine("Scan complete! Time taken: {0}", timeTaken);
@@ -122,6 +156,23 @@ namespace KickassUndelete {
 				OnScanFinished();
 			} else {
 				Console.WriteLine("Scan cancelled! Time taken: {0}", timeTaken);
+			}
+		}
+
+		private string GetPathForRecord(Dictionary<ulong, ulong> parentLinks,
+										Dictionary<ulong, string> recordNames,
+										ulong recordNum)
+		{
+			if (recordNum == 0 || !parentLinks.ContainsKey(recordNum) || parentLinks[recordNum] == recordNum)
+			{
+				return "";
+			}
+			else
+			{
+				if (!recordNames.ContainsKey(recordNum))
+					throw new Exception("Record name not found: " + recordNum);
+				return (GetPathForRecord(parentLinks, recordNames, parentLinks[recordNum])) +
+					"\\" + recordNames[recordNum];
 			}
 		}
 
