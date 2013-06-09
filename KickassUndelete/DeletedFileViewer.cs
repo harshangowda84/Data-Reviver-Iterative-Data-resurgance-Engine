@@ -122,17 +122,12 @@ namespace KickassUndelete {
 		/// </summary>
 		void state_ScanFinished(object sender, EventArgs ea) {
 			try {
-				// This entire thing will probably block the GUI, I think? Unless it's running in ScanState thread.
-				// In any case, it needs a closer look. 
-				var items = MakeListItems(m_ScanState.GetDeletedFiles());
-				foreach (var item in m_Files.Where(x => x.Checked))
-				{
-					items.First(x => x.Tag == item.Tag).Checked = true;
-				}
-				m_Files = items;
-				
 				this.Invoke(new Action(() =>
 				{
+					foreach (ListViewItem item in m_Files) {
+						item.SubItems[4].Text = ((INodeMetadata)item.Tag).GetFileSystemNode().Path;
+					}
+
 					SetScanButtonFinished();
 					UpdateTimer.Stop();
 					UpdateTimer_Tick(null, null);
