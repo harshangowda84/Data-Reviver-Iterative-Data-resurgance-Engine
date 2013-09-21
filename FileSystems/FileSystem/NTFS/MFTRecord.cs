@@ -327,34 +327,8 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private MFTRecord GetParentRecord() {
-			LoadData();
-			if (ParentDirectory != MFTRecordNumber && ParentDirectory != 0) {
-				return MFTRecord.Create(ParentDirectory, FileSystem);
-			} else {
-				return null;
-			}
-		}
-
-		public string GetPath() {
-			// Work out the path here by traversing up the MFT records.
-			MFTRecord parent = GetParentRecord();
-			if (parent == null) {
-				return Name;
-			} else {
-				return parent.GetPath() + "\\" + Name;
-			}
-		}
-
 		public FileSystemNode GetFileSystemNode() {
 			if (m_Node == null) {
-				/*if (string.IsNullOrEmpty(m_Path)) {
-					m_Path = FileSystem.GetPathOfMftRecord(RecordNum);
-					MFTRecord parent = GetParentRecord();
-					if (parent != null) {
-						m_Path = parent.GetPath() + "\\";
-					}
-				}*/
 				return GetFileSystemNode(m_Path);
 			}
 			return m_Node;
