@@ -365,26 +365,12 @@ namespace KickassUndelete {
 			progressBar.Show(this);
 			string file = Path.GetFileName(filePath);
 			Thread t = new Thread(delegate() {
-				using (BinaryWriter bw = new BinaryWriter(new FileStream(filePath, FileMode.Create))) {
-					ulong BLOCK_SIZE = 1024 * 1024; // 1MB
-					ulong offset = 0;
-					while (offset < node.StreamLength) {
-						if (offset + BLOCK_SIZE < node.StreamLength) {
-							bw.Write(node.GetBytes(offset, BLOCK_SIZE));
-						} else {
-							bw.Write(node.GetBytes(offset, node.StreamLength - offset));
-						}
-						this.BeginInvoke(new Action<double>(delegate(double progress) {
-							progressBar.SetProgress(file, progress);
-						}), (double)offset / (double)node.StreamLength);
-						offset += BLOCK_SIZE;
-					}
-					Process.Start("explorer.exe", "/select, \"" + filePath + '"');
-					this.BeginInvoke(new Action(delegate() {
-						progressBar.Close();
-						m_Saving = false;
-					}));
-				}
+				WriteFileToDisk(filePath, node, progressBar);
+				Process.Start("explorer.exe", "/select, \"" + filePath + '"');
+				this.BeginInvoke(new Action(delegate() {
+					progressBar.Close();
+					m_Saving = false;
+				}));
 			});
 
 			t.Start();
@@ -427,21 +413,7 @@ namespace KickassUndelete {
 				foreach (FileSystemNode node in nodes) {
 					string file = node.Name;
 					string fileName = Path.Combine(folderPath, file);
-					using (BinaryWriter bw = new BinaryWriter(new FileStream(fileName, FileMode.Create))) {
-						ulong BLOCK_SIZE = 1024 * 1024; // 1MB
-						ulong offset = 0;
-						while (offset < node.StreamLength) {
-							if (offset + BLOCK_SIZE < node.StreamLength) {
-								bw.Write(node.GetBytes(offset, BLOCK_SIZE));
-							} else {
-								bw.Write(node.GetBytes(offset, node.StreamLength - offset));
-							}
-							offset += BLOCK_SIZE;
-							this.BeginInvoke(new Action<double>(delegate(double progress) {
-								progressBar.SetProgress(file, progress);
-							}), Math.Min(1, (double)offset / (double)node.StreamLength));
-						}
-					}
+					WriteFileToDisk(fileName, node, progressBar);
 				}
 				Process.Start("explorer.exe", '"' + folderPath + '"');
 				this.BeginInvoke(new Action(delegate() {
@@ -452,6 +424,24 @@ namespace KickassUndelete {
 			});
 
 			t.Start();
+		}
+
+		private void WriteFileToDisk(string filePath, FileSystemNode node, SaveProgressPopup progressBar) {
+			using (BinaryWriter bw = new BinaryWriter(new FileStream(filePath, FileMode.Create))) {
+				ulong BLOCK_SIZE = 1024 * 1024; // 1MB
+				ulong offset = 0;
+				while (offset < node.StreamLength) {
+					if (offset + BLOCK_SIZE < node.StreamLength) {
+						bw.Write(node.GetBytes(offset, BLOCK_SIZE));
+					} else {
+						bw.Write(node.GetBytes(offset, node.StreamLength - offset));
+					}
+					offset += BLOCK_SIZE;
+					this.BeginInvoke(new Action<double>(delegate(double progress) {
+						progressBar.SetProgress(Path.GetFileName(filePath), progress);
+					}), Math.Min(1, (double)offset / (double)node.StreamLength));
+				}
+			}
 		}
 
 		private void fileView_ColumnClick(object sender, ColumnClickEventArgs e) {
