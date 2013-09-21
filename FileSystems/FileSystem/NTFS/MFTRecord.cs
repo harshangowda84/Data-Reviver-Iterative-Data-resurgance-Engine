@@ -144,6 +144,12 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 	}
 
+	public enum MftLoadDepth {
+		Full,
+		NameAndParentOnly,
+		None
+	}
+
 	public class MFTRecord : INodeMetadata {
 
 		#region Attribute Enums
@@ -227,7 +233,7 @@ namespace FileSystems.FileSystem.NTFS {
 		private bool m_DataLoaded = false;
 		private string m_Path = "";
 
-		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, bool loadAllData = true, bool loadOnlyParentName = false, string path = "") {
+		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, MftLoadDepth loadDepth = MftLoadDepth.Full, string path = "") {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
 
 			IDataStream stream;
@@ -248,12 +254,11 @@ namespace FileSystems.FileSystem.NTFS {
 				return null;
 			}
 
-			return new MFTRecord(recordNum, fileSystem, data, stream, loadAllData, loadOnlyParentName, path);
+			return new MFTRecord(recordNum, fileSystem, data, stream, loadDepth, path);
 		}
 
-		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem,
-				byte[] data, IDataStream stream, bool loadAllData, bool loadOnlyParentName,
-				string path) {
+		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem, byte[] data,
+				IDataStream stream, MftLoadDepth loadDepth, string path) {
 			this.RecordNum = recordNum;
 			this.FileSystem = fileSystem;
 			this.BytesPerSector = fileSystem.BytesPerSector;
@@ -266,16 +271,17 @@ namespace FileSystems.FileSystem.NTFS {
 
 			Flags = BitConverter.ToUInt16(m_Data, 22);
 
-			if (loadAllData || loadOnlyParentName) {
-				LoadData(loadOnlyParentName);
+			if (loadDepth != MftLoadDepth.None) {
+				LoadData(loadDepth);
 			}
 		}
 
-		private void LoadData(bool loadOnlyParentName = false) {
+		private void LoadData(MftLoadDepth loadDepth = MftLoadDepth.Full) {
 			if (m_DataLoaded) {
 				return;
 			}
-			if (!loadOnlyParentName) {
+			if (loadDepth == MftLoadDepth.Full) {
+				// If we're loading everything on this pass, there's no need to load in the future.
 				m_DataLoaded = true;
 			}
 
@@ -301,7 +307,7 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 
 			LoadHeader();
-			LoadAttributes(AttributeOffset, loadOnlyParentName);
+			LoadAttributes(AttributeOffset, loadDepth);
 
 			if (Attributes.Count == 0) {
 				Console.Error.WriteLine("Warning: MFT record number {0} at offset {1} had no attributes.", RecordNum, m_Stream.DeviceOffset);
@@ -381,7 +387,7 @@ namespace FileSystems.FileSystem.NTFS {
 			MFTRecordNumber = BitConverter.ToUInt32(m_Data, 44);
 		}
 
-		private void LoadAttributes(int startOffset, bool loadOnlyNameAttr) {
+		private void LoadAttributes(int startOffset, MftLoadDepth loadDepth) {
 			Attributes = new List<AttributeRecord>();
 			while (true) {
 				//Align to 8 byte boundary
@@ -397,7 +403,7 @@ namespace FileSystems.FileSystem.NTFS {
 				AttributeRecord attr = new AttributeRecord();
 				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset + 0);
 				attr.Length = BitConverter.ToUInt16(m_Data, startOffset + 4);
-				if (loadOnlyNameAttr && (AttributeType)attr.type != AttributeType.FileName) {
+				if (loadDepth == MftLoadDepth.NameAndParentOnly && (AttributeType)attr.type != AttributeType.FileName) {
 					startOffset += (int)attr.Length;
 					continue;
 				}
@@ -601,7 +607,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public string Name {
 			get {
 				if (string.IsNullOrEmpty(FileName)) {
-					LoadData(true);
+					LoadData(MftLoadDepth.NameAndParentOnly);
 				}
 				return FileName;
 			}
