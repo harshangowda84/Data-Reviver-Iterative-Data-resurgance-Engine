@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="ExtensionInfo.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="FileSavingQueue.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="ListViewNoFlicker.cs">
       <SubType>Component</SubType>

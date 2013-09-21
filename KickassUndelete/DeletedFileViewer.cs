@@ -57,10 +57,12 @@ namespace KickassUndelete {
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
 		private ScanState m_ScanState;
+		private FileSavingQueue m_FileSavingQueue;
+		private ProgressPopup m_ProgressPopup;
+		private string m_MostRecentlySavedFile;
 		private string m_Filter = "";
 		private bool m_MatchUnknownFileTypes = false;
 		private bool m_Scanning;
-		private bool m_Saving;
 
 		private List<ListViewItem> m_Files = new List<ListViewItem>();
 
@@ -86,6 +88,10 @@ namespace KickassUndelete {
 			state.ProgressUpdated += new EventHandler(state_ProgressUpdated);
 			state.ScanStarted += new EventHandler(state_ScanStarted);
 			state.ScanFinished += new EventHandler(state_ScanFinished);
+
+			m_FileSavingQueue = new FileSavingQueue();
+			m_FileSavingQueue.Finished += m_FileSavingQueue_Finished;
+			m_ProgressPopup = new ProgressPopup(m_FileSavingQueue);
 
 			UpdateFilterTextBox();
 		}
@@ -313,7 +319,7 @@ namespace KickassUndelete {
 						MenuItem recoverFile = new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
 							PromptUserToSaveFile(metadata);
 						}));
-						recoverFile.Enabled = !m_Scanning && !m_Saving;
+						recoverFile.Enabled = !m_Scanning;
 						menu.MenuItems.Add(recoverFile);
 						menu.Show(fileView, e.Location);
 					}
@@ -323,7 +329,7 @@ namespace KickassUndelete {
 					MenuItem recoverFiles = new MenuItem("Recover Files...", new EventHandler(delegate(object o, EventArgs ea) {
 						PromptUserToSaveFiles(fileView.SelectedItems);
 					}));
-					recoverFiles.Enabled = !m_Scanning && !m_Saving;
+					recoverFiles.Enabled = !m_Scanning;
 					menu.MenuItems.Add(recoverFiles);
 					menu.Show(fileView, e.Location);
 				}
@@ -348,7 +354,7 @@ namespace KickassUndelete {
 						MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
 
 						FileSystemNode node = metadata.GetFileSystemNode();
-						SaveFile(node, saveFileDialog.FileName);
+						SaveSingleFile(node, saveFileDialog.FileName);
 					}
 				}
 			}
@@ -359,21 +365,12 @@ namespace KickassUndelete {
 		/// </summary>
 		/// <param name="node">The file to recover.</param>
 		/// <param name="filePath">The path to save the file to.</param>
-		private void SaveFile(FileSystemNode node, string filePath) {
-			m_Saving = true;
-			SaveProgressPopup progressBar = new SaveProgressPopup();
-			progressBar.Show(this);
-			string file = Path.GetFileName(filePath);
-			Thread t = new Thread(delegate() {
-				WriteFileToDisk(filePath, node, progressBar);
-				Process.Start("explorer.exe", "/select, \"" + filePath + '"');
-				this.BeginInvoke(new Action(delegate() {
-					progressBar.Close();
-					m_Saving = false;
-				}));
-			});
-
-			t.Start();
+		private void SaveSingleFile(FileSystemNode node, string filePath) {
+			m_MostRecentlySavedFile = filePath;
+			if (!m_ProgressPopup.Visible) {
+				m_ProgressPopup.Show(this);
+			}
+			m_FileSavingQueue.Push(filePath, node);
 		}
 
 		private void PromptUserToSaveFiles(IEnumerable items) {
@@ -394,7 +391,7 @@ namespace KickassUndelete {
 							nodes.Add(metadata.GetFileSystemNode());
 						}
 					}
-					SaveFiles(nodes, folderDialog.SelectedPath);
+					SaveMultipleFiles(nodes, folderDialog.SelectedPath);
 				}
 			}
 		}
@@ -404,43 +401,17 @@ namespace KickassUndelete {
 		/// </summary>
 		/// <param name="nodes">The files to recover.</param>
 		/// <param name="folderPath">The folder in which to save the recovered files.</param>
-		private void SaveFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
-			m_Saving = true;
-			SaveProgressPopup progressBar = new SaveProgressPopup();
-			progressBar.Show(this);
-
-			Thread t = new Thread(delegate() {
-				foreach (FileSystemNode node in nodes) {
-					string file = node.Name;
-					string fileName = Path.Combine(folderPath, file);
-					WriteFileToDisk(fileName, node, progressBar);
-				}
-				Process.Start("explorer.exe", '"' + folderPath + '"');
-				this.BeginInvoke(new Action(delegate() {
-					progressBar.Close();
-					UpdateRestoreButton(0);
-					m_Saving = false;
-				}));
-			});
-
-			t.Start();
+		private void SaveMultipleFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
+			foreach (FileSystemNode node in nodes) {
+				string file = node.Name;
+				string fileName = Path.Combine(folderPath, file);
+				SaveSingleFile(node, fileName);
+			}
 		}
 
-		private void WriteFileToDisk(string filePath, FileSystemNode node, SaveProgressPopup progressBar) {
-			using (BinaryWriter bw = new BinaryWriter(new FileStream(filePath, FileMode.Create))) {
-				ulong BLOCK_SIZE = 1024 * 1024; // 1MB
-				ulong offset = 0;
-				while (offset < node.StreamLength) {
-					if (offset + BLOCK_SIZE < node.StreamLength) {
-						bw.Write(node.GetBytes(offset, BLOCK_SIZE));
-					} else {
-						bw.Write(node.GetBytes(offset, node.StreamLength - offset));
-					}
-					offset += BLOCK_SIZE;
-					this.BeginInvoke(new Action<double>(delegate(double progress) {
-						progressBar.SetProgress(Path.GetFileName(filePath), progress);
-					}), Math.Min(1, (double)offset / (double)node.StreamLength));
-				}
+		private void m_FileSavingQueue_Finished() {
+			if (!string.IsNullOrEmpty(m_MostRecentlySavedFile)) {
+				Process.Start("explorer.exe", "/select, \"" + m_MostRecentlySavedFile + '"');
 			}
 		}
 
@@ -503,7 +474,7 @@ namespace KickassUndelete {
 		/// Sets the restore button to be enabled if there are list items checked.
 		/// </summary>
 		private void UpdateRestoreButton(int change) {
-			if (!m_Scanning && !m_Saving) {
+			if (!m_Scanning) {
 				bRestoreFiles.Enabled = fileView.CheckedItems.Count + change > 0;
 			}
 		}

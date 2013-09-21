@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace GuiComponents {
-    partial class SaveProgressPopup {
+    partial class ProgressPopup {
         /// <summary>
         /// Required designer variable.
         /// </summary>
