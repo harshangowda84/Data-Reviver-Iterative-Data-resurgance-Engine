@@ -405,6 +405,17 @@ namespace KickassUndelete {
 			foreach (FileSystemNode node in nodes) {
 				string file = node.Name;
 				string fileName = Path.Combine(folderPath, file);
+				if (System.IO.File.Exists(fileName)) {
+					int copyNum = 1;
+					string newFileName;
+					do {
+						newFileName = Path.Combine(Path.GetDirectoryName(fileName),
+							string.Format("{0} ({1}){2}", Path.GetFileNameWithoutExtension(fileName),
+							copyNum, Path.GetExtension(fileName)));
+						copyNum++;
+					} while (System.IO.File.Exists(newFileName));
+					fileName = newFileName;
+				}
 				SaveSingleFile(node, fileName);
 			}
 		}
