@@ -244,6 +244,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 			string Magic = Encoding.ASCII.GetString(data, 0, 4);
 			if (!Magic.Equals("FILE")) {
+				Console.Error.WriteLine("Warning: MFT record number {0} at offset {1} was missing the 'FILE' header. Skipping.", recordNum, stream.DeviceOffset);
 				return null;
 			}
 
@@ -303,7 +304,7 @@ namespace FileSystems.FileSystem.NTFS {
 			LoadAttributes(AttributeOffset, loadOnlyParentName);
 
 			if (Attributes.Count == 0) {
-				//throw new InvalidFILERecordException(FileSystem, fixedStream.DeviceOffset, "MFT record had no attributes.");
+				Console.Error.WriteLine("Warning: MFT record number {0} at offset {1} had no attributes.", RecordNum, m_Stream.DeviceOffset);
 			}
 		}
 
@@ -357,7 +358,9 @@ namespace FileSystems.FileSystem.NTFS {
 						return attr;
 					}
 				}
-			} catch { }
+			} catch (Exception e) {
+				Console.Error.WriteLine(e);
+			}
 			return null;
 		}
 
@@ -489,7 +492,8 @@ namespace FileSystems.FileSystem.NTFS {
 
 					try {
 						lcn = (ulong)((long)lcn + Util.GetArbitraryInt(m_Data, (int)offset + 1 + L, F));
-					} catch {
+					} catch (Exception e) {
+						Console.Error.WriteLine(e);
 						return false;
 					}
 
