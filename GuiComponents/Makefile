@@ -1,4 +1,4 @@
-SOURCES=./Explorers/IExplorer.cs ./Explorers/FileExplorer.Designer.cs ./Explorers/FileExplorer.cs ./IProgressable.cs ./Properties/AssemblyInfo.cs ./ProgressPopup.cs ./ProgressPopup.Designer.cs 
+SOURCES=*.cs */*.cs
 LIBS=../FileSystems/KFA.FileSystems.dll
 RESOURCES=Explorers/GuiComponents.FileExplorer.resources GuiComponents.SaveProgressPopup.resources
 KFA.GuiComponents.dll: ${SOURCES} ${LIBS|} ${RESOURCES}
