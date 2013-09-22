@@ -4,11 +4,12 @@ import os
 import shutil
 import sys
 
-VERSION = "1.4 alpha"
+VERSION = "1.5 beta"
 EXE_NAME = "KickassUndelete_{0}.exe".format(VERSION.replace(' ','_'))
 ZIP_NAME = "KickassUndelete_{0}.zip".format(VERSION.replace(' ','_'))
 
-MSBUILD = "C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\msbuild.exe"
+FRAMEWORK = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319"
+MSBUILD = FRAMEWORK + "\\msbuild.exe"
 ILMERGE = "C:\\Program Files (x86)\\Microsoft\\ILMerge\\ILMerge.exe"
 
 SOLUTION = "KickassUndelete/KickassUndelete.sln"
@@ -52,7 +53,7 @@ def buildSolution():
 # Merges the assemblies together
 def mergeAssemblies(assemblies, outfile):
     print "Merging assemblies:"
-    command = [ILMERGE, "/out:{0}".format(outfile)]
+    command = [ILMERGE, "/out:{0}".format(outfile), "/targetplatform:v4,{0}".format(FRAMEWORK)]
     command += assemblies
     print command
     if not executeProcess(command):
