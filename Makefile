@@ -1,6 +1,6 @@
-SOURCES=./KickassUndelete/Properties/Settings.Designer.cs ./KickassUndelete/Properties/Resources.Designer.cs ./KickassUndelete/Properties/AssemblyInfo.cs ./KickassUndelete/ScanState.cs ./KickassUndelete/Program.cs ./KickassUndelete/DeletedFileViewer.Designer.cs ./KickassUndelete/ListViewColumnSorter.cs ./KickassUndelete/ExtensionMethods.cs ./KickassUndelete/MainForm.Designer.cs ./KickassUndelete/MainForm.cs ./KickassUndelete/DeletedFileViewer.cs ./KickassUndelete/ExtensionInfo.cs ./KickassUndelete/ConsoleCommands.cs ./KickassUndelete/ListViewNoFlicker.cs
+SOURCES=./KickassUndelete/ConsoleCommands.cs ./KickassUndelete/DeletedFileViewer.cs ./KickassUndelete/DeletedFileViewer.Designer.cs ./KickassUndelete/ExtensionInfo.cs ./KickassUndelete/ExtensionMethods.cs ./KickassUndelete/FileSavingQueue.cs ./KickassUndelete/ListViewColumnSorter.cs ./KickassUndelete/ListViewNoFlicker.cs ./KickassUndelete/MainForm.cs ./KickassUndelete/MainForm.Designer.cs ./KickassUndelete/Program.cs ./KickassUndelete/Properties/AssemblyInfo.cs ./KickassUndelete/Properties/Resources.Designer.cs ./KickassUndelete/Properties/Settings.Designer.cs ./KickassUndelete/ScanState.cs
 LIBS=FileSystems/KFA.FileSystems.Lite.dll GuiComponents/KFA.GuiComponents.dll
-RESOURCES=KickassUndelete/KickassUndelete.MainForm.resources KickassUndelete/KickassUndelete.DeletedFileViewer.resources
+RESOURCES=KickassUndelete/KickassUndelete.DeletedFileViewer.resources KickassUndelete/KickassUndelete.MainForm.resources KickassUndelete/Properties/Resources.resx
 .SUFFIXES:
 .SUFFIXES: .resx .resources
 .resx.resources:
