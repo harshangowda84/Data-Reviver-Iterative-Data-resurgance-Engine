@@ -20,115 +20,115 @@ using System.Collections;
 using System.Xml.Serialization;
 
 namespace KFA.Disks {
-    #region Enums
-    public enum Access : ushort {
-        Unknown = 0,
-        Readable = 1,
-        Writable = 2,
-        ReadWriteSupported = 3,
-        WriteOnce = 4
-    }
-    public enum Availability : int {
-        None = 0,
-        Other = 1,
-        Unknown = 2,
-        RunningOrFullPower = 3,
-        Warning = 4,
-        InTest = 5,
-        NotApplicable = 6,
-        PowerOff = 7,
-        OffLine = 8,
-        OffDuty = 9,
-        Degraded = 10,
-        NotInstalled = 11,
-        InstallError = 12,
-        PowerSaveUnknown = 13,
-        PowerSaveLowPowerMode = 14,
-        PowerSaveStandby = 15,
-        PowerCycle = 16,
-        PowerSaveWarning = 17
-    }
-    public enum Capability : ushort {
-        Unknown = 0,
-        Other = 1,
-        SequentialAccess = 2,
-        RandomAccess = 3,
-        SupportsWriting = 4,
-        Encryption = 5,
-        Compression = 6,
-        SupportsRemovableMedia = 7,
-        ManualCleaning = 8,
-        AutomaticCleaning = 9,
-        SMARTNotification = 10,
-        SupportsDualSidedMedia = 11,
-        EjectionPriorToDriveDismountNotRequired = 12
-    }
-    public enum PowerManagementCapability : int {
-        Unknown = 0,
-        NotSupported = 1,
-        Disabled = 2,
-        Enabled = 3,
-        PowerSavingModesEnteredAutomatically = 4,
-        PowerStateSettable = 5,
-        PowerCyclingSupported = 6,
-        TimedPowerOnSupported = 7
-    }
-    public enum StatusInfo : int {
-        None = 0,
-        Other = 1,
-        Unknown = 2,
-        Enabled = 3,
-        Disabled = 4,
-        NotApplicable = 5
-    }
-    #endregion
+	#region Enums
+	public enum Access : ushort {
+		Unknown = 0,
+		Readable = 1,
+		Writable = 2,
+		ReadWriteSupported = 3,
+		WriteOnce = 4
+	}
+	public enum Availability : int {
+		None = 0,
+		Other = 1,
+		Unknown = 2,
+		RunningOrFullPower = 3,
+		Warning = 4,
+		InTest = 5,
+		NotApplicable = 6,
+		PowerOff = 7,
+		OffLine = 8,
+		OffDuty = 9,
+		Degraded = 10,
+		NotInstalled = 11,
+		InstallError = 12,
+		PowerSaveUnknown = 13,
+		PowerSaveLowPowerMode = 14,
+		PowerSaveStandby = 15,
+		PowerCycle = 16,
+		PowerSaveWarning = 17
+	}
+	public enum Capability : ushort {
+		Unknown = 0,
+		Other = 1,
+		SequentialAccess = 2,
+		RandomAccess = 3,
+		SupportsWriting = 4,
+		Encryption = 5,
+		Compression = 6,
+		SupportsRemovableMedia = 7,
+		ManualCleaning = 8,
+		AutomaticCleaning = 9,
+		SMARTNotification = 10,
+		SupportsDualSidedMedia = 11,
+		EjectionPriorToDriveDismountNotRequired = 12
+	}
+	public enum PowerManagementCapability : int {
+		Unknown = 0,
+		NotSupported = 1,
+		Disabled = 2,
+		Enabled = 3,
+		PowerSavingModesEnteredAutomatically = 4,
+		PowerStateSettable = 5,
+		PowerCyclingSupported = 6,
+		TimedPowerOnSupported = 7
+	}
+	public enum StatusInfo : int {
+		None = 0,
+		Other = 1,
+		Unknown = 2,
+		Enabled = 3,
+		Disabled = 4,
+		NotApplicable = 5
+	}
+	#endregion
 
-    [XmlInclude(typeof(MasterBootRecordAttributes))]
-    [XmlInclude(typeof(PhysicalDiskAttributes))]
-    [XmlInclude(typeof(PhysicalDiskPartitionAttributes))]
-    [XmlInclude(typeof(UnallocatedDiskAreaAttributes))]
-    public abstract class Attributes : IDescribable {
-        protected T GetProperty<T>(ManagementObject mo, string name, T def) {
-            try {
-                object o = mo[name];
-                if (o != null) {
-                    if (typeof(T).IsEnum) {
-                        return (T)Enum.ToObject(typeof(T), o);
-                    } else {
-                        return (T)Convert.ChangeType(o, typeof(T));
-                    }
-                }
-            } catch (ManagementException) { }
-            return def;
-        }
-        protected T[] GetArray<T>(ManagementObject mo, string name, T[] def) {
-            try {
-                object o = mo[name];
-                if (o != null && o.GetType().IsArray) {
-                    ArrayList list = new ArrayList((ICollection)o);
-                    T[] res = new T[list.Count];
-                    for (int i = 0; i < list.Count; i++) {
-                        res[i] = (T)list[i];
-                    }
-                    return res;
-                }
-            } catch (ManagementException) { }
-            return def;
-        }
+	[XmlInclude(typeof(MasterBootRecordAttributes))]
+	[XmlInclude(typeof(PhysicalDiskAttributes))]
+	[XmlInclude(typeof(PhysicalDiskPartitionAttributes))]
+	[XmlInclude(typeof(UnallocatedDiskAreaAttributes))]
+	public abstract class Attributes : IDescribable {
+		protected T GetProperty<T>(ManagementObject mo, string name, T def) {
+			try {
+				object o = mo[name];
+				if (o != null) {
+					if (typeof(T).IsEnum) {
+						return (T)Enum.ToObject(typeof(T), o);
+					} else {
+						return (T)Convert.ChangeType(o, typeof(T));
+					}
+				}
+			} catch (ManagementException) { }
+			return def;
+		}
+		protected T[] GetArray<T>(ManagementObject mo, string name, T[] def) {
+			try {
+				object o = mo[name];
+				if (o != null && o.GetType().IsArray) {
+					ArrayList list = new ArrayList((ICollection)o);
+					T[] res = new T[list.Count];
+					for (int i = 0; i < list.Count; i++) {
+						res[i] = (T)list[i];
+					}
+					return res;
+				}
+			} catch (ManagementException) { }
+			return def;
+		}
 
-        protected string ArrayToString<T>(T[] a) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < a.Length; i++) {
-                if (i > 0) sb.Append(", ");
-                sb.Append(a[i].ToString());
-            }
-            return sb.ToString();
-        }
+		protected string ArrayToString<T>(T[] a) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < a.Length; i++) {
+				if (i > 0) sb.Append(", ");
+				sb.Append(a[i].ToString());
+			}
+			return sb.ToString();
+		}
 
-        #region IDescribable Members
+		#region IDescribable Members
 
-        public abstract string TextDescription { get; }
+		public abstract string TextDescription { get; }
 
-        #endregion
-    }
+		#endregion
+	}
 }

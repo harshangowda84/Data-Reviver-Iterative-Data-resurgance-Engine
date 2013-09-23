@@ -88,7 +88,7 @@ namespace KickassUndelete {
 			// TODO: This could probably be one record[]
 			Dictionary<ulong, ulong> parentLinks = new Dictionary<ulong, ulong>();
 			Dictionary<ulong, string> recordNames = new Dictionary<ulong, string>();
-			
+
 			ulong numFiles;
 
 			OnScanStarted();
@@ -98,8 +98,7 @@ namespace KickassUndelete {
 			// TODO: Replace me with a search strategy selected from a text box!
 			ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
 
-			if (m_FileSystem is FileSystemNTFS)
-			{
+			if (m_FileSystem is FileSystemNTFS) {
 				var ntfsFS = m_FileSystem as FileSystemNTFS;
 				numFiles = ntfsFS.MFT.StreamLength / (ulong)(ntfsFS.SectorsPerMFTRecord * ntfsFS.BytesPerSector);
 			}
@@ -109,8 +108,7 @@ namespace KickassUndelete {
 
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
 				var record = metadata as MFTRecord;
-				if (record != null)
-				{
+				if (record != null) {
 					parentLinks[record.RecordNum] = record.ParentDirectory;
 					recordNames[record.RecordNum] = record.Name;
 				}
@@ -134,14 +132,12 @@ namespace KickassUndelete {
 				return !m_ScanCancelled;
 			}));
 
-			if (m_FileSystem is FileSystemNTFS)
-			{
+			if (m_FileSystem is FileSystemNTFS) {
 				List<INodeMetadata> fileList;
 				lock (m_DeletedFiles) {
 					fileList = m_DeletedFiles;
 				}
-				foreach (var file in fileList)
-				{
+				foreach (var file in fileList) {
 					var record = file as MFTRecord;
 					var node = file.GetFileSystemNode();
 					node.Path = GetPathForRecord(parentLinks, recordNames, record.RecordNum);
@@ -161,14 +157,10 @@ namespace KickassUndelete {
 
 		private string GetPathForRecord(Dictionary<ulong, ulong> parentLinks,
 										Dictionary<ulong, string> recordNames,
-										ulong recordNum)
-		{
-			if (recordNum == 0 || !parentLinks.ContainsKey(recordNum) || parentLinks[recordNum] == recordNum)
-			{
+										ulong recordNum) {
+			if (recordNum == 0 || !parentLinks.ContainsKey(recordNum) || parentLinks[recordNum] == recordNum) {
 				return "";
-			}
-			else
-			{
+			} else {
 				if (!recordNames.ContainsKey(recordNum))
 					throw new Exception("Record name not found: " + recordNum);
 				return (GetPathForRecord(parentLinks, recordNames, parentLinks[recordNum])) +

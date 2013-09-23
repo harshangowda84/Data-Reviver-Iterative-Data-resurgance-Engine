@@ -19,7 +19,7 @@ using KFA.Exceptions;
 namespace FileSystems.FileSystem.NTFS {
 	public class FixupStream : SubStream {
 		// Static method that just works on an array.
-        // TODO: Make this work with non-sector-aligned, or non-whole-number-of-sectors
+		// TODO: Make this work with non-sector-aligned, or non-whole-number-of-sectors
 		public static void FixArray(byte[] data, ushort updateSequenceNumber, ushort[] updateSequenceArray, int sectorSize) {
 			int current = sectorSize - 2;
 			while (current < data.Length) {

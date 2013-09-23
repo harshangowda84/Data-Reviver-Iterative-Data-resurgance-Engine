@@ -94,9 +94,9 @@ namespace FileSystems.FileSystem.NTFS {
 
 		private SectorStatus GetClusterStatus(ulong lcn) {
 			if (lcn / 8 >= (ulong)m_Bitmap.Length) {
-				Console.Error.WriteLine(string.Format("ERROR: Tried to read off the end of "+
+				Console.Error.WriteLine(string.Format("ERROR: Tried to read off the end of " +
 					"the $Bitmap file. $Bitmap length = {0}, lcn = {1}, lcn / 8 = {2}",
-					m_Bitmap.Length,lcn,lcn/8));
+					m_Bitmap.Length, lcn, lcn / 8));
 				return SectorStatus.Unknown;
 			}
 			Byte b = m_Bitmap[lcn / 8];

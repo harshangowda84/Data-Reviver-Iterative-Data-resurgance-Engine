@@ -19,9 +19,9 @@ using System.Management;
 using System.Xml.Serialization;
 
 namespace KFA.Disks {
-    public class LinLogicalDiskAttributes : LogicalDiskAttributes, IDescribable {
-        public LinLogicalDiskAttributes() { }
-        public LinLogicalDiskAttributes(LinLogicalDisk disk) {
-        }
-    }
+	public class LinLogicalDiskAttributes : LogicalDiskAttributes, IDescribable {
+		public LinLogicalDiskAttributes() { }
+		public LinLogicalDiskAttributes(LinLogicalDisk disk) {
+		}
+	}
 }

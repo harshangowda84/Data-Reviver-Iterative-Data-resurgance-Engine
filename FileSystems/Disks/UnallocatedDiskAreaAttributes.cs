@@ -16,15 +16,15 @@
 using System.Xml.Serialization;
 
 namespace KFA.Disks {
-    public class UnallocatedDiskAreaAttributes : Attributes, IDescribable {
+	public class UnallocatedDiskAreaAttributes : Attributes, IDescribable {
 
-        public UnallocatedDiskAreaAttributes() {}
+		public UnallocatedDiskAreaAttributes() { }
 
-        [XmlIgnore]
-        public override string TextDescription {
-            get {
-                return "";
-            }
-        }
-    }
+		[XmlIgnore]
+		public override string TextDescription {
+			get {
+				return "";
+			}
+		}
+	}
 }

@@ -552,7 +552,7 @@ namespace FileSystems.FileSystem.NTFS {
 				}
 
 				//0xFF... marks end of attributes;
-				if (offset == attrList.ValueLength || BitConverter.ToUInt32(m_Data, offset+startOffset) == 0xFFFFFFFF) {
+				if (offset == attrList.ValueLength || BitConverter.ToUInt32(m_Data, offset + startOffset) == 0xFFFFFFFF) {
 					break;
 				}
 

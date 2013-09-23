@@ -20,8 +20,7 @@ using System.Threading;
 using FileSystems;
 using KFA.Disks;
 
-namespace KickassUndelete 
-{
+namespace KickassUndelete {
 	public class ConsoleCommands {
 		public static void ListDisks() {
 			Console.Error.WriteLine("Logical Disks:\n==============\n");

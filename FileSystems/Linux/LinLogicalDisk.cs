@@ -56,7 +56,7 @@ namespace KFA.Disks {
 			get { return StorageType.LogicalVolume; }
 		}
 
-		Attributes IFileSystemStore.Attributes { 
+		Attributes IFileSystemStore.Attributes {
 			get { return Attributes; }
 		}
 

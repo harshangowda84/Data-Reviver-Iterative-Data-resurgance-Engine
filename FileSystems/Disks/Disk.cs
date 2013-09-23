@@ -20,7 +20,7 @@ using Microsoft.Win32.SafeHandles;
 namespace KFA.Disks {
 	public abstract class Disk : IDataStream {
 		#region IDataStream Members
-		
+
 		public byte GetByte(ulong offset) {
 			return GetBytes(offset, 1)[0];
 		}

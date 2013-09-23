@@ -37,7 +37,7 @@ namespace FileSystems {
 				disks.Add(disk);
 			}
 			return disks;*/
-			
+
 			var disks = new List<Disk>();
 #if MONO
 			foreach (var file in Directory.GetFiles("/dev/disk/by-path")) {

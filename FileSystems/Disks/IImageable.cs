@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFA.Disks {
-    public interface IImageable : IHasSectors {
-        Attributes GetAttributes();
-    }
+	public interface IImageable : IHasSectors {
+		Attributes GetAttributes();
+	}
 }

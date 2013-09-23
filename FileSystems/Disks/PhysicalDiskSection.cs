@@ -17,63 +17,63 @@ using System;
 using KFA.DataStream;
 
 namespace KFA.Disks {
-    public abstract class PhysicalDiskSection : IImageable, IDescribable {
-        public PhysicalDisk PhysicalDisk { get; protected set; }
-        public ulong Offset { get; protected set; }
-        public ulong Length { get; protected set; }
+	public abstract class PhysicalDiskSection : IImageable, IDescribable {
+		public PhysicalDisk PhysicalDisk { get; protected set; }
+		public ulong Offset { get; protected set; }
+		public ulong Length { get; protected set; }
 
-        #region IDataStream Members
+		#region IDataStream Members
 
-        public byte GetByte(ulong offset) {
-            if ((ulong)offset >= Length) {
-                throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
-            }
-            return PhysicalDisk.GetByte(offset + Offset);
-        }
+		public byte GetByte(ulong offset) {
+			if ((ulong)offset >= Length) {
+				throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
+			}
+			return PhysicalDisk.GetByte(offset + Offset);
+		}
 
-        public byte[] GetBytes(ulong offset, ulong length) {
-            if ((ulong)offset + length - 1 >= Length) {
-                throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
-            }
-            return PhysicalDisk.GetBytes(offset + Offset, length);
-        }
+		public byte[] GetBytes(ulong offset, ulong length) {
+			if ((ulong)offset + length - 1 >= Length) {
+				throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
+			}
+			return PhysicalDisk.GetBytes(offset + Offset, length);
+		}
 
-        public ulong StreamLength {
-            get { return Length; }
-        }
+		public ulong StreamLength {
+			get { return Length; }
+		}
 
-        public virtual String StreamName {
-            get { return "Physical Disk Section"; }
-        }
+		public virtual String StreamName {
+			get { return "Physical Disk Section"; }
+		}
 
-        public virtual IDataStream ParentStream {
-            get { return PhysicalDisk; }
-        }
+		public virtual IDataStream ParentStream {
+			get { return PhysicalDisk; }
+		}
 
-        public ulong DeviceOffset {
-            get { return ParentStream.DeviceOffset + Offset; }
-        }
+		public ulong DeviceOffset {
+			get { return ParentStream.DeviceOffset + Offset; }
+		}
 
-        public void Open() { }
+		public void Open() { }
 
-        public void Close() { }
+		public void Close() { }
 
-        #endregion
+		#endregion
 
-        #region IImageable Members
+		#region IImageable Members
 
-        public abstract Attributes GetAttributes();
+		public abstract Attributes GetAttributes();
 
-        public abstract ulong GetSectorSize();
+		public abstract ulong GetSectorSize();
 
-        public abstract SectorStatus GetSectorStatus(ulong sectorNum);
+		public abstract SectorStatus GetSectorStatus(ulong sectorNum);
 
-        #endregion
+		#endregion
 
-        #region IDescribable Members
+		#region IDescribable Members
 
-        public abstract string TextDescription { get; }
+		public abstract string TextDescription { get; }
 
-        #endregion
-    }
+		#endregion
+	}
 }

@@ -28,76 +28,76 @@ using KFA.DataStream;
 using FileSystems;
 
 namespace KickassUndelete {
-    /// <summary>
-    /// The main form of Kickass Undelete.
-    /// </summary>
-    public partial class MainForm : Form {
-        FileSystem m_FileSystem;
-        Dictionary<FileSystem, ScanState> m_ScanStates = new Dictionary<FileSystem, ScanState>();
-        Dictionary<FileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<FileSystem, DeletedFileViewer>();
+	/// <summary>
+	/// The main form of Kickass Undelete.
+	/// </summary>
+	public partial class MainForm : Form {
+		FileSystem m_FileSystem;
+		Dictionary<FileSystem, ScanState> m_ScanStates = new Dictionary<FileSystem, ScanState>();
+		Dictionary<FileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<FileSystem, DeletedFileViewer>();
 
-        /// <summary>
-        /// Constructs the main form.
-        /// </summary>
-        public MainForm() {
-            InitializeComponent();
-        }
+		/// <summary>
+		/// Constructs the main form.
+		/// </summary>
+		public MainForm() {
+			InitializeComponent();
+		}
 
-        private void MainForm_Load(object sender, EventArgs e) {
-            LoadLogicalDisks();
-        }
+		private void MainForm_Load(object sender, EventArgs e) {
+			LoadLogicalDisks();
+		}
 
-        private void LoadLogicalDisks() {
-            foreach (Disk disk in DiskLoader.LoadLogicalVolumes()) {
-                TreeNode node = new TreeNode(disk.ToString());
-								Console.WriteLine("Added disk: " + disk.ToString());
-                node.Tag = disk;
-                node.ImageKey = "HDD";
-                if (((IFileSystemStore)disk).FS == null) {
-                    node.ForeColor = Color.Gray;
-                }
-                diskTree.Nodes.Add(node);
-            }
-        }
+		private void LoadLogicalDisks() {
+			foreach (Disk disk in DiskLoader.LoadLogicalVolumes()) {
+				TreeNode node = new TreeNode(disk.ToString());
+				Console.WriteLine("Added disk: " + disk.ToString());
+				node.Tag = disk;
+				node.ImageKey = "HDD";
+				if (((IFileSystemStore)disk).FS == null) {
+					node.ForeColor = Color.Gray;
+				}
+				diskTree.Nodes.Add(node);
+			}
+		}
 
-        private void diskTree_AfterSelect(object sender, TreeViewEventArgs e) {
-            SetFileSystem((IFileSystemStore)e.Node.Tag);
-        }
+		private void diskTree_AfterSelect(object sender, TreeViewEventArgs e) {
+			SetFileSystem((IFileSystemStore)e.Node.Tag);
+		}
 
-        private void SetFileSystem(IFileSystemStore logicalDisk) {
-            if (logicalDisk.FS != null) {
-                if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
-                    m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.ToString(), logicalDisk.FS);
-                    m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_ScanStates[logicalDisk.FS]);
-                    AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
-                }
-                if (m_FileSystem != null && m_ScanStates.ContainsKey(m_FileSystem)) {
-                    m_DeletedViewers[m_FileSystem].Hide();
-                }
-                m_FileSystem = logicalDisk.FS;
-                m_DeletedViewers[logicalDisk.FS].Show();
-            }
-        }
+		private void SetFileSystem(IFileSystemStore logicalDisk) {
+			if (logicalDisk.FS != null) {
+				if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
+					m_ScanStates[logicalDisk.FS] = new ScanState(logicalDisk.ToString(), logicalDisk.FS);
+					m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_ScanStates[logicalDisk.FS]);
+					AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
+				}
+				if (m_FileSystem != null && m_ScanStates.ContainsKey(m_FileSystem)) {
+					m_DeletedViewers[m_FileSystem].Hide();
+				}
+				m_FileSystem = logicalDisk.FS;
+				m_DeletedViewers[logicalDisk.FS].Show();
+			}
+		}
 
-        private void AddDeletedFileViewer(DeletedFileViewer viewer) {
-            int MARGIN = 12;
-            splitContainer1.Panel2.Controls.Add(viewer);
-            viewer.Top = viewer.Left = MARGIN;
-            viewer.Width = splitContainer1.Panel2.Width - MARGIN * 2;
-            viewer.Height = splitContainer1.Panel2.Height - MARGIN * 2;
-            viewer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-        }
+		private void AddDeletedFileViewer(DeletedFileViewer viewer) {
+			int MARGIN = 12;
+			splitContainer1.Panel2.Controls.Add(viewer);
+			viewer.Top = viewer.Left = MARGIN;
+			viewer.Width = splitContainer1.Panel2.Width - MARGIN * 2;
+			viewer.Height = splitContainer1.Panel2.Height - MARGIN * 2;
+			viewer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+		}
 
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {
-            foreach (ScanState state in m_ScanStates.Values) {
-                state.CancelScan();
-            }
-        }
+		private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {
+			foreach (ScanState state in m_ScanStates.Values) {
+				state.CancelScan();
+			}
+		}
 
-        private void diskTree_BeforeSelect(object sender, TreeViewCancelEventArgs e) {
-            if (((IFileSystemStore)e.Node.Tag).FS == null) {
-                e.Cancel = true;
-            }
-        }
-    }
+		private void diskTree_BeforeSelect(object sender, TreeViewCancelEventArgs e) {
+			if (((IFileSystemStore)e.Node.Tag).FS == null) {
+				e.Cancel = true;
+			}
+		}
+	}
 }
