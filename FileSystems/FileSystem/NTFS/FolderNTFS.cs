@@ -211,7 +211,7 @@ namespace FileSystems.FileSystem.NTFS {
         private NTFSFileStream m_indexRoot, m_indexAllocation;
         private List<IndexEntry> m_rootEntries = null;
 
-        public FolderNTFS(MFTRecord record, string path) {
+        public FolderNTFS(MFTRecord record, string path, bool isRoot = false) {
             m_record = record;
             m_indexRoot = new NTFSFileStream(m_record.PartitionStream, m_record, "IndexRoot");
 
@@ -221,8 +221,9 @@ namespace FileSystems.FileSystem.NTFS {
             }
             Name = record.FileName;
             if (path == null) {
-                Path = ComputePath();
-            } else if (path == "") { // root
+                Path = "";
+            }
+						if (isRoot) { // root
                 Root = true;
                 Path = "\\";
                 foreach (FileSystemNode node in GetChildren("$Volume")) {
@@ -233,16 +234,14 @@ namespace FileSystems.FileSystem.NTFS {
                     }
                 }
             } else {
-                Path = path + Name + "/";
+							if (!string.IsNullOrEmpty(path)) {
+								Path = path + Name + "/";
+							} else {
+								Path = Name + "/";
+							}
             }
             FileSystem = record.FileSystem;
             Deleted = m_record.Deleted;
-        }
-
-        private string ComputePath() {
-            
-            return "";
-            //throw new NotImplementedException();
         }
 
         public long BytesPerSector {

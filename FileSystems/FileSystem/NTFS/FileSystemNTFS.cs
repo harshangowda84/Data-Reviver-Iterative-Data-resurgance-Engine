@@ -71,7 +71,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 			m_mftSector = (BPB_MFTStartCluster64 * BPB_SecPerClus);
 			m_MFT = new FileNTFS(MFTRecord.Create(0, this), "");
-			m_Root = new FolderNTFS(MFTRecord.Create(5, this), "");
+			m_Root = new FolderNTFS(MFTRecord.Create(5, this), "", true);
 
 			m_bitmapFile = new FileNTFS(MFTRecord.Create(6, this), "");
 			m_Bitmap = m_bitmapFile.GetBytes(0, m_bitmapFile.StreamLength);
