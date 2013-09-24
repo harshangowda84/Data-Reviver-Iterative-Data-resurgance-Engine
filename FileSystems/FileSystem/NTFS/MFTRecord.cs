@@ -103,7 +103,6 @@ namespace FileSystems.FileSystem.NTFS {
 
 		private FileSystemNode m_Node = null;
 		private byte[] m_Data;
-		private IDataStream m_Stream;
 		private bool m_DataLoaded = false;
 		private string m_Path = "";
 
@@ -128,11 +127,11 @@ namespace FileSystems.FileSystem.NTFS {
 				return null;
 			}
 
-			return new MFTRecord(recordNum, fileSystem, data, stream, loadDepth, path);
+			return new MFTRecord(recordNum, fileSystem, data, loadDepth, path);
 		}
 
 		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem, byte[] data,
-				IDataStream stream, MFTLoadDepth loadDepth, string path) {
+				MFTLoadDepth loadDepth, string path) {
 			this.RecordNum = recordNum;
 			this.FileSystem = fileSystem;
 			this.BytesPerSector = fileSystem.BytesPerSector;
@@ -140,7 +139,6 @@ namespace FileSystems.FileSystem.NTFS {
 			this.PartitionStream = fileSystem.Store;
 
 			m_Data = data;
-			m_Stream = stream;
 			m_Path = path;
 
 			Flags = (RecordFlags)BitConverter.ToUInt16(m_Data, 22);
@@ -170,8 +168,7 @@ namespace FileSystems.FileSystem.NTFS {
 				read++;
 			}
 
-			// Apply fixups to both the stream and the in-memory array
-			m_Stream = new FixupStream(m_Stream, 0, m_Stream.StreamLength, updateSequenceNumber, updateSequenceArray, (ulong)BytesPerSector);
+			// Apply fixups to the in-memory array
 			try {
 				FixupStream.FixArray(m_Data, updateSequenceNumber, updateSequenceArray, (int)BytesPerSector);
 			} catch (NTFSFixupException e) {
@@ -184,7 +181,7 @@ namespace FileSystems.FileSystem.NTFS {
 			LoadAttributes(AttributeOffset, loadDepth);
 
 			if (Attributes.Count == 0) {
-				Console.Error.WriteLine("Warning: MFT record number {0} at offset {1} had no attributes.", RecordNum, m_Stream.DeviceOffset);
+				Console.Error.WriteLine("Warning: MFT record number {0} had no attributes.", RecordNum);
 			}
 		}
 
