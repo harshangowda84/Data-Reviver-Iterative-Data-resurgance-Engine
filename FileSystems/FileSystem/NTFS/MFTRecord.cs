@@ -27,11 +27,11 @@ namespace FileSystems.FileSystem.NTFS {
 		None
 	}
 
+	[Flags]
 	public enum FilenameType {
-		Posix = 1,
-		Win32 = 2,
-		Dos = 4,
-		DosAndWin32 = 8
+		Posix = 0,
+		Win32 = 1,
+		Dos = 2,
 	}
 
 	[Flags]
@@ -309,7 +309,7 @@ namespace FileSystems.FileSystem.NTFS {
 			ActualSize = BitConverter.ToUInt64(m_Data, startOffset + 48);
 			FileNameLength = m_Data[startOffset + 64];
 			FileNameType = (FilenameType)m_Data[startOffset + 65];
-			if (FileName == null || FileName.Contains("~")) {
+			if (FileName == null && FileNameType != FilenameType.Dos) { // Don't bother reading DOS (8.3) filenames
 				FileName = Encoding.Unicode.GetString(m_Data, startOffset + 66, FileNameLength * 2);
 			}
 		}
