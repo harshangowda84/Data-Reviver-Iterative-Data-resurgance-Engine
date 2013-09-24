@@ -37,7 +37,7 @@ namespace FileSystems.FileSystem.NTFS {
 			Deleted = m_record.Deleted;
 		}
 
-		public FileNTFS(MFTRecord record, AttributeRecord attr, string path) {
+		public FileNTFS(MFTRecord record, MFTAttribute attr, string path) {
 			m_record = record;
 			m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, attr);
 			Name = record.FileName + ":" + attr.Name;
@@ -49,7 +49,7 @@ namespace FileSystems.FileSystem.NTFS {
 		/// <summary>
 		/// Gets a list of the on-disk runs of this NTFSFile. Returns null if resident.
 		/// </summary>
-		public IEnumerable<Run> GetRuns() {
+		public IEnumerable<NTFSDataRun> GetRuns() {
 			return m_stream.GetRuns();
 		}
 

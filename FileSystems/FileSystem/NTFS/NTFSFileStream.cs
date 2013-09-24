@@ -24,10 +24,10 @@ namespace FileSystems.FileSystem.NTFS {
 		private IDataStream m_partitionStream, m_residentStream;
 		private ulong m_length;
 		private MFTRecord m_record;
-		private List<Run> m_runs;
+		private List<NTFSDataRun> m_runs;
 		private bool m_nonResident;
 
-		public NTFSFileStream(IDataStream partition, MFTRecord record, AttributeRecord attr) {
+		public NTFSFileStream(IDataStream partition, MFTRecord record, MFTAttribute attr) {
 			if (attr != null) {
 				m_nonResident = attr.NonResident;
 				if (m_nonResident) {
@@ -48,8 +48,8 @@ namespace FileSystems.FileSystem.NTFS {
 		/// <summary>
 		/// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
 		/// </summary>
-		public IEnumerable<Run> GetRuns() {
-			return m_nonResident ? new ReadOnlyCollection<Run>(m_runs) : null;
+		public IEnumerable<NTFSDataRun> GetRuns() {
+			return m_nonResident ? new ReadOnlyCollection<NTFSDataRun>(m_runs) : null;
 		}
 
 		public byte GetByte(ulong offset) {
@@ -59,7 +59,7 @@ namespace FileSystems.FileSystem.NTFS {
 			if (m_nonResident) {
 				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
 				ulong clusterNum = offset / bytesPerCluster;
-				foreach (Run run in m_runs) {
+				foreach (NTFSDataRun run in m_runs) {
 					if (clusterNum >= run.VCN && clusterNum < run.VCN + run.Length) {
 						return run.GetByte(offset - run.VCN * bytesPerCluster);
 					}
@@ -86,7 +86,7 @@ namespace FileSystems.FileSystem.NTFS {
 				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
 				ulong firstCluster = offset / bytesPerCluster;
 				ulong lastCluster = (offset + length - 1) / bytesPerCluster;
-				foreach (Run run in m_runs) {
+				foreach (NTFSDataRun run in m_runs) {
 					// If this run doesn't overlap the cluster range we want, skip it.
 					if (run.VCN + run.Length <= firstCluster || run.VCN > lastCluster) {
 						continue;

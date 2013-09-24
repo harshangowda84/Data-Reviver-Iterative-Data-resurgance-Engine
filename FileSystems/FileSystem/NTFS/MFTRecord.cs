@@ -21,129 +21,6 @@ using FileSystems.FileSystem;
 using System.Text;
 
 namespace FileSystems.FileSystem.NTFS {
-
-	#region Attribute Structs
-
-	public class AttributeRecord {
-		public MFTRecord.AttributeType type;
-		public UInt32 Length;
-		public bool NonResident;
-		public bool Compressed;
-		public byte NameLength;
-		public UInt16 NameOffset;
-		public String Name;
-		public UInt16 Flags;
-		public UInt16 Instance;
-		public UInt16 Id;
-
-		/* Used for resident */
-		public UInt32 ValueLength;
-		public UInt16 ValueOffset;
-		public Byte ResidentFlags;
-		public IDataStream value;
-
-		/* Used for non resident */
-		public Int64 lowVCN, highVCN;
-		public UInt32 MappingPairsOffset;
-		public Byte CompressionUnit;
-		public UInt64 AllocatedSize, DataSize, InitialisedSize;
-		public UInt64 CompressedSize;
-
-		public List<Run> Runs;
-
-	};
-
-	#endregion
-
-	public class Run : IDataStream {
-		private ulong m_vcn, m_lcn, m_length, m_bytesPerCluster, m_lengthInBytes;
-		private MFTRecord m_record;
-		public ulong VCN { get { return m_vcn; } }
-		public ulong LCN { get { return m_lcn; } }
-		public ulong Length { get { return m_length; } }
-		public Run(ulong vcn, ulong lcn, ulong length, MFTRecord record) {
-			m_vcn = vcn;
-			m_lcn = lcn;
-			m_length = length;
-			m_record = record;
-			m_bytesPerCluster = (ulong)(m_record.BytesPerSector * m_record.SectorsPerCluster);
-			m_lengthInBytes = m_length * m_bytesPerCluster;
-		}
-
-		public bool Contains(ulong vcn) {
-			return vcn >= VCN && vcn < VCN + Length;
-		}
-
-		public virtual bool HasRealClusters {
-			get { return true; }
-		}
-
-		#region IDataStream Members
-
-		public virtual byte GetByte(ulong offset) {
-			if (offset < m_lengthInBytes) {
-				return m_record.PartitionStream.GetByte(LCN * m_bytesPerCluster + offset);
-			} else {
-				throw new Exception("Offset does not exist in this run!");
-			}
-		}
-
-		public virtual byte[] GetBytes(ulong offset, ulong length) {
-			if (offset + length - 1 < m_lengthInBytes) {
-				return m_record.PartitionStream.GetBytes(LCN * m_bytesPerCluster + offset, length);
-			} else {
-				throw new Exception("Offset does not exist in this run!");
-			}
-		}
-
-		public ulong StreamLength {
-			get { return m_lengthInBytes; }
-		}
-
-		public string StreamName {
-			get { return "Non-resident Attribute Run"; }
-		}
-
-		public IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
-		}
-
-		public ulong DeviceOffset {
-			get { return ParentStream.DeviceOffset + LCN * m_bytesPerCluster; }
-		}
-
-		public void Open() {
-			m_record.PartitionStream.Open();
-		}
-
-		public void Close() {
-			m_record.PartitionStream.Close();
-		}
-
-		#endregion
-
-		public override string ToString() {
-			return string.Format("Run: VCN {0}, Length {1}, LCN {2}", VCN, Length, LCN);
-		}
-	};
-
-	public class SparseRun : Run {
-		public SparseRun(ulong vcn, ulong length, MFTRecord record) :
-			base(vcn, 0, length, record) { }
-
-		public override byte GetByte(ulong offset) {
-			return 0;
-		}
-
-		public override bool HasRealClusters {
-			get { return false; }
-		}
-
-		public override string ToString() {
-			return "Sparse " + base.ToString();
-		}
-	}
-
 	public enum MftLoadDepth {
 		Full,
 		NameAndParentOnly,
@@ -167,28 +44,6 @@ namespace FileSystems.FileSystem.NTFS {
 			Is4 = 4, //?
 			ViewIndex = 8,
 			SpaceFiller = 16
-		};
-
-		public enum AttributeType {
-			Unused = 0,
-			StandardInformation = 0x10,
-			AttributeList = 0x20,
-			FileName = 0x30,
-			ObjectId = 0x40,
-			SecurityDescriptor = 0x50,
-			VolumeName = 0x60,
-			VolumeInformation = 0x70,
-			Data = 0x80,
-			IndexRoot = 0x90,
-			IndexAllocation = 0xa0,
-			Bitmap = 0xb0,
-			ReparseFont = 0xc0,
-			EAInformation = 0xd0,
-			EA = 0xe0,
-			PropertySet = 0xf0,
-			LoggedUtilityStream = 0x100,
-			FirstUserDefinedAttribute = 0x1000,
-			End = 0xffffff
 		};
 
 		#endregion
@@ -223,7 +78,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public ulong RecordNum, StartOffset;
 		public FileSystemNTFS FileSystem;
 		public IDataStream PartitionStream;
-		public List<AttributeRecord> Attributes;
+		public List<MFTAttribute> Attributes;
 
 		#endregion
 
@@ -355,11 +210,11 @@ namespace FileSystems.FileSystem.NTFS {
 			return m_Node;
 		}
 
-		public AttributeRecord GetAttribute(String name) {
+		public MFTAttribute GetAttribute(String name) {
 			LoadData();
 			try {
 				AttributeType flag = (AttributeType)Enum.Parse(typeof(AttributeType), name);
-				foreach (AttributeRecord attr in Attributes) {
+				foreach (MFTAttribute attr in Attributes) {
 					if (attr.type == flag) {
 						return attr;
 					}
@@ -388,7 +243,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void LoadAttributes(int startOffset, MftLoadDepth loadDepth) {
-			Attributes = new List<AttributeRecord>();
+			Attributes = new List<MFTAttribute>();
 			while (true) {
 				//Align to 8 byte boundary
 				if (startOffset % 8 != 0) {
@@ -400,7 +255,7 @@ namespace FileSystems.FileSystem.NTFS {
 					break;
 				}
 
-				AttributeRecord attr = new AttributeRecord();
+				MFTAttribute attr = new MFTAttribute();
 				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset + 0);
 				attr.Length = BitConverter.ToUInt16(m_Data, startOffset + 4);
 				if (loadDepth == MftLoadDepth.NameAndParentOnly && (AttributeType)attr.type != AttributeType.FileName) {
@@ -440,14 +295,14 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private void LoadResidentAttribute(int startOffset, AttributeRecord attr) {
+		private void LoadResidentAttribute(int startOffset, MFTAttribute attr) {
 			attr.ValueLength = BitConverter.ToUInt32(m_Data, startOffset + 16);
 			attr.ValueOffset = BitConverter.ToUInt16(m_Data, startOffset + 20);
 			attr.ResidentFlags = m_Data[startOffset + 22];
 			attr.value = new SubStream(m_Stream, (ulong)(startOffset + attr.ValueOffset), attr.ValueLength);
 		}
 
-		private bool LoadNonResidentAttribute(int startOffset, AttributeRecord attr) {
+		private bool LoadNonResidentAttribute(int startOffset, MFTAttribute attr) {
 			attr.lowVCN = BitConverter.ToInt32(m_Data, startOffset + 16);
 			attr.highVCN = BitConverter.ToInt64(m_Data, startOffset + 24);
 
@@ -462,7 +317,7 @@ namespace FileSystems.FileSystem.NTFS {
 				return false;
 			}
 
-			attr.Runs = new List<Run>();
+			attr.Runs = new List<NTFSDataRun>();
 			ulong cur_vcn = (ulong)attr.lowVCN;
 			ulong lcn = 0;
 			ulong offset = (ulong)startOffset + attr.MappingPairsOffset;
@@ -503,7 +358,7 @@ namespace FileSystems.FileSystem.NTFS {
 						return false;
 					}
 
-					Run run = new Run(cur_vcn, lcn, (ulong)length, this);
+					NTFSDataRun run = new NTFSDataRun(cur_vcn, lcn, (ulong)length, this);
 					attr.Runs.Add(run);
 				}
 				cur_vcn += (ulong)length;
@@ -543,7 +398,7 @@ namespace FileSystems.FileSystem.NTFS {
 			VolumeLabel = Encoding.Unicode.GetString(m_Data, startOffset, length);
 		}
 
-		private void LoadExternalAttributeList(int startOffset, AttributeRecord attrList) {
+		private void LoadExternalAttributeList(int startOffset, MFTAttribute attrList) {
 			int offset = 0;
 			while (true) {
 				//Align to 8 byte boundary
@@ -556,7 +411,7 @@ namespace FileSystems.FileSystem.NTFS {
 					break;
 				}
 
-				AttributeRecord attr = new AttributeRecord();
+				MFTAttribute attr = new MFTAttribute();
 				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
 				attr.Length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
 				attr.NameLength = m_Data[offset + startOffset + 0x6];
@@ -566,12 +421,12 @@ namespace FileSystems.FileSystem.NTFS {
 				ulong fileRef = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
 				if (fileRef != this.MFTRecordNumber && fileRef != RecordNum) {
 					MFTRecord mftRec = MFTRecord.Create(fileRef, this.FileSystem);
-					foreach (AttributeRecord attr2 in mftRec.Attributes) {
+					foreach (MFTAttribute attr2 in mftRec.Attributes) {
 						if (attr.Id == attr2.Id) {
 							if (attr2.NonResident && attr2.type == AttributeType.Data) {
 								// Find the corresponding data attribute on this record and merge the runlists
 								bool merged = false;
-								foreach (AttributeRecord rec in Attributes) {
+								foreach (MFTAttribute rec in Attributes) {
 									if (rec.type == AttributeType.Data && attr2.Name == rec.Name) {
 										MergeRunLists(ref rec.Runs, attr2.Runs);
 										merged = true;
@@ -597,7 +452,7 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private void MergeRunLists(ref List<Run> list1, List<Run> list2) {
+		private void MergeRunLists(ref List<NTFSDataRun> list1, List<NTFSDataRun> list2) {
 			list1.AddRange(list2);
 			// TODO: Verify that the runlists don't overlap
 		}

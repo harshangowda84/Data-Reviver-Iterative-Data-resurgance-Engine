@@ -113,7 +113,7 @@ namespace FileSystems.FileSystem.NTFS {
 			if (file == null) {
 				return FileRecoveryStatus.Unknown;
 			} else {
-				IEnumerable<Run> runs = file.GetRuns();
+				IEnumerable<NTFSDataRun> runs = file.GetRuns();
 				if (runs == null) {
 					// The data stream is resident, so recovery is trivial.
 					return FileRecoveryStatus.Recoverable;
@@ -121,7 +121,7 @@ namespace FileSystems.FileSystem.NTFS {
 					ulong totalClusters = 0;
 					ulong usedClusters = 0;
 					// Check the status of each cluster in the runs.
-					foreach (Run run in runs) {
+					foreach (NTFSDataRun run in runs) {
 						if (run.HasRealClusters) {
 							totalClusters += run.Length;
 							for (ulong i = run.LCN; i < run.Length; i++) {

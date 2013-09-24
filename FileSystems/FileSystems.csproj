@@ -106,7 +106,9 @@
     <Compile Include="FileSystem\NTFS\FixupStream.cs" />
     <Compile Include="FileSystem\NTFS\FolderNTFS.cs" />
     <Compile Include="FileSystem\NTFS\HiddenDataStreamFileNTFS.cs" />
+    <Compile Include="FileSystem\NTFS\MFTAttribute.cs" />
     <Compile Include="FileSystem\NTFS\MFTRecord.cs" />
+    <Compile Include="FileSystem\NTFS\NTFSDataRun.cs" />
     <Compile Include="FileSystem\NTFS\NTFSFileStream.cs" />
     <Compile Include="FileSystem\ISearchStrategy.cs" />
     <Compile Include="FileSystem\SearchStrategy.cs" />

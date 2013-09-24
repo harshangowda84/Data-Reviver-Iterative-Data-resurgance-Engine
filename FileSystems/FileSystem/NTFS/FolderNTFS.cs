@@ -215,7 +215,7 @@ namespace FileSystems.FileSystem.NTFS {
 			m_record = record;
 			m_indexRoot = new NTFSFileStream(m_record.PartitionStream, m_record, "IndexRoot");
 
-			AttributeRecord attr = m_record.GetAttribute("IndexAllocation");
+			MFTAttribute attr = m_record.GetAttribute("IndexAllocation");
 			if (attr != null) {
 				m_indexAllocation = new NTFSFileStream(m_record.PartitionStream, m_record, "IndexAllocation");
 			}
