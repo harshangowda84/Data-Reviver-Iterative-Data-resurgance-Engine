@@ -27,28 +27,24 @@ namespace FileSystems.FileSystem.NTFS {
 		None
 	}
 
+	public enum FilenameType {
+		Posix = 1,
+		Win32 = 2,
+		Dos = 4,
+		DosAndWin32 = 8
+	}
+
+	public enum RecordFlags {
+		InUse = 1,
+		Directory = 2,
+		Is4 = 4, //?
+		ViewIndex = 8,
+		SpaceFiller = 16
+	}
+
 	public class MFTRecord : INodeMetadata {
 
-		#region Attribute Enums
-
-		public enum FilenameType {
-			Posix = 1,
-			Win32 = 2,
-			Dos = 4,
-			DosAndWin32 = 8
-		};
-
-		public enum RecordFlags {
-			InUse = 1,
-			Directory = 2,
-			Is4 = 4, //?
-			ViewIndex = 8,
-			SpaceFiller = 16
-		};
-
-		#endregion
-
-		#region Fields
+		#region Header Fields
 
 		public byte[] record_Magic;
 		public UInt16 record_Ofs, record_Count;
@@ -69,7 +65,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public Int32 _Attributes;
 		public Int32 _Attributes2;
 		public Byte FileNameLength;
-		public UInt16 FileNameType;
+		public FilenameType FileNameType;
 		public String FileName;
 		public string VolumeLabel;
 
@@ -199,7 +195,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public FileSystemNode GetFileSystemNode(String path) {
 			LoadData();
 			if (m_Node == null) {
-				if ((Flags & (int)MFTRecord.RecordFlags.Directory) > 0) {
+				if ((Flags & (int)RecordFlags.Directory) > 0) {
 					m_Node = new FolderNTFS(this, path);
 				} else if (HiddenDataStreamFileNTFS.GetHiddenDataStreams(this).Count > 0) {
 					m_Node = new HiddenDataStreamFileNTFS(this, path);
@@ -301,7 +297,7 @@ namespace FileSystems.FileSystem.NTFS {
 			_Attributes = BitConverter.ToInt32(m_Data, startOffset + 56);
 			_Attributes2 = BitConverter.ToInt32(m_Data, startOffset + 60);
 			FileNameLength = m_Data[startOffset + 64];
-			FileNameType = m_Data[startOffset + 65];
+			FileNameType = (FilenameType)m_Data[startOffset + 65];
 			if (FileName == null || FileName.Contains("~")) {
 				FileName = Encoding.Unicode.GetString(m_Data, startOffset + 66, FileNameLength * 2);
 			}
