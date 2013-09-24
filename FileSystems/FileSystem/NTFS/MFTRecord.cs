@@ -88,7 +88,7 @@ namespace FileSystems.FileSystem.NTFS {
 		private bool m_DataLoaded = false;
 		private string m_Path = "";
 
-		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
+		public static MFTRecord Load(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
 
 			IDataStream stream;
@@ -420,7 +420,7 @@ namespace FileSystems.FileSystem.NTFS {
 				ulong vcn = BitConverter.ToUInt64(m_Data, offset + startOffset + 0x8);
 				ulong fileRef = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
 				if (fileRef != this.MFTRecordNumber && fileRef != RecordNum) {
-					MFTRecord mftRec = MFTRecord.Create(fileRef, this.FileSystem);
+					MFTRecord mftRec = MFTRecord.Load(fileRef, this.FileSystem);
 					foreach (MFTAttribute attr2 in mftRec.Attributes) {
 						if (attr.Id == attr2.Id) {
 							if (attr2.NonResident && attr2.type == AttributeType.Data) {

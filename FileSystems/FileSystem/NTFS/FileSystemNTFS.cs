@@ -70,10 +70,10 @@ namespace FileSystems.FileSystem.NTFS {
 			LoadBPB();
 
 			m_mftSector = (BPB_MFTStartCluster64 * BPB_SecPerClus);
-			m_MFT = new FileNTFS(MFTRecord.Create(0, this), "");
-			m_Root = new FolderNTFS(MFTRecord.Create(5, this), "", true);
+			m_MFT = new FileNTFS(MFTRecord.Load(0, this), "");
+			m_Root = new FolderNTFS(MFTRecord.Load(5, this), "", true);
 
-			m_bitmapFile = new FileNTFS(MFTRecord.Create(6, this), "");
+			m_bitmapFile = new FileNTFS(MFTRecord.Load(6, this), "");
 			m_Bitmap = m_bitmapFile.GetBytes(0, m_bitmapFile.StreamLength);
 		}
 
@@ -199,7 +199,7 @@ namespace FileSystems.FileSystem.NTFS {
 			ulong numFiles = m_MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
 
 			for (ulong i = 0; i < numFiles; i++) {
-				MFTRecord record = MFTRecord.Create(i, this, MFTLoadDepth.NameAndParentOnly);
+				MFTRecord record = MFTRecord.Load(i, this, MFTLoadDepth.NameAndParentOnly);
 
 				if (record != null) {
 					if (!callback(record, i, numFiles)) {

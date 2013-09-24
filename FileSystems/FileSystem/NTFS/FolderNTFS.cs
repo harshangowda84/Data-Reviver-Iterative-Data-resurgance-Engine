@@ -152,7 +152,7 @@ namespace FileSystems.FileSystem.NTFS {
 						}
 
 						if (recordNum != m_Folder.m_record.RecordNum) {
-							MFTRecord record = MFTRecord.Create(recordNum, m_Folder.m_record.FileSystem);
+							MFTRecord record = MFTRecord.Load(recordNum, m_Folder.m_record.FileSystem);
 							node = record.GetFileSystemNode(m_Folder.Path);
 						}
 					}
