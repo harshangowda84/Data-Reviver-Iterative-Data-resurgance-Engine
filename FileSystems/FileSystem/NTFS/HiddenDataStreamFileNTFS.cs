@@ -35,7 +35,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		public override DateTime LastModified {
-			get { return m_record.fileLastDataChangeTime; }
+			get { return m_record.LastDataChangeTime; }
 		}
 
 		public override long Identifier {

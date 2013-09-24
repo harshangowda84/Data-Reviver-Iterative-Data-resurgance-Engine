@@ -59,7 +59,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public UInt32 ValueLength;
 		public UInt16 ValueOffset;
 		public Byte ResidentFlags;
-		public IDataStream value;
+		public IDataStream ResidentData;
 
 		/* Used for non resident */
 		public Int64 lowVCN, highVCN;
@@ -110,7 +110,7 @@ namespace FileSystems.FileSystem.NTFS {
 			ValueLength = BitConverter.ToUInt32(data, startOffset + 16);
 			ValueOffset = BitConverter.ToUInt16(data, startOffset + 20);
 			ResidentFlags = data[startOffset + 22];
-			value = new ArrayBackedStream(data, (uint)(startOffset + ValueOffset), ValueLength);
+			ResidentData = new ArrayBackedStream(data, (uint)(startOffset + ValueOffset), ValueLength);
 		}
 
 		private void LoadNonResidentHeader(byte[] data, int startOffset) {

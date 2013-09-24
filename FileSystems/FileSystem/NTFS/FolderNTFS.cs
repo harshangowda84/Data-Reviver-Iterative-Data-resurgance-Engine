@@ -213,11 +213,11 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public FolderNTFS(MFTRecord record, string path, bool isRoot = false) {
 			m_record = record;
-			m_indexRoot = new NTFSFileStream(m_record.PartitionStream, m_record, "IndexRoot");
+			m_indexRoot = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.IndexRoot);
 
-			MFTAttribute attr = m_record.GetAttribute("IndexAllocation");
+			MFTAttribute attr = m_record.GetAttribute(AttributeType.IndexAllocation);
 			if (attr != null) {
-				m_indexAllocation = new NTFSFileStream(m_record.PartitionStream, m_record, "IndexAllocation");
+				m_indexAllocation = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.IndexAllocation);
 			}
 			Name = record.FileName;
 			if (path == null) {
@@ -355,19 +355,19 @@ namespace FileSystems.FileSystem.NTFS {
 		public override void Close() { }
 
 		public DateTime CreationTime {
-			get { return m_record.fileCreationTime; }
+			get { return m_record.CreationTime; }
 		}
 
 		public DateTime LastAccessed {
-			get { return m_record.fileLastAccessTime; }
+			get { return m_record.LastAccessTime; }
 		}
 
 		public override DateTime LastModified {
-			get { return m_record.fileLastDataChangeTime; }
+			get { return m_record.LastDataChangeTime; }
 		}
 
 		public DateTime LastModifiedMFT {
-			get { return m_record.fileLastMFTChangeTime; }
+			get { return m_record.LastMFTChangeTime; }
 		}
 
 		public bool Root {

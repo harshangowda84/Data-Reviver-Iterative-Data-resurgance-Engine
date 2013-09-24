@@ -34,6 +34,7 @@ namespace FileSystems.FileSystem.NTFS {
 		DosAndWin32 = 8
 	}
 
+	[Flags]
 	public enum RecordFlags {
 		InUse = 1,
 		Directory = 2,
@@ -42,32 +43,56 @@ namespace FileSystems.FileSystem.NTFS {
 		SpaceFiller = 16
 	}
 
+	[Flags]
+	public enum FilePermissions {
+		ReadOnly = 0x1,
+		Hidden = 0x2,
+		System = 0x4,
+		Archive = 0x20,
+		Device = 0x40,
+		Normal = 0x80,
+		Temporary = 0x100,
+		SparseFile = 0x200,
+		ReparsePoint = 0x400,
+		Compressed = 0x800,
+		Offline = 0x1000,
+		NotContentIndexed = 0x2000,
+		Encrypted = 0x4000
+	}
+
 	public class MFTRecord : INodeMetadata {
 
 		#region Header Fields
 
-		public byte[] record_Magic;
-		public UInt16 record_Ofs, record_Count;
 		public UInt64 LogSequenceNumber;
-		public UInt16 SequenceNumber, record_NumHardLinks;
+		public UInt16 SequenceNumber;
+		public UInt16 HardLinkCount;
 		public UInt16 AttributeOffset;
-		public UInt16 Flags;
+		public RecordFlags Flags;
 		public UInt32 BytesInUse;
 		public UInt32 BytesAllocated;
 		public UInt64 BaseMFTRecord;
 		public UInt16 NextAttrInstance;
-		public UInt16 Reserved;
 		public UInt32 MFTRecordNumber;
 
+		#endregion
+
+		#region Attribute Fields
+
 		public UInt64 ParentDirectory = 0;
-		public DateTime fileCreationTime, fileLastDataChangeTime, fileLastMFTChangeTime, fileLastAccessTime;
-		public UInt64 AllocatedSize, ActualSize;
-		public Int32 _Attributes;
-		public Int32 _Attributes2;
+		public DateTime CreationTime;
+		public DateTime LastDataChangeTime;
+		public DateTime LastMFTChangeTime;
+		public DateTime LastAccessTime;
+		public UInt64 AllocatedSize;
+		public UInt64 ActualSize;
+		public FilePermissions FilePermissions;
 		public Byte FileNameLength;
 		public FilenameType FileNameType;
 		public String FileName;
 		public string VolumeLabel;
+
+		#endregion
 
 		public long BytesPerSector;
 		public long SectorsPerCluster;
@@ -75,8 +100,6 @@ namespace FileSystems.FileSystem.NTFS {
 		public FileSystemNTFS FileSystem;
 		public IDataStream PartitionStream;
 		public List<MFTAttribute> Attributes;
-
-		#endregion
 
 		private FileSystemNode m_Node = null;
 		private byte[] m_Data;
@@ -120,7 +143,7 @@ namespace FileSystems.FileSystem.NTFS {
 			m_Stream = stream;
 			m_Path = path;
 
-			Flags = BitConverter.ToUInt16(m_Data, 22);
+			Flags = (RecordFlags)BitConverter.ToUInt16(m_Data, 22);
 
 			if (loadDepth != MFTLoadDepth.None) {
 				LoadData(loadDepth);
@@ -175,13 +198,13 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public bool Deleted {
 			get {
-				return (Flags & (ushort)RecordFlags.InUse) == 0;
+				return (Flags & RecordFlags.InUse) == 0;
 			}
 		}
 
 		public DateTime LastModified {
 			get {
-				return fileLastDataChangeTime;
+				return LastDataChangeTime;
 			}
 		}
 
@@ -195,7 +218,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public FileSystemNode GetFileSystemNode(String path) {
 			LoadData();
 			if (m_Node == null) {
-				if ((Flags & (int)RecordFlags.Directory) > 0) {
+				if ((Flags & RecordFlags.Directory) > 0) {
 					m_Node = new FolderNTFS(this, path);
 				} else if (HiddenDataStreamFileNTFS.GetHiddenDataStreams(this).Count > 0) {
 					m_Node = new HiddenDataStreamFileNTFS(this, path);
@@ -206,12 +229,11 @@ namespace FileSystems.FileSystem.NTFS {
 			return m_Node;
 		}
 
-		public MFTAttribute GetAttribute(String name) {
+		public MFTAttribute GetAttribute(AttributeType type) {
 			LoadData();
 			try {
-				AttributeType flag = (AttributeType)Enum.Parse(typeof(AttributeType), name);
 				foreach (MFTAttribute attr in Attributes) {
-					if (attr.Type == flag) {
+					if (attr.Type == type) {
 						return attr;
 					}
 				}
@@ -222,19 +244,14 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void LoadHeader() {
-			// record_Magic = data[0..4]
-			record_Ofs = BitConverter.ToUInt16(m_Data, 4);
-			record_Count = BitConverter.ToUInt16(m_Data, 6);
 			LogSequenceNumber = BitConverter.ToUInt64(m_Data, 8);
 			SequenceNumber = BitConverter.ToUInt16(m_Data, 16);
-			record_NumHardLinks = BitConverter.ToUInt16(m_Data, 18);
+			HardLinkCount = BitConverter.ToUInt16(m_Data, 18);
 			AttributeOffset = BitConverter.ToUInt16(m_Data, 20);
-			Flags = BitConverter.ToUInt16(m_Data, 22);
 			BytesInUse = BitConverter.ToUInt32(m_Data, 24);
 			BytesAllocated = BitConverter.ToUInt32(m_Data, 28);
 			BaseMFTRecord = BitConverter.ToUInt64(m_Data, 32);
 			NextAttrInstance = BitConverter.ToUInt16(m_Data, 40);
-			Reserved = BitConverter.ToUInt16(m_Data, 42);
 			MFTRecordNumber = BitConverter.ToUInt32(m_Data, 44);
 		}
 
@@ -278,24 +295,18 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void LoadStandardAttributes(int startOffset) {
-			fileCreationTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset));
-			fileLastDataChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 8));
-			fileLastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
-			fileLastAccessTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 24));
-			_Attributes = BitConverter.ToInt32(m_Data, startOffset + 32);
+			CreationTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset));
+			LastDataChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 8));
+			LastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
+			LastAccessTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 24));
+			FilePermissions = (FilePermissions)BitConverter.ToInt32(m_Data, startOffset + 32);
 		}
 
 		private void LoadNameAttributes(int startOffset) {
 			// Read in the bytes, then parse them.
 			ParentDirectory = BitConverter.ToUInt64(m_Data, startOffset) & 0xFFFFFF;
-			fileCreationTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 8));
-			fileLastDataChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
-			fileLastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 24));
-			fileLastAccessTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 32));
 			AllocatedSize = BitConverter.ToUInt64(m_Data, startOffset + 40);
 			ActualSize = BitConverter.ToUInt64(m_Data, startOffset + 48);
-			_Attributes = BitConverter.ToInt32(m_Data, startOffset + 56);
-			_Attributes2 = BitConverter.ToInt32(m_Data, startOffset + 60);
 			FileNameLength = m_Data[startOffset + 64];
 			FileNameType = (FilenameType)m_Data[startOffset + 65];
 			if (FileName == null || FileName.Contains("~")) {
@@ -356,7 +367,7 @@ namespace FileSystems.FileSystem.NTFS {
 				}
 
 				ulong startByte = vcn * (ulong)FileSystem.BytesPerCluster;
-				attr.value = new SubStream(attrList.value, startByte, startByte + attr.Length);
+				attr.ResidentData = new SubStream(attrList.ResidentData, startByte, startByte + attr.Length);
 				offset += 0x1A + (attr.NameLength * 2);
 			}
 		}

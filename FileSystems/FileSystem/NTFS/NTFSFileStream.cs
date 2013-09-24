@@ -34,16 +34,16 @@ namespace FileSystems.FileSystem.NTFS {
 					m_runs = attr.Runs;
 					m_length = attr.DataSize;
 				} else {
-					m_residentStream = attr.value;
-					m_length = attr.value.StreamLength;
+					m_residentStream = attr.ResidentData;
+					m_length = attr.ResidentData.StreamLength;
 				}
 			}
 			m_record = record;
 			m_partitionStream = partition;
 		}
 
-		public NTFSFileStream(IDataStream partition, MFTRecord record, String attrName) :
-			this(partition, record, record.GetAttribute(attrName)) { }
+		public NTFSFileStream(IDataStream partition, MFTRecord record, AttributeType attrType) :
+			this(partition, record, record.GetAttribute(attrType)) { }
 
 		/// <summary>
 		/// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
