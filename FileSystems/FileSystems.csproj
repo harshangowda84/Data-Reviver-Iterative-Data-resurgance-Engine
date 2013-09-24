@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStream\ArrayBackedStream.cs" />
     <Compile Include="DataStream\FileDataStream.cs" />
     <Compile Include="DataStream\ForensicsAppStream.cs" />
     <Compile Include="DataStream\IDataStream.cs" />
