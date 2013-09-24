@@ -215,7 +215,7 @@ namespace FileSystems.FileSystem.NTFS {
 			try {
 				AttributeType flag = (AttributeType)Enum.Parse(typeof(AttributeType), name);
 				foreach (MFTAttribute attr in Attributes) {
-					if (attr.type == flag) {
+					if (attr.Type == flag) {
 						return attr;
 					}
 				}
@@ -255,33 +255,25 @@ namespace FileSystems.FileSystem.NTFS {
 					break;
 				}
 
-				MFTAttribute attr = new MFTAttribute();
-				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset + 0);
-				attr.Length = BitConverter.ToUInt16(m_Data, startOffset + 4);
-				if (loadDepth == MFTLoadDepth.NameAndParentOnly && (AttributeType)attr.type != AttributeType.FileName) {
-					startOffset += (int)attr.Length;
+				// Read the attribute type and length and determine whether we care about this attribute.
+				AttributeType type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset);
+				int length = BitConverter.ToUInt16(m_Data, startOffset + 4);
+				if (loadDepth == MFTLoadDepth.NameAndParentOnly && type != AttributeType.FileName) {
+					startOffset += length;
 					continue;
 				}
-				attr.NonResident = m_Data[startOffset + 8] > 0;
-				attr.NameLength = m_Data[startOffset + 9];
-				attr.NameOffset = BitConverter.ToUInt16(m_Data, startOffset + 10);
-				attr.Compressed = m_Data[startOffset + 0xC] > 0;
-				attr.Id = BitConverter.ToUInt16(m_Data, startOffset + 0xE);
-				if (attr.NameLength > 0) {
-					attr.Name = Encoding.Unicode.GetString(m_Data, startOffset + attr.NameOffset, attr.NameLength * 2);
-				}
-				attr.Flags = BitConverter.ToUInt16(m_Data, startOffset + 12);
-				attr.Instance = BitConverter.ToUInt16(m_Data, startOffset + 14);
+
+				MFTAttribute attr = MFTAttribute.Load(m_Data, startOffset);
 				bool success = true;
 				if (!attr.NonResident) {
 					LoadResidentAttribute(startOffset, attr);
-					if ((AttributeType)attr.type == AttributeType.StandardInformation) {
+					if ((AttributeType)attr.Type == AttributeType.StandardInformation) {
 						LoadStandardAttributes(startOffset + attr.ValueOffset);
-					} else if ((AttributeType)attr.type == AttributeType.FileName) {
+					} else if ((AttributeType)attr.Type == AttributeType.FileName) {
 						LoadNameAttributes(startOffset + attr.ValueOffset);
-					} else if ((AttributeType)attr.type == AttributeType.AttributeList) {
+					} else if ((AttributeType)attr.Type == AttributeType.AttributeList) {
 						LoadExternalAttributeList(startOffset + attr.ValueOffset, attr);
-					} else if ((AttributeType)attr.type == AttributeType.VolumeName) {
+					} else if ((AttributeType)attr.Type == AttributeType.VolumeName) {
 						LoadVolumeNameAttributes(startOffset + attr.ValueOffset, (int)attr.ValueLength);
 					}
 				} else {
@@ -412,7 +404,7 @@ namespace FileSystems.FileSystem.NTFS {
 				}
 
 				MFTAttribute attr = new MFTAttribute();
-				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
+				attr.Type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
 				attr.Length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
 				attr.NameLength = m_Data[offset + startOffset + 0x6];
 				attr.Id = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x18);
@@ -423,11 +415,11 @@ namespace FileSystems.FileSystem.NTFS {
 					MFTRecord mftRec = MFTRecord.Load(fileRef, this.FileSystem);
 					foreach (MFTAttribute attr2 in mftRec.Attributes) {
 						if (attr.Id == attr2.Id) {
-							if (attr2.NonResident && attr2.type == AttributeType.Data) {
+							if (attr2.NonResident && attr2.Type == AttributeType.Data) {
 								// Find the corresponding data attribute on this record and merge the runlists
 								bool merged = false;
 								foreach (MFTAttribute rec in Attributes) {
-									if (rec.type == AttributeType.Data && attr2.Name == rec.Name) {
+									if (rec.Type == AttributeType.Data && attr2.Name == rec.Name) {
 										MergeRunLists(ref rec.Runs, attr2.Runs);
 										merged = true;
 										break;

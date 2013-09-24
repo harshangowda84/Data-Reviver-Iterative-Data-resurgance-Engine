@@ -51,7 +51,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public static List<MFTAttribute> GetHiddenDataStreams(MFTRecord record) {
 			List<MFTAttribute> result = new List<MFTAttribute>();
 			foreach (MFTAttribute attr in record.Attributes) {
-				if (attr.type == AttributeType.Data && attr.Name != null) {
+				if (attr.Type == AttributeType.Data && attr.Name != null) {
 					result.Add(attr);
 				}
 			}

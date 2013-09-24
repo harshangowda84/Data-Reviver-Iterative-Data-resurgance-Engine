@@ -28,7 +28,7 @@ namespace FileSystems.FileSystem.NTFS {
 	}
 
 	public class MFTAttribute {
-		public AttributeType type;
+		public AttributeType Type;
 		public UInt32 Length;
 		public bool NonResident;
 		public bool Compressed;
@@ -53,5 +53,27 @@ namespace FileSystems.FileSystem.NTFS {
 		public UInt64 CompressedSize;
 
 		public List<NTFSDataRun> Runs;
+
+		public static MFTAttribute Load(byte[] data, int startOffset) {
+			return new MFTAttribute(data, startOffset);
+		}
+
+		public MFTAttribute() { }
+
+		protected MFTAttribute(byte[] data, int startOffset) {
+			// Read the attribute header.
+			Type = (AttributeType)BitConverter.ToUInt32(data, startOffset + 0);
+			Length = BitConverter.ToUInt16(data, startOffset + 4);
+			NonResident = data[startOffset + 8] > 0;
+			NameLength = data[startOffset + 9];
+			NameOffset = BitConverter.ToUInt16(data, startOffset + 10);
+			Compressed = data[startOffset + 0xC] > 0;
+			Id = BitConverter.ToUInt16(data, startOffset + 0xE);
+			if (NameLength > 0) {
+				Name = Encoding.Unicode.GetString(data, startOffset + NameOffset, NameLength * 2);
+			}
+			Flags = BitConverter.ToUInt16(data, startOffset + 12);
+			Instance = BitConverter.ToUInt16(data, startOffset + 14);
+		}
 	}
 }
