@@ -21,7 +21,7 @@ using FileSystems.FileSystem;
 using System.Text;
 
 namespace FileSystems.FileSystem.NTFS {
-	public enum MftLoadDepth {
+	public enum MFTLoadDepth {
 		Full,
 		NameAndParentOnly,
 		None
@@ -88,7 +88,7 @@ namespace FileSystems.FileSystem.NTFS {
 		private bool m_DataLoaded = false;
 		private string m_Path = "";
 
-		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, MftLoadDepth loadDepth = MftLoadDepth.Full, string path = "") {
+		public static MFTRecord Create(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
 
 			IDataStream stream;
@@ -113,7 +113,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private MFTRecord(ulong recordNum, FileSystemNTFS fileSystem, byte[] data,
-				IDataStream stream, MftLoadDepth loadDepth, string path) {
+				IDataStream stream, MFTLoadDepth loadDepth, string path) {
 			this.RecordNum = recordNum;
 			this.FileSystem = fileSystem;
 			this.BytesPerSector = fileSystem.BytesPerSector;
@@ -126,16 +126,16 @@ namespace FileSystems.FileSystem.NTFS {
 
 			Flags = BitConverter.ToUInt16(m_Data, 22);
 
-			if (loadDepth != MftLoadDepth.None) {
+			if (loadDepth != MFTLoadDepth.None) {
 				LoadData(loadDepth);
 			}
 		}
 
-		private void LoadData(MftLoadDepth loadDepth = MftLoadDepth.Full) {
+		private void LoadData(MFTLoadDepth loadDepth = MFTLoadDepth.Full) {
 			if (m_DataLoaded) {
 				return;
 			}
-			if (loadDepth == MftLoadDepth.Full) {
+			if (loadDepth == MFTLoadDepth.Full) {
 				// If we're loading everything on this pass, there's no need to load in the future.
 				m_DataLoaded = true;
 			}
@@ -242,7 +242,7 @@ namespace FileSystems.FileSystem.NTFS {
 			MFTRecordNumber = BitConverter.ToUInt32(m_Data, 44);
 		}
 
-		private void LoadAttributes(int startOffset, MftLoadDepth loadDepth) {
+		private void LoadAttributes(int startOffset, MFTLoadDepth loadDepth) {
 			Attributes = new List<MFTAttribute>();
 			while (true) {
 				//Align to 8 byte boundary
@@ -258,7 +258,7 @@ namespace FileSystems.FileSystem.NTFS {
 				MFTAttribute attr = new MFTAttribute();
 				attr.type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset + 0);
 				attr.Length = BitConverter.ToUInt16(m_Data, startOffset + 4);
-				if (loadDepth == MftLoadDepth.NameAndParentOnly && (AttributeType)attr.type != AttributeType.FileName) {
+				if (loadDepth == MFTLoadDepth.NameAndParentOnly && (AttributeType)attr.type != AttributeType.FileName) {
 					startOffset += (int)attr.Length;
 					continue;
 				}
@@ -462,7 +462,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public string Name {
 			get {
 				if (string.IsNullOrEmpty(FileName)) {
-					LoadData(MftLoadDepth.NameAndParentOnly);
+					LoadData(MFTLoadDepth.NameAndParentOnly);
 				}
 				return FileName;
 			}
