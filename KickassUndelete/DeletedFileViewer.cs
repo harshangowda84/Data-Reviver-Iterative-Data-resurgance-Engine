@@ -61,6 +61,7 @@ namespace KickassUndelete {
 		private ProgressPopup m_ProgressPopup;
 		private string m_MostRecentlySavedFile;
 		private string m_Filter = "";
+		private int m_NumCheckedItems = 0;
 		private bool m_MatchUnknownFileTypes = false;
 		private bool m_Scanning;
 
@@ -482,9 +483,9 @@ namespace KickassUndelete {
 		}
 
 		private void bRestoreFiles_Click(object sender, EventArgs e) {
-			if (fileView.CheckedItems.Count == 1) {
+			if (m_NumCheckedItems == 1) {
 				PromptUserToSaveFile(fileView.CheckedItems[0].Tag as INodeMetadata);
-			} else if (fileView.CheckedItems.Count > 1) {
+			} else if (m_NumCheckedItems > 1) {
 				PromptUserToSaveFiles(fileView.CheckedItems);
 			}
 		}
@@ -492,14 +493,16 @@ namespace KickassUndelete {
 		/// <summary>
 		/// Sets the restore button to be enabled if there are list items checked.
 		/// </summary>
-		private void UpdateRestoreButton(int change) {
+		private void UpdateRestoreButton() {
 			if (!m_Scanning) {
-				bRestoreFiles.Enabled = fileView.CheckedItems.Count + change > 0;
+				bRestoreFiles.Enabled = m_NumCheckedItems > 0;
 			}
 		}
 
 		private void fileView_ItemCheck(object sender, ItemCheckEventArgs e) {
-			UpdateRestoreButton(e.NewValue == CheckState.Checked ? 1 : -1);
+			// Update the number of checked items
+			m_NumCheckedItems += e.NewValue == CheckState.Checked ? 1 : -1;
+			UpdateRestoreButton();
 		}
 	}
 }
