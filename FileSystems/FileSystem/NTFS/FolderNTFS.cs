@@ -153,7 +153,9 @@ namespace FileSystems.FileSystem.NTFS {
 
 						if (recordNum != m_Folder.m_record.RecordNum) {
 							MFTRecord record = MFTRecord.Load(recordNum, m_Folder.m_record.FileSystem);
-							node = record.GetFileSystemNode(m_Folder.Path);
+							if (record.Valid) {
+								node = record.GetFileSystemNode(m_Folder.Path);
+							}
 						}
 					}
 					return node;

@@ -201,7 +201,7 @@ namespace FileSystems.FileSystem.NTFS {
 			for (ulong i = 0; i < numFiles; i++) {
 				MFTRecord record = MFTRecord.Load(i, this, MFTLoadDepth.NameAndParentOnly);
 
-				if (record != null) {
+				if (record.Valid) {
 					if (!callback(record, i, numFiles)) {
 						return;
 					}

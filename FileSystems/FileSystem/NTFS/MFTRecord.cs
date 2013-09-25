@@ -101,6 +101,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public IDataStream PartitionStream;
 		public List<MFTAttribute> Attributes;
 
+		public bool Valid { get; private set; }
 		private FileSystemNode m_Node = null;
 		private byte[] m_Data;
 		private bool m_DataLoaded = false;
@@ -121,12 +122,6 @@ namespace FileSystems.FileSystem.NTFS {
 			// Read the whole record into memory
 			byte[] data = stream.GetBytes(0, stream.StreamLength);
 
-			string Magic = Encoding.ASCII.GetString(data, 0, 4);
-			if (!Magic.Equals("FILE")) {
-				Console.Error.WriteLine("Warning: MFT record number {0} at offset {1} was missing the 'FILE' header. Skipping.", recordNum, stream.DeviceOffset);
-				return null;
-			}
-
 			return new MFTRecord(recordNum, fileSystem, data, loadDepth, path);
 		}
 
@@ -137,6 +132,8 @@ namespace FileSystems.FileSystem.NTFS {
 			this.BytesPerSector = fileSystem.BytesPerSector;
 			this.SectorsPerCluster = fileSystem.SectorsPerCluster;
 			this.PartitionStream = fileSystem.Store;
+
+			Valid = true;
 
 			m_Data = data;
 			m_Path = path;
@@ -157,6 +154,14 @@ namespace FileSystems.FileSystem.NTFS {
 				m_DataLoaded = true;
 			}
 
+			string Magic = Encoding.ASCII.GetString(m_Data, 0, 4);
+			if (!Magic.Equals("FILE")) {
+				Console.Error.WriteLine("Warning: MFT record number {0} was missing the 'FILE' header. Skipping.", RecordNum);
+				// This record is invalid, so don't read any more.
+				Valid = false;
+				return;
+			}
+
 			ushort updateSequenceOffset = BitConverter.ToUInt16(m_Data, 4);
 			ushort updateSequenceLength = BitConverter.ToUInt16(m_Data, 6);
 
@@ -174,6 +179,7 @@ namespace FileSystems.FileSystem.NTFS {
 			} catch (NTFSFixupException e) {
 				Console.Error.WriteLine(e);
 				// This record is invalid, so don't read any more.
+				Valid = false;
 				return;
 			}
 
@@ -338,7 +344,7 @@ namespace FileSystems.FileSystem.NTFS {
 				if (extensionRecordNumber != RecordNum && extensionRecordNumber != MFTRecordNumber) { // TODO: Are these ever different?
 					// Load the MFT extension record, locate the attribute we want, and copy it over.
 					MFTRecord extensionRecord = MFTRecord.Load(extensionRecordNumber, this.FileSystem);
-					if (extensionRecord != null) {
+					if (extensionRecord.Valid) {
 						foreach (MFTAttribute externalAttribute in extensionRecord.Attributes) {
 							if (id == externalAttribute.Id) {
 								if (externalAttribute.NonResident && externalAttribute.Type == AttributeType.Data) {
