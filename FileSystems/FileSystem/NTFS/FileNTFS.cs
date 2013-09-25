@@ -27,7 +27,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 		public FileNTFS(MFTRecord record, string path) {
 			m_record = record;
-			if (m_record.GetAttribute(AttributeType.Data) != null) {
+			if (m_record.DataAttribute != null) {
 				m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.Data);
 			}
 			Name = record.FileName;

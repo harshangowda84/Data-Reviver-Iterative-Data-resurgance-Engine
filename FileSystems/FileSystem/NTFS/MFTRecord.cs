@@ -19,12 +19,13 @@ using KFA.DataStream;
 using KFA.Exceptions;
 using FileSystems.FileSystem;
 using System.Text;
+using System.Collections.ObjectModel;
 
 namespace FileSystems.FileSystem.NTFS {
 	public enum MFTLoadDepth {
-		Full,
-		NameAndParentOnly,
-		None
+		Full = 2,
+		NameAttributeOnly = 1,
+		None = 0
 	}
 
 	[Flags]
@@ -99,12 +100,31 @@ namespace FileSystems.FileSystem.NTFS {
 		public ulong RecordNum, StartOffset;
 		public FileSystemNTFS FileSystem;
 		public IDataStream PartitionStream;
-		public List<MFTAttribute> Attributes;
+
+		// Attributes stored on this MFT Record
+		private List<MFTAttribute> m_Attributes;
+		public IList<MFTAttribute> Attributes {
+			get { return new ReadOnlyCollection<MFTAttribute>(m_Attributes); }
+		}
+		private MFTAttribute m_DataAttribute;
+		public MFTAttribute DataAttribute {
+			get {
+				LoadData(MFTLoadDepth.Full);
+				return m_DataAttribute;
+			}
+		}
+		private List<MFTAttribute> m_NamedDataAttributes = new List<MFTAttribute>();
+		public IList<MFTAttribute> NamedDataAttributes {
+			get {
+				LoadData(MFTLoadDepth.Full);
+				return new ReadOnlyCollection<MFTAttribute>(m_NamedDataAttributes);
+			}
+		}
 
 		public bool Valid { get; private set; }
 		private FileSystemNode m_Node = null;
 		private byte[] m_Data;
-		private bool m_DataLoaded = false;
+		private MFTLoadDepth m_DataLoaded = MFTLoadDepth.None;
 		private string m_Path = "";
 
 		public static MFTRecord Load(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
@@ -146,12 +166,9 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void LoadData(MFTLoadDepth loadDepth = MFTLoadDepth.Full) {
-			if (m_DataLoaded) {
+			if (loadDepth.CompareTo(m_DataLoaded) <= 0) {
+				// If we're not loading more than we already have, just stop here.
 				return;
-			}
-			if (loadDepth == MFTLoadDepth.Full) {
-				// If we're loading everything on this pass, there's no need to load in the future.
-				m_DataLoaded = true;
 			}
 
 			string Magic = Encoding.ASCII.GetString(m_Data, 0, 4);
@@ -186,9 +203,11 @@ namespace FileSystems.FileSystem.NTFS {
 			LoadHeader();
 			LoadAttributes(AttributeOffset, loadDepth);
 
-			if (Attributes.Count == 0) {
+			if (m_Attributes.Count == 0) {
 				Console.Error.WriteLine("Warning: MFT record number {0} had no attributes.", RecordNum);
 			}
+
+			m_DataLoaded = loadDepth;
 		}
 
 		public static DateTime fromNTFS(ulong time) {
@@ -223,7 +242,7 @@ namespace FileSystems.FileSystem.NTFS {
 			if (m_Node == null) {
 				if ((Flags & RecordFlags.Directory) > 0) {
 					m_Node = new FolderNTFS(this, path);
-				} else if (HiddenDataStreamFileNTFS.GetHiddenDataStreams(this).Count > 0) {
+				} else if (m_NamedDataAttributes.Count > 0) {
 					m_Node = new HiddenDataStreamFileNTFS(this, path);
 				} else {
 					m_Node = new FileNTFS(this, path);
@@ -235,7 +254,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public MFTAttribute GetAttribute(AttributeType type) {
 			LoadData();
 			try {
-				foreach (MFTAttribute attr in Attributes) {
+				foreach (MFTAttribute attr in m_Attributes) {
 					if (attr.Type == type) {
 						return attr;
 					}
@@ -259,7 +278,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void LoadAttributes(int startOffset, MFTLoadDepth loadDepth) {
-			Attributes = new List<MFTAttribute>();
+			m_Attributes = new List<MFTAttribute>();
 			while (true) {
 				//Align to 8 byte boundary
 				if (startOffset % 8 != 0) {
@@ -272,25 +291,41 @@ namespace FileSystems.FileSystem.NTFS {
 					break;
 				}
 				int length = BitConverter.ToUInt16(m_Data, startOffset + 4);
-				if (loadDepth == MFTLoadDepth.NameAndParentOnly && type != AttributeType.FileName) {
+				if (loadDepth == MFTLoadDepth.NameAttributeOnly && type != AttributeType.FileName) {
+					// Skip this attribute if we're only loading the filename
 					startOffset += length;
 					continue;
 				}
 
 				MFTAttribute attribute = MFTAttribute.Load(m_Data, startOffset, this);
 				if (!attribute.NonResident) {
-					if ((AttributeType)attribute.Type == AttributeType.StandardInformation) {
-						LoadStandardAttribute(startOffset + attribute.ValueOffset);
-					} else if ((AttributeType)attribute.Type == AttributeType.FileName) {
-						LoadNameAttribute(startOffset + attribute.ValueOffset);
-					} else if ((AttributeType)attribute.Type == AttributeType.AttributeList) {
-						LoadExternalAttributeList(startOffset + attribute.ValueOffset, attribute);
-					} else if ((AttributeType)attribute.Type == AttributeType.VolumeLabel) {
-						LoadVolumeLabelAttribute(startOffset + attribute.ValueOffset, (int)attribute.ValueLength);
+					switch (attribute.Type) {
+						case AttributeType.StandardInformation:
+							LoadStandardAttribute(startOffset + attribute.ValueOffset);
+							break;
+						case AttributeType.FileName:
+							LoadNameAttribute(startOffset + attribute.ValueOffset);
+							break;
+						case AttributeType.AttributeList:
+							LoadExternalAttributeList(startOffset + attribute.ValueOffset, attribute);
+							break;
+						case AttributeType.VolumeLabel:
+							LoadVolumeLabelAttribute(startOffset + attribute.ValueOffset, (int)attribute.ValueLength);
+							break;
 					}
 				}
 				if (attribute.Valid) {
-					Attributes.Add(attribute);
+					if (attribute.Type == AttributeType.Data) {
+						if (attribute.Name == null) {
+							if (m_DataAttribute != null) {
+								Console.Error.WriteLine("Warning: multiple unnamed data streams found on MFT record {0}.", RecordNum);
+							}
+							m_DataAttribute = attribute;
+						} else {
+							m_NamedDataAttributes.Add(attribute);
+						}
+					}
+					m_Attributes.Add(attribute);
 				}
 
 				startOffset += (int)attribute.Length;
@@ -345,12 +380,12 @@ namespace FileSystems.FileSystem.NTFS {
 					// Load the MFT extension record, locate the attribute we want, and copy it over.
 					MFTRecord extensionRecord = MFTRecord.Load(extensionRecordNumber, this.FileSystem);
 					if (extensionRecord.Valid) {
-						foreach (MFTAttribute externalAttribute in extensionRecord.Attributes) {
+						foreach (MFTAttribute externalAttribute in extensionRecord.m_Attributes) {
 							if (id == externalAttribute.Id) {
 								if (externalAttribute.NonResident && externalAttribute.Type == AttributeType.Data) {
 									// Find the corresponding data attribute on this record and merge the runlists
 									bool merged = false;
-									foreach (MFTAttribute attribute in Attributes) {
+									foreach (MFTAttribute attribute in m_Attributes) {
 										if (attribute.Type == AttributeType.Data && externalAttribute.Name == attribute.Name) {
 											MergeRunLists(ref attribute.Runs, externalAttribute.Runs);
 											merged = true;
@@ -358,10 +393,10 @@ namespace FileSystems.FileSystem.NTFS {
 										}
 									}
 									if (!merged) {
-										this.Attributes.Add(externalAttribute);
+										this.m_Attributes.Add(externalAttribute);
 									}
 								} else {
-									this.Attributes.Add(externalAttribute);
+									this.m_Attributes.Add(externalAttribute);
 								}
 							}
 						}
@@ -382,7 +417,7 @@ namespace FileSystems.FileSystem.NTFS {
 		public string Name {
 			get {
 				if (string.IsNullOrEmpty(FileName)) {
-					LoadData(MFTLoadDepth.NameAndParentOnly);
+					LoadData(MFTLoadDepth.NameAttributeOnly);
 				}
 				return FileName;
 			}

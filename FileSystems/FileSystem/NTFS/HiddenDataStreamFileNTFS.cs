@@ -29,7 +29,7 @@ namespace FileSystems.FileSystem.NTFS {
 			Path = path + Name + "/";
 			children = new List<FileSystemNode>();
 			children.Add(new FileNTFS(m_record, Path));
-			foreach (MFTAttribute attr in GetHiddenDataStreams(m_record)) {
+			foreach (MFTAttribute attr in m_record.NamedDataAttributes) {
 				children.Add(new FileNTFS(m_record, attr, Path));
 			}
 		}
@@ -44,18 +44,8 @@ namespace FileSystems.FileSystem.NTFS {
 			get { return (long)m_record.MFTRecordNumber; }
 		}
 
-		public List<MFTAttribute> GetHiddenDataStreams() {
-			return GetHiddenDataStreams(m_record);
-		}
-
-		public static List<MFTAttribute> GetHiddenDataStreams(MFTRecord record) {
-			List<MFTAttribute> result = new List<MFTAttribute>();
-			foreach (MFTAttribute attr in record.Attributes) {
-				if (attr.Type == AttributeType.Data && attr.Name != null) {
-					result.Add(attr);
-				}
-			}
-			return result;
+		public IList<MFTAttribute> GetHiddenDataStreams() {
+			return m_record.NamedDataAttributes;
 		}
 
 

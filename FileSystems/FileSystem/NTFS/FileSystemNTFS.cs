@@ -199,7 +199,7 @@ namespace FileSystems.FileSystem.NTFS {
 			ulong numFiles = m_MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
 
 			for (ulong i = 0; i < numFiles; i++) {
-				MFTRecord record = MFTRecord.Load(i, this, MFTLoadDepth.NameAndParentOnly);
+				MFTRecord record = MFTRecord.Load(i, this, MFTLoadDepth.NameAttributeOnly);
 
 				if (record.Valid) {
 					if (!callback(record, i, numFiles)) {
