@@ -28,7 +28,7 @@ namespace FileSystems.FileSystem.NTFS {
 		FileName = 0x30,
 		ObjectId = 0x40,
 		SecurityDescriptor = 0x50,
-		VolumeName = 0x60,
+		VolumeLabel = 0x60,
 		VolumeInformation = 0x70,
 		Data = 0x80,
 		IndexRoot = 0x90,

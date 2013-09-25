@@ -271,27 +271,27 @@ namespace FileSystems.FileSystem.NTFS {
 					continue;
 				}
 
-				MFTAttribute attr = MFTAttribute.Load(m_Data, startOffset, this);
-				if (!attr.NonResident) {
-					if ((AttributeType)attr.Type == AttributeType.StandardInformation) {
-						LoadStandardAttributes(startOffset + attr.ValueOffset);
-					} else if ((AttributeType)attr.Type == AttributeType.FileName) {
-						LoadNameAttributes(startOffset + attr.ValueOffset);
-					} else if ((AttributeType)attr.Type == AttributeType.AttributeList) {
-						LoadExternalAttributeList(startOffset + attr.ValueOffset, attr);
-					} else if ((AttributeType)attr.Type == AttributeType.VolumeName) {
-						LoadVolumeNameAttributes(startOffset + attr.ValueOffset, (int)attr.ValueLength);
+				MFTAttribute attribute = MFTAttribute.Load(m_Data, startOffset, this);
+				if (!attribute.NonResident) {
+					if ((AttributeType)attribute.Type == AttributeType.StandardInformation) {
+						LoadStandardAttribute(startOffset + attribute.ValueOffset);
+					} else if ((AttributeType)attribute.Type == AttributeType.FileName) {
+						LoadNameAttribute(startOffset + attribute.ValueOffset);
+					} else if ((AttributeType)attribute.Type == AttributeType.AttributeList) {
+						LoadExternalAttributeList(startOffset + attribute.ValueOffset, attribute);
+					} else if ((AttributeType)attribute.Type == AttributeType.VolumeLabel) {
+						LoadVolumeLabelAttribute(startOffset + attribute.ValueOffset, (int)attribute.ValueLength);
 					}
 				}
-				if (attr.Valid) {
-					Attributes.Add(attr);
+				if (attribute.Valid) {
+					Attributes.Add(attribute);
 				}
 
-				startOffset += (int)attr.Length;
+				startOffset += (int)attribute.Length;
 			}
 		}
 
-		private void LoadStandardAttributes(int startOffset) {
+		private void LoadStandardAttribute(int startOffset) {
 			CreationTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset));
 			LastDataChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 8));
 			LastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
@@ -299,7 +299,7 @@ namespace FileSystems.FileSystem.NTFS {
 			FilePermissions = (FilePermissions)BitConverter.ToInt32(m_Data, startOffset + 32);
 		}
 
-		private void LoadNameAttributes(int startOffset) {
+		private void LoadNameAttribute(int startOffset) {
 			// Read in the bytes, then parse them.
 			ParentDirectory = BitConverter.ToUInt64(m_Data, startOffset) & 0xFFFFFF;
 			AllocatedSize = BitConverter.ToUInt64(m_Data, startOffset + 40);
@@ -311,7 +311,7 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private void LoadVolumeNameAttributes(int startOffset, int length) {
+		private void LoadVolumeLabelAttribute(int startOffset, int length) {
 			VolumeLabel = Encoding.Unicode.GetString(m_Data, startOffset, length);
 		}
 
@@ -323,49 +323,46 @@ namespace FileSystems.FileSystem.NTFS {
 					offset = (offset / 8 + 1) * 8;
 				}
 
-				//0xFF... marks end of attributes;
-				if (offset == attrList.ValueLength || BitConverter.ToUInt32(m_Data, offset + startOffset) == 0xFFFFFFFF) {
+				// Load the header for this external attribute reference.
+				AttributeType type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
+				// 0xFFFFFFFF marks end of attributes.
+				if (offset == attrList.ValueLength || type == AttributeType.End) {
 					break;
 				}
-
-				MFTAttribute attr = new MFTAttribute();
-				attr.Type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
-				attr.Length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
-				attr.NameLength = m_Data[offset + startOffset + 0x6];
-				attr.Id = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x18);
-
+				ushort length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
+				byte nameLength = m_Data[offset + startOffset + 0x6];
+				ushort id = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x18);
 				ulong vcn = BitConverter.ToUInt64(m_Data, offset + startOffset + 0x8);
-				ulong fileRef = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
-				if (fileRef != this.MFTRecordNumber && fileRef != RecordNum) {
-					MFTRecord mftRec = MFTRecord.Load(fileRef, this.FileSystem);
-					foreach (MFTAttribute attr2 in mftRec.Attributes) {
-						if (attr.Id == attr2.Id) {
-							if (attr2.NonResident && attr2.Type == AttributeType.Data) {
-								// Find the corresponding data attribute on this record and merge the runlists
-								bool merged = false;
-								foreach (MFTAttribute rec in Attributes) {
-									if (rec.Type == AttributeType.Data && attr2.Name == rec.Name) {
-										MergeRunLists(ref rec.Runs, attr2.Runs);
-										merged = true;
-										break;
+				ulong extensionRecordNumber = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
+
+				if (extensionRecordNumber != RecordNum && extensionRecordNumber != MFTRecordNumber) { // TODO: Are these ever different?
+					// Load the MFT extension record, locate the attribute we want, and copy it over.
+					MFTRecord extensionRecord = MFTRecord.Load(extensionRecordNumber, this.FileSystem);
+					if (extensionRecord != null) {
+						foreach (MFTAttribute externalAttribute in extensionRecord.Attributes) {
+							if (id == externalAttribute.Id) {
+								if (externalAttribute.NonResident && externalAttribute.Type == AttributeType.Data) {
+									// Find the corresponding data attribute on this record and merge the runlists
+									bool merged = false;
+									foreach (MFTAttribute attribute in Attributes) {
+										if (attribute.Type == AttributeType.Data && externalAttribute.Name == attribute.Name) {
+											MergeRunLists(ref attribute.Runs, externalAttribute.Runs);
+											merged = true;
+											break;
+										}
 									}
+									if (!merged) {
+										this.Attributes.Add(externalAttribute);
+									}
+								} else {
+									this.Attributes.Add(externalAttribute);
 								}
-								if (!merged) {
-									this.Attributes.Add(attr2);
-								}
-							} else {
-								this.Attributes.Add(attr2);
 							}
 						}
 					}
 				}
-				if (attr.NameLength > 0) {
-					attr.Name = Encoding.Unicode.GetString(m_Data, 0x1A, (attr.NameLength * 2));
-				}
 
-				ulong startByte = vcn * (ulong)FileSystem.BytesPerCluster;
-				attr.ResidentData = new SubStream(attrList.ResidentData, startByte, startByte + attr.Length);
-				offset += 0x1A + (attr.NameLength * 2);
+				offset += 0x1A + (nameLength * 2);
 			}
 		}
 
