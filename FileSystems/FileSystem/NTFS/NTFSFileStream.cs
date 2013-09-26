@@ -19,8 +19,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// An NTFS data stream comprising multiple data runs.
+	/// </summary>
 	class NTFSFileStream : IDataStream {
-
 		private IDataStream m_partitionStream, m_residentStream;
 		private ulong m_length;
 		private MFTRecord m_record;

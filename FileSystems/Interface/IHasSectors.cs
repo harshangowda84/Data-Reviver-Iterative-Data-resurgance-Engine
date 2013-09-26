@@ -28,6 +28,9 @@ namespace KFS.Disks {
 		UnknownFilesystem
 	};
 
+	/// <summary>
+	/// A data source made out of sectors.
+	/// </summary>
 	public interface IHasSectors : IDataStream {
 		ulong GetSectorSize();
 		SectorStatus GetSectorStatus(ulong sectorNum);

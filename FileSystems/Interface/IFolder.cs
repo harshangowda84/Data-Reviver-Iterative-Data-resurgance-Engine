@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// An interface representing a folder (directory).
+	/// </summary>
 	public interface IFolder : IFileSystemNode {
 	}
 }

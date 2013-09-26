@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// Allows a file on the host system to be treated as an IFile.
+	/// </summary>
 	public class FileFromHostSystem : FileDataStream, IFile {
 		private FileInfo _info;
 

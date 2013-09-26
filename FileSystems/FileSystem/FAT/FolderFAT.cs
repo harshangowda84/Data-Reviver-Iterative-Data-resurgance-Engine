@@ -21,6 +21,10 @@ using System.Diagnostics;
 using System.Text;
 
 namespace KFS.FileSystems.FAT {
+	/// <summary>
+	/// Attribute flags for a FAT directory.
+	/// </summary>
+	[Flags]
 	public enum FATDirectoryAttributes : byte {
 		ATTR_READ_ONLY = 0x01,
 		ATTR_HIDDEN = 0x02,
@@ -30,6 +34,9 @@ namespace KFS.FileSystems.FAT {
 		ATTR_ARCHIVE = 0x20,
 		ATTR_LONG_NAME = 0x0F
 	}
+	/// <summary>
+	/// A folder (directory) node in the FAT filesystem.
+	/// </summary>
 	public class FolderFAT : Folder, IDescribable {
 		public long Offset { get; protected set; }
 		private const int DIR_ENTRY_SIZE = 32;

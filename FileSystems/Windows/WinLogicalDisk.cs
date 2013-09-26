@@ -20,6 +20,9 @@ using System.Management;
 using System.Runtime.InteropServices;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// A logical disk on a Windows host system.
+	/// </summary>
 	public class WinLogicalDisk : WinDisk, ILogicalDisk {
 		public LogicalDiskAttributes Attributes { get; private set; }
 

@@ -19,13 +19,15 @@ using System;
 using System.IO;
 
 namespace KFS.Disks {
-
+	/// <summary>
+	/// A logical disk attached to a Linux host system.
+	/// </summary>
 	public class LinLogicalDisk : LinDisk, ILogicalDisk, IFileSystemStore, IDescribable {
 		public LinLogicalDiskAttributes Attributes { get; private set; }
 
 		private readonly string _devName;
 		private readonly ulong _size;
-		private readonly FileSystem _fileSystem;
+		private readonly IFileSystem _fileSystem;
 
 		public LinLogicalDisk(string dev) {
 			_devName = dev;

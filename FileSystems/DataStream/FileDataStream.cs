@@ -17,6 +17,9 @@ using System;
 using System.IO;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// A data stream wrapper for a file on the host system, such as a disk image.
+	/// </summary>
 	public class FileDataStream : IDataStream {
 		private FileStream fs = null;
 		private string path;

@@ -19,6 +19,9 @@ using System.Linq;
 using System.Text;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// A data stream wrapper for an array of bytes.
+	/// </summary>
 	public class ArrayBackedStream : IDataStream {
 		private uint m_Offset;
 		private uint m_Length;

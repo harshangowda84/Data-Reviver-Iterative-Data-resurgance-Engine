@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.Disks {
+	/// <summary>
+	/// A logical disk.
+	/// </summary>
 	public interface ILogicalDisk : IFileSystemStore, IDescribable {
 	}
 }

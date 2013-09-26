@@ -16,8 +16,10 @@
 using System;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// A data stream representing a single disk sector.
+	/// </summary>
 	public class SectorStream : SubStream {
-
 		private ulong m_sectorNum;
 
 		public SectorStream(IDataStream stream, ulong start, ulong length, ulong sectorNum) :

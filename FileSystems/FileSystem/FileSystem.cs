@@ -27,10 +27,14 @@ namespace KFS.FileSystems {
 		PartiallyRecoverable = 3,
 		Overwritten = 4
 	}
+	/// <summary>
+	/// The abstract FileSystem class. Call FileSystem.TryLoad() to load a
+	/// filesystem from an IFileSystemStore.
+	/// </summary>
 	public abstract class FileSystem : IFileSystem {
 		public delegate bool NodeVisitCallback(INodeMetadata node, ulong current, ulong total);
 
-		public static FileSystem TryLoad(IFileSystemStore store) {
+		public static IFileSystem TryLoad(IFileSystemStore store) {
 			if (store == null || store.StreamLength == 0) return null;
 			switch (store.StorageType) {
 				case StorageType.PhysicalDiskPartition: {

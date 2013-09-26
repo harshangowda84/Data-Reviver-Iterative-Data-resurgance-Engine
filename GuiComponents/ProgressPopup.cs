@@ -28,14 +28,13 @@ namespace GuiComponents {
 	/// </summary>
 	public partial class ProgressPopup : Form {
 		IProgressable m_Model;
+		private ProgressPopup() {
+			InitializeComponent();
+		}
 
 		/// <summary>
 		/// Constructs the popup window.
 		/// </summary>
-		public ProgressPopup() {
-			InitializeComponent();
-		}
-
 		public ProgressPopup(IProgressable model)
 			: this() {
 			m_Model = model;

@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// A strategy for searching through the files of a filesystem.
+	/// </summary>
 	public interface ISearchStrategy {
 		string Name { get; set; }
 		void Search(FileSystem.NodeVisitCallback callback);

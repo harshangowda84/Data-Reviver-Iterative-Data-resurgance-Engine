@@ -17,6 +17,9 @@ using System;
 using System.IO;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Used when reading a disk from a Linux host system.
+	/// </summary>
 	public abstract class LinDisk : Disk {
 		protected FileStream Handle { get; set; }
 

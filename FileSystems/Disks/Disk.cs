@@ -17,6 +17,9 @@ using KFS.DataStream;
 using System;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Represents a disk. Caches the most recent block read.
+	/// </summary>
 	public abstract class Disk : IDataStream {
 		#region IDataStream Members
 

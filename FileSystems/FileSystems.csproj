@@ -104,7 +104,7 @@
     <Compile Include="FileSystem\FAT\FileSystemFAT.cs" />
     <Compile Include="FileSystem\FAT\FolderFAT.cs" />
     <Compile Include="FileSystem\File.cs" />
-    <Compile Include="FileSystem\FileAttributes.cs" />
+    <Compile Include="FileSystem\FAT\FileAttributesFAT.cs" />
     <Compile Include="FileSystem\FileFromHostSystem.cs" />
     <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="FileSystem\FileSystemNode.cs" />

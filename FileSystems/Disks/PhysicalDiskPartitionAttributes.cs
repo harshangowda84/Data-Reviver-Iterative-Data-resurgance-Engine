@@ -20,7 +20,9 @@ using System.Text;
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
-
+	/// <summary>
+	/// Attributes of a physical disk partition. Windows only.
+	/// </summary>
 	public class PhysicalDiskPartitionAttributes : Attributes, IDescribable {
 		public PartitionType PartitionType { get; set; }
 		public Access Access { get; set; }

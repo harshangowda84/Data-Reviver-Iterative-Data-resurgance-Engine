@@ -19,6 +19,9 @@ using System.Text;
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Attributes of a physical disk. Windows only.
+	/// </summary>
 	public class PhysicalDiskAttributes : Attributes, IDescribable {
 		public Availability Availability { get; set; }
 		public uint BytesPerSector { get; set; }

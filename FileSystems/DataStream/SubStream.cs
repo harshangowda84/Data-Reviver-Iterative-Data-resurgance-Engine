@@ -16,8 +16,10 @@
 using System;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// A data stream that allows access to a subset of another stream.
+	/// </summary>
 	public class SubStream : IDataStream {
-
 		private IDataStream m_stream;
 		private ulong m_start, m_length;
 

@@ -19,6 +19,9 @@ using System.Text;
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Types of logical drives.
+	/// </summary>
 	public enum DriveType : uint {
 		Unknown = 0,
 		NoRootDirectory = 1,
@@ -28,6 +31,9 @@ namespace KFS.Disks {
 		CompactDisc = 5,
 		RAMDisk = 6
 	}
+	/// <summary>
+	/// The attributes of a logical disk. Windows only.
+	/// </summary>
 	public class LogicalDiskAttributes : Attributes {
 		public Access Access { get; set; }
 		public Availability Availability { get; set; }

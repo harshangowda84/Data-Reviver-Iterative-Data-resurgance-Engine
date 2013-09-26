@@ -24,6 +24,9 @@ using Mono.Unix;
 using KFS.Disks;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// Deals with loading disks on a Linux host system.
+	/// </summary>
 	public class LinDiskLoader : DiskLoader {
 		protected override List<Disk> LoadDisksInternal() {
 			throw new NotImplementedException();

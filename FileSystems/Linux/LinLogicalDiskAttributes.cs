@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Attributes of a Linux logical disk.
+	/// </summary>
 	public class LinLogicalDiskAttributes : LogicalDiskAttributes, IDescribable {
 		public LinLogicalDiskAttributes() { }
 		public LinLogicalDiskAttributes(LinLogicalDisk disk) {

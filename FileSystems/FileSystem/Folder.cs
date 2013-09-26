@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// A folder (directory) node of the filesystem tree.
+	/// </summary>
 	public abstract class Folder : FileSystemNode, IFolder {
 		public override string ToString() {
 			return Name;

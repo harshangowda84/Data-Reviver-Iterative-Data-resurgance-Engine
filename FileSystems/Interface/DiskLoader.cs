@@ -18,7 +18,9 @@ using System;
 using System.Collections.Generic;
 
 namespace KFS.FileSystems {
-
+	/// <summary>
+	/// Provides access to the user's currently mounted disks.
+	/// </summary>
 	public abstract class DiskLoader {
 		public static DiskLoader GetNativeLoader() {
 			if (IsWindows()) {

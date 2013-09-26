@@ -16,8 +16,14 @@
 using KFS.DataStream;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// An NTFS data run that contains only zeroes. Stored on disk as metadata
+	/// only (i.e. the zeroes are not actually stored) in order to save space.
+	/// </summary>
 	public class SparseRun : IRun {
 		public SparseRun(ulong vcn, ulong lengthInClusters, MFTRecord record) {
+			VCN = vcn;
+			LengthInClusters = lengthInClusters;
 			ulong clusterSize = (ulong)record.BytesPerSector * (ulong)record.SectorsPerCluster;
 			StreamLength = lengthInClusters * clusterSize;
 		}
@@ -47,6 +53,14 @@ namespace KFS.FileSystems.NTFS {
 		public bool HasRealClusters {
 			get { return false; }
 		}
+
+		public ulong VCN { get; private set; }
+
+		public ulong LCN {
+			get { return 0; }
+		}
+
+		public ulong LengthInClusters { get; private set; }
 
 		public override string ToString() {
 			return "Sparse " + base.ToString();

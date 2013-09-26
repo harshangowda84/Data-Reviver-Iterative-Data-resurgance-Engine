@@ -22,6 +22,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// Utility functions for reading data streams.
+	/// </summary>
 	public static class Util {
 		public static string FileSizeToHumanReadableString(ulong count) {
 			double val = count;

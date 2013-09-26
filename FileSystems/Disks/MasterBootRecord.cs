@@ -18,10 +18,16 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Whether a partition is active or inactive.
+	/// </summary>
 	public enum PartitionState {
 		Inactive = 0x00,
 		Active = 0x80
 	}
+	/// <summary>
+	/// The type of filesystem contained on a partition.
+	/// </summary>
 	public enum PartitionType : byte {
 		Unknown = 0x00,
 		FAT12 = 0x01,
@@ -40,6 +46,9 @@ namespace KFS.Disks {
 		FAT16LBAMapped = 0x0E,
 		Win95ExtendedWithLBA = 0x0F
 	}
+	/// <summary>
+	/// The master boot record of a physical disk.
+	/// </summary>
 	public class MasterBootRecord : PhysicalDiskSection {
 		public const int MBR_SIZE = 0x200;
 		public const uint MAX_PARTITIONS = 4;

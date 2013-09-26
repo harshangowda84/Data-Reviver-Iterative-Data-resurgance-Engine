@@ -20,6 +20,9 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// A file node in the NTFS filesystem.
+	/// </summary>
 	public class FileNTFS : File, IDescribable {
 
 		private MFTRecord m_record;

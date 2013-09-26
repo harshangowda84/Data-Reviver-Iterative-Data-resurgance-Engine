@@ -17,6 +17,10 @@ using KFS.DataStream;
 using System;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// A standard run of data on an NTFS filesystem. Represents a contiguous
+	/// block of data stored on disk.
+	/// </summary>
 	public class NTFSDataRun : IRun {
 		private ulong m_vcn, m_lcn, m_bytesPerCluster, m_lengthInBytes;
 		private MFTRecord m_record;
@@ -36,7 +40,7 @@ namespace KFS.FileSystems.NTFS {
 			return vcn >= VCN && vcn < VCN + LengthInClusters;
 		}
 
-		public virtual bool HasRealClusters {
+		public bool HasRealClusters {
 			get { return true; }
 		}
 

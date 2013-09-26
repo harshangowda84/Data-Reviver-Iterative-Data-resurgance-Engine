@@ -19,6 +19,9 @@ using System.Linq;
 using System.Text;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// An adapter that allows an IDataStream to be treated as a System.IO.Stream.
+	/// </summary>
 	public class ForensicsAppStream : System.IO.Stream {
 		IDataStream m_Stream = null;
 		ulong m_Position = 0;

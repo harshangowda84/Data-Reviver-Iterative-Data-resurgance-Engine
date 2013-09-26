@@ -20,6 +20,9 @@ using KFS.DataStream;
 #endif
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// A file node.
+	/// </summary>
 	public abstract class File : FileSystemNode, IFile {
 #if !KFS_LEAN_AND_MEAN
 		private bool m_IsZip = false;

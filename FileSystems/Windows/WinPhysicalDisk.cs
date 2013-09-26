@@ -21,6 +21,9 @@ using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// A physical disk attached to a Windows host system.
+	/// </summary>
 	public class WinPhysicalDisk : WinDisk, IPhysicalDisk, IImageable, IDescribable {
 		public PhysicalDiskAttributes Attributes { get; private set; }
 

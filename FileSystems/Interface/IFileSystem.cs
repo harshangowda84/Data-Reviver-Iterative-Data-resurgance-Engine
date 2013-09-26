@@ -16,7 +16,9 @@
 using KFS.Disks;
 
 namespace KFS.FileSystems {
-
+	/// <summary>
+	/// An interface representing a loaded filesystem.
+	/// </summary>
 	public interface IFileSystem {
 		FileSystemNode GetRoot();
 

@@ -16,6 +16,10 @@
 using KFS.DataStream;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// A stream that applies NTFS fixups to a given data stream. The data
+	/// used should be an MFT FILE or INDX record.
+	/// </summary>
 	public class FixupStream : SubStream {
 		// Static method that just works on an array.
 		// TODO: Make this work with non-sector-aligned, or non-whole-number-of-sectors

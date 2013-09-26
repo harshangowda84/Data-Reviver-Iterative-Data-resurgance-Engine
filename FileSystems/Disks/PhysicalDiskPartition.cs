@@ -21,7 +21,7 @@ using System.Text;
 namespace KFS.Disks {
 	public class PhysicalDiskPartition : PhysicalDiskSection, IFileSystemStore {
 		public PhysicalDiskPartitionAttributes Attributes { get; private set; }
-		private FileSystem m_fileSystem;
+		private IFileSystem m_fileSystem;
 
 		public PhysicalDiskPartition(WinPhysicalDisk disk, MasterBootRecord.PartitionEntry pEntry) {
 			PhysicalDisk = disk;

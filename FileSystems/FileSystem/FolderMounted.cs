@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// Allows a folder on the host system to be treated as an IFolder.
+	/// </summary>
 	public class FolderMounted : Folder {
 		private string m_Path;
 		private IDataStream m_Parent;

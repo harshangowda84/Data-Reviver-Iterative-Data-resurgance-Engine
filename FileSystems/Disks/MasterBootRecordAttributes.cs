@@ -16,6 +16,9 @@
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Attributes of the master boot record.
+	/// </summary>
 	public class MasterBootRecordAttributes : Attributes, IDescribable {
 		public MasterBootRecordAttributes() { }
 

@@ -387,6 +387,9 @@ namespace KFS.Disks {
 		End = 2
 	}
 
+	/// <summary>
+	/// A wrapper for native Win32 methods.
+	/// </summary>
 	public static class Win32 {
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern SafeFileHandle CreateFile(

@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// An interface representing a file.
+	/// </summary>
 	public interface IFile : IFileSystemNode {
 	}
 }

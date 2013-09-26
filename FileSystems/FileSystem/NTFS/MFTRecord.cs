@@ -21,6 +21,9 @@ using System.Collections.ObjectModel;
 using System.Text;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// Tells an MFT record whether to load all, none, or some of its attributes.
+	/// </summary>
 	public enum MFTLoadDepth {
 		Full = 2,
 		NameAttributeOnly = 1,
@@ -38,7 +41,6 @@ namespace KFS.FileSystems.NTFS {
 	public enum RecordFlags {
 		InUse = 1,
 		Directory = 2,
-		Is4 = 4, //?
 		ViewIndex = 8,
 		SpaceFiller = 16
 	}
@@ -60,6 +62,9 @@ namespace KFS.FileSystems.NTFS {
 		Encrypted = 0x4000
 	}
 
+	/// <summary>
+	/// A record in the NTFS Master File Table. Stores metadata about a single file.
+	/// </summary>
 	public class MFTRecord : INodeMetadata {
 
 		#region Header Fields

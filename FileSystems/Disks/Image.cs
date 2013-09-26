@@ -20,6 +20,10 @@ using System.IO;
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Represents a disk image stored in a file, allowing the filesystem to be
+	/// loaded as if it were a physical disk.
+	/// </summary>
 	public class Image : IFileSystemStore, IDescribable, IHasSectors {
 		public delegate void ImageCallback(ulong x, ulong total);
 
@@ -37,7 +41,7 @@ namespace KFS.Disks {
 			}
 		}
 
-		private FileSystem m_fileSystem;
+		private IFileSystem m_fileSystem;
 		[XmlIgnore]
 		public IFileSystem FS {
 			get { return m_fileSystem; }

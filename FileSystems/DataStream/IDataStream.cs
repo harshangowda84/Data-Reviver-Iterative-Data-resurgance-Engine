@@ -16,6 +16,9 @@
 using System;
 
 namespace KFS.DataStream {
+	/// <summary>
+	/// An interface for interacting with streams of data.
+	/// </summary>
 	public interface IDataStream {
 		byte GetByte(ulong offset);
 		byte[] GetBytes(ulong offset, ulong length);

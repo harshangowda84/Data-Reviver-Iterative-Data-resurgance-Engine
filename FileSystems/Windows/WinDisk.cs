@@ -17,6 +17,10 @@ using Microsoft.Win32.SafeHandles;
 using System;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Represents a disk, and uses the Win32 API to read bytes from it.
+	/// Can only be used when running on Windows.
+	/// </summary>
 	public abstract class WinDisk : Disk {
 		protected SafeFileHandle Handle { get; set; }
 

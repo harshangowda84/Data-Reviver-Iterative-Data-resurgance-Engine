@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// An abstract node of the filesystem tree.
+	/// </summary>
 	public abstract class FileSystemNode : IFileSystemNode {
 		public abstract long Identifier { get; }
 		public abstract FSNodeType Type { get; }

@@ -16,6 +16,9 @@
 using KFS.DataStream;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// A physical disk.
+	/// </summary>
 	public interface IPhysicalDisk : IDataStream {
 		PhysicalDiskAttributes Attributes { get; }
 	}

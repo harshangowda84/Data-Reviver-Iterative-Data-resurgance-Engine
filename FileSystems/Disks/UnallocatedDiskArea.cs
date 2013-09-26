@@ -16,6 +16,9 @@
 using System.Text;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// An unallocated section of the disk (also known as slack space).
+	/// </summary>
 	public class UnallocatedDiskArea : PhysicalDiskSection {
 		public UnallocatedDiskArea(IPhysicalDisk disk, ulong offset, ulong len) {
 			PhysicalDisk = disk;

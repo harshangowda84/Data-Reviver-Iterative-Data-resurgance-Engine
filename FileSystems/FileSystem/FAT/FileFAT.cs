@@ -19,6 +19,9 @@ using System;
 using System.Collections.Generic;
 
 namespace KFS.FileSystems.FAT {
+	/// <summary>
+	/// A file node in the FAT filesystem.
+	/// </summary>
 	public class FileFAT : File, IDescribable {
 		private long _length;
 

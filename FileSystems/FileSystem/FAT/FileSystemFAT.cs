@@ -20,7 +20,7 @@ using System.Text;
 
 namespace KFS.FileSystems.FAT {
 	/// <summary>
-	/// A FAT filesystem. Only deals with FAT16 for now.
+	/// A FAT16 or FAT32 filesystem.
 	/// </summary>
 	public class FileSystemFAT : FileSystem {
 		private const int BPB_SIZE = 128;

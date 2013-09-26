@@ -17,12 +17,19 @@ using KFS.DataStream;
 using KFS.FileSystems;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Determines what type of data source an IFileSystemStore is.
+	/// </summary>
 	public enum StorageType {
 		PhysicalDiskRange = 0,
 		PhysicalDisk = 1,
 		PhysicalDiskPartition = 2,
 		LogicalVolume = 3
 	}
+	/// <summary>
+	/// An IFileSystemStore represents a data source, such as a logical drive
+	/// or disk partition, that contains a filesystem.
+	/// </summary>
 	public interface IFileSystemStore : IDataStream {
 		StorageType StorageType { get; }
 		Attributes Attributes { get; }

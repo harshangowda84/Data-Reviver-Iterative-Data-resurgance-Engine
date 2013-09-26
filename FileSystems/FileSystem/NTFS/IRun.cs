@@ -16,7 +16,13 @@
 using KFS.DataStream;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// An contiguous block of on-disk data. Used in NTFS.
+	/// </summary>
 	public interface IRun : IDataStream {
-
+		ulong VCN { get; }
+		ulong LCN { get; }
+		ulong LengthInClusters { get; }
+		bool HasRealClusters { get; }
 	}
 }

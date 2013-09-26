@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace KFS.Disks {
+	/// <summary>
+	/// An interface that means something has a displayable text description.
+	/// </summary>
 	public interface IDescribable {
 		string TextDescription { get; }
 	}

@@ -84,6 +84,9 @@ namespace KFS.Disks {
 	}
 	#endregion
 
+	/// <summary>
+	/// Describes the attributes of a disk or disk section. Windows only.
+	/// </summary>
 	[XmlInclude(typeof(MasterBootRecordAttributes))]
 	[XmlInclude(typeof(PhysicalDiskAttributes))]
 	[XmlInclude(typeof(PhysicalDiskPartitionAttributes))]

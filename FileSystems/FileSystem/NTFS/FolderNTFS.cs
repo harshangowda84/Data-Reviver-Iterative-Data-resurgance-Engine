@@ -20,6 +20,9 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// A folder (directory) node in the NTFS filesystem.
+	/// </summary>
 	public class FolderNTFS : Folder, IDescribable {
 		private class IndexBuffer {
 			List<IndexEntry> entries = null;

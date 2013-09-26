@@ -19,6 +19,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// Encapsulates an NTFS filesystem.
+	/// </summary>
 	public class FileSystemNTFS : FileSystem {
 		private const int BPB_SIZE = 84;
 		ushort BPB_BytsPerSec;
@@ -116,7 +119,7 @@ namespace KFS.FileSystems.NTFS {
 					ulong totalClusters = 0;
 					ulong usedClusters = 0;
 					// Check the status of each cluster in the runs.
-					foreach (NTFSDataRun run in runs) {
+					foreach (IRun run in runs) {
 						if (run.HasRealClusters) {
 							totalClusters += run.LengthInClusters;
 							for (ulong i = run.LCN; i < run.LengthInClusters; i++) {

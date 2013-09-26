@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// The different types of MFT attributes.
+	/// </summary>
 	public enum AttributeType : uint {
 		Unused = 0,
 		StandardInformation = 0x10,
@@ -41,6 +44,11 @@ namespace KFS.FileSystems.NTFS {
 		End = 0xFFFFFFFF
 	}
 
+	/// <summary>
+	/// An attribute of an MFT record. The data of an attribute can be resident
+	/// (stored within the record itself) or non-resident (stored in runs
+	/// elsewhere on the volume).
+	/// </summary>
 	public class MFTAttribute {
 		public AttributeType Type;
 		public UInt32 Length;

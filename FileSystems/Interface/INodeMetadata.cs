@@ -16,6 +16,9 @@
 using System;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// A metadata record for a filesystem node.
+	/// </summary>
 	public interface INodeMetadata {
 		string Name { get; }
 		ulong Size { get; }

@@ -16,8 +16,10 @@
 using System.Xml.Serialization;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Attributes of an unallocated disk area.
+	/// </summary>
 	public class UnallocatedDiskAreaAttributes : Attributes, IDescribable {
-
 		public UnallocatedDiskAreaAttributes() { }
 
 		[XmlIgnore]

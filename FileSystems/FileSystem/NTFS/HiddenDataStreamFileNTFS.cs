@@ -18,6 +18,9 @@ using System;
 using System.Collections.Generic;
 
 namespace KFS.FileSystems.NTFS {
+	/// <summary>
+	/// An NTFS file that contains alternate (named) data streams.
+	/// </summary>
 	public class HiddenDataStreamFileNTFS : Folder {
 		private List<IFileSystemNode> children;
 		private MFTRecord m_record;

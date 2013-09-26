@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.Management;
 
 namespace KFS.FileSystems {
+	/// <summary>
+	/// Deals with loading disks on a Windows host system.
+	/// </summary>
 	public class WinDiskLoader : DiskLoader {
 		protected override List<Disk> LoadDisksInternal() {
 			List<Disk> res = new List<Disk>();

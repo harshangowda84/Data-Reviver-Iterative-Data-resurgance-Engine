@@ -17,6 +17,9 @@ using KFS.DataStream;
 using System;
 
 namespace KFS.Disks {
+	/// <summary>
+	/// Part of a physical disk.
+	/// </summary>
 	public abstract class PhysicalDiskSection : IImageable, IDescribable {
 		public IPhysicalDisk PhysicalDisk { get; protected set; }
 		public ulong Offset { get; protected set; }

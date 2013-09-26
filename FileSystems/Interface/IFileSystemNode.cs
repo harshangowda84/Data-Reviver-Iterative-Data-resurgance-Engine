@@ -17,7 +17,9 @@ using KFS.DataStream;
 using System.Collections.Generic;
 
 namespace KFS.FileSystems {
-
+	/// <summary>
+	/// An interface representing a node in the filesystem.
+	/// </summary>
 	public interface IFileSystemNode : INodeMetadata, IDataStream {
 		IFile AsFile();
 		IFolder AsFolder();
