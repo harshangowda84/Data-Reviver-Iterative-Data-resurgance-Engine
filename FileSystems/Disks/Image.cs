@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.FileSystems;
 using System;
-using System.Xml.Serialization;
 using System.IO;
-using KFA.DataStream;
-using FileSystems.FileSystem;
+using System.Xml.Serialization;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public class Image : IFileSystemStore, IDescribable, IHasSectors {
 		public delegate void ImageCallback(ulong x, ulong total);
 
@@ -39,7 +39,7 @@ namespace KFA.Disks {
 
 		private FileSystem m_fileSystem;
 		[XmlIgnore]
-		public FileSystem FS {
+		public IFileSystem FS {
 			get { return m_fileSystem; }
 		}
 
@@ -60,7 +60,7 @@ namespace KFA.Disks {
 			result.Path = path;
 			result.Name = System.IO.Path.GetFileNameWithoutExtension(path);
 			result.Attributes = stream.GetAttributes();
-			if (stream is PhysicalDisk) {
+			if (stream is IPhysicalDisk) {
 				result.StorageType = StorageType.PhysicalDisk;
 			} else if (stream is PhysicalDiskPartition) {
 				result.StorageType = StorageType.PhysicalDiskPartition;
@@ -118,7 +118,7 @@ namespace KFA.Disks {
 
 		public void Open() {
 			if (fileStream == null) {
-				fileStream = new FileDataStream(Path);
+				fileStream = new FileDataStream(Path, null);
 				fileStream.Open();
 			}
 		}

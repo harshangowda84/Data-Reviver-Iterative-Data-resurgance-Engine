@@ -13,14 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using KFA.DataStream;
-using KFA.Exceptions;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public enum AttributeType : uint {
 		Unused = 0,
 		StandardInformation = 0x10,
@@ -67,9 +65,9 @@ namespace FileSystems.FileSystem.NTFS {
 		public Byte CompressionUnit;
 		public UInt64 AllocatedSize, DataSize, InitialisedSize;
 		public UInt64 CompressedSize;
-		public List<NTFSDataRun> Runs;
+		public List<IRun> Runs;
 
-		private MFTRecord m_Record;
+		private MFTRecord _record;
 
 		public bool Valid { get; private set; }
 
@@ -83,7 +81,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 		protected MFTAttribute(byte[] data, int startOffset, MFTRecord record)
 			: this() {
-			m_Record = record;
+			_record = record;
 
 			// Read the attribute header.
 			Type = (AttributeType)BitConverter.ToUInt32(data, startOffset + 0);
@@ -129,7 +127,7 @@ namespace FileSystems.FileSystem.NTFS {
 				return;
 			}
 
-			Runs = new List<NTFSDataRun>();
+			Runs = new List<IRun>();
 			ulong cur_vcn = (ulong)lowVCN;
 			ulong lcn = 0;
 			ulong offset = (ulong)startOffset + MappingPairsOffset;
@@ -151,7 +149,7 @@ namespace FileSystems.FileSystem.NTFS {
 					length = Util.GetArbitraryUInt(data, (int)offset + 1, L);
 					if (F > 0 && length + cur_vcn > (ulong)highVCN + 1) {
 						// The run goes too far, so log an error and skip.
-						Console.Error.WriteLine("Error: A data run went longer than the high VCN in MFT record {0}!", m_Record.MFTRecordNumber);
+						Console.Error.WriteLine("Error: A data run went longer than the high VCN in MFT record {0}!", _record.MFTRecordNumber);
 						Valid = false;
 						return;
 					}
@@ -159,7 +157,7 @@ namespace FileSystems.FileSystem.NTFS {
 
 				if (F == 0) {
 					// This is a sparse run
-					Runs.Add(new SparseRun(cur_vcn, (ulong)length, m_Record));
+					Runs.Add(new SparseRun(cur_vcn, (ulong)length, _record));
 				} else {
 					//if (vcn + run.length > attr.highVCN) break; // data is corrupt
 
@@ -171,7 +169,7 @@ namespace FileSystems.FileSystem.NTFS {
 						return;
 					}
 
-					NTFSDataRun run = new NTFSDataRun(cur_vcn, lcn, (ulong)length, m_Record);
+					NTFSDataRun run = new NTFSDataRun(cur_vcn, lcn, (ulong)length, _record);
 					Runs.Add(run);
 				}
 				cur_vcn += (ulong)length;

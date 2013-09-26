@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,21 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
 using System.Collections.Generic;
-using KFA.DataStream;
 
-namespace FileSystems.FileSystem.NTFS {
-
+namespace KFS.FileSystems.NTFS {
 	public class HiddenDataStreamFileNTFS : Folder {
-		private List<FileSystemNode> children;
+		private List<IFileSystemNode> children;
 		private MFTRecord m_record;
 
 		public HiddenDataStreamFileNTFS(MFTRecord record, string path) {
 			m_record = record;
 			Name = record.FileName + "(Hidden Streams)";
 			Path = path + Name + "/";
-			children = new List<FileSystemNode>();
+			children = new List<IFileSystemNode>();
 			children.Add(new FileNTFS(m_record, Path));
 			foreach (MFTAttribute attr in m_record.NamedDataAttributes) {
 				children.Add(new FileNTFS(m_record, attr, Path));
@@ -49,12 +48,12 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 
-		public override IEnumerable<FileSystemNode> GetChildren() {
+		public override IEnumerable<IFileSystemNode> GetChildren() {
 			return children;
 		}
 
-		public override IEnumerable<FileSystemNode> GetChildren(string path) {
-			return new List<FileSystemNode>();
+		public override IEnumerable<IFileSystemNode> GetChildren(string path) {
+			return new List<IFileSystemNode>();
 		}
 
 		public override byte GetByte(ulong offset) {

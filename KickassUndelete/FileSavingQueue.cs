@@ -1,4 +1,4 @@
-﻿using FileSystems.FileSystem;
+﻿using KFS.FileSystems;
 using GuiComponents;
 using System;
 using System.Collections.Generic;
@@ -11,13 +11,13 @@ namespace KickassUndelete {
 	public class FileSavingQueue : IProgressable {
 		private bool m_Saving = false;
 		private Thread m_ProcessingThread;
-		private Queue<KeyValuePair<string, FileSystemNode>> m_Queue = new Queue<KeyValuePair<string, FileSystemNode>>();
+		private Queue<KeyValuePair<string, IFileSystemNode>> m_Queue = new Queue<KeyValuePair<string, IFileSystemNode>>();
 
 		public FileSavingQueue() { }
 
-		public void Push(string filepath, FileSystemNode fileNode) {
+		public void Push(string filepath, IFileSystemNode fileNode) {
 			lock (m_Queue) {
-				m_Queue.Enqueue(new KeyValuePair<string, FileSystemNode>(filepath, fileNode));
+				m_Queue.Enqueue(new KeyValuePair<string, IFileSystemNode>(filepath, fileNode));
 				if (!m_Saving) {
 					m_Saving = true;
 					m_ProcessingThread = new Thread(delegate() {
@@ -26,7 +26,7 @@ namespace KickassUndelete {
 							remaining = m_Queue.Count;
 						}
 						while (remaining > 0) {
-							KeyValuePair<string, FileSystemNode> nextFile;
+							KeyValuePair<string, IFileSystemNode> nextFile;
 							lock (m_Queue) {
 								nextFile = m_Queue.Dequeue();
 							}
@@ -48,7 +48,7 @@ namespace KickassUndelete {
 			}
 		}
 
-		private void WriteFileToDisk(string filePath, FileSystemNode node) {
+		private void WriteFileToDisk(string filePath, IFileSystemNode node) {
 			using (BinaryWriter bw = new BinaryWriter(new FileStream(filePath, FileMode.Create))) {
 				ulong BLOCK_SIZE = 1024 * 1024; // 1MB
 				ulong offset = 0;

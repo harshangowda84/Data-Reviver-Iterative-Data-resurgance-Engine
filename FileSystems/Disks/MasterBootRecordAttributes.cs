@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 using System.Xml.Serialization;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public class MasterBootRecordAttributes : Attributes, IDescribable {
 		public MasterBootRecordAttributes() { }
 

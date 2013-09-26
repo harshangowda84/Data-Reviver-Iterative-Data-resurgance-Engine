@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public enum PartitionState {
 		Inactive = 0x00,
 		Active = 0x80
@@ -67,12 +67,12 @@ namespace KFA.Disks {
 
 		private byte[] m_Data;
 
-		public MasterBootRecord(PhysicalDisk disk) {
+		public MasterBootRecord(WinPhysicalDisk disk) {
 			PhysicalDisk = disk;
 			Offset = 0;
 			Length = MBR_SIZE;
 
-			m_PartitionEntries = new List<PartitionEntry>();
+			_partitionEntries = new List<PartitionEntry>();
 
 			try {
 				m_Data = disk.GetBytes(0, MBR_SIZE);
@@ -83,11 +83,11 @@ namespace KFA.Disks {
 			for (int i = 0; i < MAX_PARTITIONS; i++) {
 				int offset = 0x1BE + 16 * i;
 				if (PartitionEntryExistsAt(offset, 16)) {
-					m_PartitionEntries.Add(new PartitionEntry(m_Data, offset, (int)disk.Attributes.BytesPerSector, i));
+					_partitionEntries.Add(new PartitionEntry(m_Data, offset, (int)disk.Attributes.BytesPerSector, i));
 				}
 			}
 
-			m_PartitionEntries.Sort(new Comparison<PartitionEntry>(delegate(PartitionEntry a, PartitionEntry b) {
+			_partitionEntries.Sort(new Comparison<PartitionEntry>(delegate(PartitionEntry a, PartitionEntry b) {
 				return a.PartitionOffset.CompareTo(b.PartitionOffset);
 			}));
 		}
@@ -100,9 +100,9 @@ namespace KFA.Disks {
 			return total != 0;
 		}
 
-		private List<PartitionEntry> m_PartitionEntries;
+		private List<PartitionEntry> _partitionEntries;
 		public List<PartitionEntry> PartitionEntries {
-			get { return new List<PartitionEntry>(m_PartitionEntries); }
+			get { return new List<PartitionEntry>(_partitionEntries); }
 		}
 
 		public override string ToString() {

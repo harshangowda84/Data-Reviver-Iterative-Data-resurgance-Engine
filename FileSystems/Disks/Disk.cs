@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman, Lukas Korsika
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
-using KFA.DataStream;
-using Microsoft.Win32.SafeHandles;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public abstract class Disk : IDataStream {
 		#region IDataStream Members
 

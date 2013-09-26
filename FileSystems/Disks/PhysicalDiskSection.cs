@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
-using KFA.DataStream;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public abstract class PhysicalDiskSection : IImageable, IDescribable {
-		public PhysicalDisk PhysicalDisk { get; protected set; }
+		public IPhysicalDisk PhysicalDisk { get; protected set; }
 		public ulong Offset { get; protected set; }
 		public ulong Length { get; protected set; }
 

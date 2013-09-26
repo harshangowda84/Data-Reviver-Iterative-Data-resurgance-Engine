@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using KFA.DataStream;
+using KFS.DataStream;
 
 namespace KFA.GUI.Explorers {
 	/// <summary>

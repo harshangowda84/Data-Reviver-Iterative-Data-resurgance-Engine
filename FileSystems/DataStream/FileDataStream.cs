@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,14 +16,14 @@
 using System;
 using System.IO;
 
-namespace KFA.DataStream {
-	class FileDataStream : IDataStream {
-
+namespace KFS.DataStream {
+	public class FileDataStream : IDataStream {
 		private FileStream fs = null;
 		private string path;
 
-		public FileDataStream(String filePath) {
+		public FileDataStream(String filePath, IDataStream parentStream) {
 			path = filePath;
+			ParentStream = parentStream;
 			Open();
 		}
 
@@ -47,6 +47,10 @@ namespace KFA.DataStream {
 			}
 		}
 
+		public long Identifier {
+			get { return 0; /* no-op */ }
+		}
+
 		public ulong StreamLength {
 			get {
 				return (ulong)fs.Length;
@@ -57,13 +61,11 @@ namespace KFA.DataStream {
 			get { return 0; }
 		}
 
-		public String StreamName {
+		public virtual String StreamName {
 			get { return "Local File"; }
 		}
 
-		public IDataStream ParentStream {
-			get { return null; }
-		}
+		public IDataStream ParentStream { get; private set; }
 
 		public void Open() {
 			if (fs == null) {

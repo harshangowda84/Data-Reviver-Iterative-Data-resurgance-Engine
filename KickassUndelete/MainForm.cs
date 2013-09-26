@@ -15,26 +15,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using KFA.Disks;
-using System.Threading;
-using FileSystems.FileSystem;
-using KFA.DataStream;
-using FileSystems;
+
+using KFS.Disks;
+using KFS.FileSystems;
 
 namespace KickassUndelete {
 	/// <summary>
 	/// The main form of Kickass Undelete.
 	/// </summary>
 	public partial class MainForm : Form {
-		FileSystem m_FileSystem;
-		Dictionary<FileSystem, ScanState> m_ScanStates = new Dictionary<FileSystem, ScanState>();
-		Dictionary<FileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<FileSystem, DeletedFileViewer>();
+		IFileSystem m_FileSystem;
+		Dictionary<IFileSystem, ScanState> m_ScanStates = new Dictionary<IFileSystem, ScanState>();
+		Dictionary<IFileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
 
 		/// <summary>
 		/// Constructs the main form.

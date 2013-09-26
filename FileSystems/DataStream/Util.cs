@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,17 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Text;
-using System.IO;
-using KFA.Disks;
+using KFS.Disks;
 using Microsoft.Win32.SafeHandles;
-using System.Runtime.InteropServices;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 
-namespace KFA.DataStream {
+namespace KFS.DataStream {
 	public static class Util {
-		public static string ByteFormat(ulong count) {
+		public static string FileSizeToHumanReadableString(ulong count) {
 			double val = count;
 			string units = " bytes";
 			if (val >= 1024) {

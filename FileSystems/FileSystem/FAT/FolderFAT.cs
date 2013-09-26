@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,14 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.Disks;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
-using KFA.DataStream;
-using KFA.Disks;
+using System.Text;
 
-namespace FileSystems.FileSystem.FAT {
+namespace KFS.FileSystems.FAT {
 	public enum FATDirectoryAttributes : byte {
 		ATTR_READ_ONLY = 0x01,
 		ATTR_HIDDEN = 0x02,
@@ -202,7 +202,7 @@ namespace FileSystems.FileSystem.FAT {
 			Attributes = new FileAttributesFAT(entry);
 			Deleted = Attributes.Deleted;
 		}
-		public override IEnumerable<FileSystemNode> GetChildren() {
+		public override IEnumerable<IFileSystemNode> GetChildren() {
 			List<FileSystemNode> res = new List<FileSystemNode>();
 			foreach (DirectoryEntry entry in GetDirectoryEntries()) {
 				if (entry.FileName.Replace(".", "") != ""

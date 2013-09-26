@@ -22,18 +22,18 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using KFA.DataStream;
-using KFA.Disks;
-using FileSystems.FileSystem;
-using FileSystems.FileSystem.NTFS;
-using File = FileSystems.FileSystem.File;
+using KFS.DataStream;
+using KFS.Disks;
+using KFS.FileSystems;
+using KFS.FileSystems.NTFS;
+using File = KFS.FileSystems.File;
 
 namespace KFA.GUI.Explorers {
 	/// <summary>
 	/// Builds a treeview of the filesystem in a given IFileSystemStore.
 	/// </summary>
 	public partial class FileExplorer : UserControl, IExplorer {
-		private IDataStream m_CurrentStream;
+		private IDataStream _currentStream;
 
 		/// <summary>
 		/// Constructs the file explorer.
@@ -50,9 +50,9 @@ namespace KFA.GUI.Explorers {
 		/// </summary>
 		/// <param name="node">The node to which the new children will be appended.</param>
 		/// <param name="children">The filesystem nodes to create TreeNodes for.</param>
-		private static void AppendChildren(TreeNode node, IEnumerable<FileSystemNode> children) {
+		private static void AppendChildren(TreeNode node, IEnumerable<IFileSystemNode> children) {
 			node.Nodes.Clear();
-			foreach (FileSystemNode child in children) {
+			foreach (IFileSystemNode child in children) {
 				TreeNode treeNode = new TreeNode(child.ToString());
 				treeNode.Tag = child;
 				if (child.Deleted) {
@@ -74,10 +74,10 @@ namespace KFA.GUI.Explorers {
 		}
 
 		private void treeFiles_BeforeExpand(object sender, TreeViewCancelEventArgs e) {
-			FileSystemNode fsNode = e.Node.Tag as FileSystemNode;
+			IFileSystemNode fsNode = e.Node.Tag as IFileSystemNode;
 			if (fsNode != null && !fsNode.Loaded) {
 				AppendChildren(e.Node, fsNode.GetChildren());
-				fsNode.Loaded = true;
+				fsNode.Loaded = true; // TODO: Set this in GetChildren, then TEST
 			}
 		}
 
@@ -109,12 +109,12 @@ namespace KFA.GUI.Explorers {
 		/// </summary>
 		/// <param name="stream">The data stream to view.</param>
 		public void View(IDataStream stream) {
-			if (stream != m_CurrentStream) {
-				m_CurrentStream = stream;
+			if (stream != _currentStream) {
+				_currentStream = stream;
 				treeFiles.Nodes.Clear();
 				IFileSystemStore store = stream as IFileSystemStore;
 				if (store != null) {
-					FileSystem fs = store.FS;
+					IFileSystem fs = store.FS;
 					FileSystemNode fsRoot;
 					if (fs != null) {
 						fsRoot = fs.GetRoot();

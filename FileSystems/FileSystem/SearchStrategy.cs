@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,30 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+namespace KFS.FileSystems {
+	public delegate void SearchFunction(FileSystem.NodeVisitCallback callback, string searchPath);
 
-namespace FileSystems.FileSystem {
-    public delegate void SearchFunction(FileSystem.NodeVisitCallback callback, string searchPath);
+	public class SearchStrategy : ISearchStrategy {
+		private SearchFunction m_Func;
 
-    public class SearchStrategy : ISearchStrategy {
-        private SearchFunction m_Func;
+		public string Name { get; set; }
 
-        public string Name { get; set; }
+		public void Search(FileSystem.NodeVisitCallback callback, string searchPath) {
+			m_Func(callback, searchPath);
+		}
 
-        public void Search(FileSystem.NodeVisitCallback callback, string searchPath) {
-            m_Func(callback, searchPath);
-        }
+		public void Search(FileSystem.NodeVisitCallback callback) {
+			m_Func(callback, null);
+		}
 
-        public void Search(FileSystem.NodeVisitCallback callback) {
-            m_Func(callback, null);
-        }
-
-        public SearchStrategy(string name, SearchFunction func) {
-            Name = name;
-            m_Func = func;
-        }
-    }
+		public SearchStrategy(string name, SearchFunction func) {
+			Name = name;
+			m_Func = func;
+		}
+	}
 }

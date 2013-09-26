@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,10 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using KFA.DataStream;
-using KFA.Exceptions;
+using KFS.DataStream;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public class FixupStream : SubStream {
 		// Static method that just works on an array.
 		// TODO: Make this work with non-sector-aligned, or non-whole-number-of-sectors

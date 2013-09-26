@@ -13,30 +13,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using KFA.DataStream;
 
-namespace FileSystems.FileSystem.NTFS {
-	public class NTFSDataRun : IDataStream {
-		private ulong m_vcn, m_lcn, m_length, m_bytesPerCluster, m_lengthInBytes;
+namespace KFS.FileSystems.NTFS {
+	public class NTFSDataRun : IRun {
+		private ulong m_vcn, m_lcn, m_bytesPerCluster, m_lengthInBytes;
 		private MFTRecord m_record;
 		public ulong VCN { get { return m_vcn; } }
 		public ulong LCN { get { return m_lcn; } }
-		public ulong Length { get { return m_length; } }
-		public NTFSDataRun(ulong vcn, ulong lcn, ulong length, MFTRecord record) {
+		public ulong LengthInClusters { get; private set; }
+		public NTFSDataRun(ulong vcn, ulong lcn, ulong lengthInClusters, MFTRecord record) {
 			m_vcn = vcn;
 			m_lcn = lcn;
-			m_length = length;
+			LengthInClusters = lengthInClusters;
 			m_record = record;
 			m_bytesPerCluster = (ulong)(m_record.BytesPerSector * m_record.SectorsPerCluster);
-			m_lengthInBytes = m_length * m_bytesPerCluster;
+			m_lengthInBytes = LengthInClusters * m_bytesPerCluster;
 		}
 
 		public bool Contains(ulong vcn) {
-			return vcn >= VCN && vcn < VCN + Length;
+			return vcn >= VCN && vcn < VCN + LengthInClusters;
 		}
 
 		public virtual bool HasRealClusters {
@@ -88,24 +85,7 @@ namespace FileSystems.FileSystem.NTFS {
 		#endregion
 
 		public override string ToString() {
-			return string.Format("Run: VCN {0}, Length {1}, LCN {2}", VCN, Length, LCN);
-		}
-	}
-
-	public class SparseRun : NTFSDataRun {
-		public SparseRun(ulong vcn, ulong length, MFTRecord record) :
-			base(vcn, 0, length, record) { }
-
-		public override byte GetByte(ulong offset) {
-			return 0;
-		}
-
-		public override bool HasRealClusters {
-			get { return false; }
-		}
-
-		public override string ToString() {
-			return "Sparse " + base.ToString();
+			return string.Format("Run: VCN {0}, Length {1}, LCN {2}", VCN, LengthInClusters, LCN);
 		}
 	}
 }

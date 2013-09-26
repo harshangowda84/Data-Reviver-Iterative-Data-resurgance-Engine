@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,18 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+namespace KFS.FileSystems {
+	public abstract class Folder : FileSystemNode, IFolder {
+		public override string ToString() {
+			return Name;
+		}
 
-namespace FileSystems.FileSystem {
-    public abstract class Folder : FileSystemNode {
-        public override string ToString() {
-            return Name;
-        }
-        public override FileSystemNode.NodeType Type {
-            get { return NodeType.Folder; }
-        }
-    }
+		public override FSNodeType Type {
+			get { return FSNodeType.Folder; }
+		}
+	}
 }

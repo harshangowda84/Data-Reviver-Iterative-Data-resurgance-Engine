@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Text;
 using System.Management;
+using System.Text;
 using System.Xml.Serialization;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public enum DriveType : uint {
 		Unknown = 0,
 		NoRootDirectory = 1,
@@ -28,7 +28,7 @@ namespace KFA.Disks {
 		CompactDisc = 5,
 		RAMDisk = 6
 	}
-	public class LogicalDiskAttributes : Attributes, IDescribable {
+	public class LogicalDiskAttributes : Attributes {
 		public Access Access { get; set; }
 		public Availability Availability { get; set; }
 		public UInt64 BlockSize { get; set; }

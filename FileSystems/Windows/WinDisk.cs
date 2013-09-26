@@ -1,4 +1,4 @@
-// Copyright (C) 2011  Joey Scarr, Josh Oosterman, Lukas Korsika
+// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,23 +13,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using KFA.DataStream;
 using Microsoft.Win32.SafeHandles;
+using System;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public abstract class WinDisk : Disk {
 		protected SafeFileHandle Handle { get; set; }
 
 		#region Disk Members
 		protected override void ForceReadBytes(byte[] result, ulong offset, ulong length) {
-			uint bytes_read = 0;
+			uint bytesRead = 0;
 
 			long filePtr;
 			Win32.SetFilePointerEx(Handle, (long)offset, out filePtr, EMoveMethod.Begin);
-			bool readSuccess = Win32.ReadFile(Handle, result, (uint)length - bytes_read, out bytes_read, IntPtr.Zero);
+			bool readSuccess = Win32.ReadFile(Handle, result, (uint)length - bytesRead, out bytesRead, IntPtr.Zero);
 			if (!readSuccess) {
-				//throw new Exception("File's screwed!");
+				Console.Error.Write("Read failed: {0}", Handle);
 			}
 		}
 		#endregion

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,17 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.FileSystems;
 using System;
-using System.Text;
 using System.Management;
-using FileSystems.FileSystem;
+using System.Text;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public class PhysicalDiskPartition : PhysicalDiskSection, IFileSystemStore {
 		public PhysicalDiskPartitionAttributes Attributes { get; private set; }
 		private FileSystem m_fileSystem;
 
-		public PhysicalDiskPartition(PhysicalDisk disk, MasterBootRecord.PartitionEntry pEntry) {
+		public PhysicalDiskPartition(WinPhysicalDisk disk, MasterBootRecord.PartitionEntry pEntry) {
 			PhysicalDisk = disk;
 			Offset = pEntry.PartitionOffset;
 			Length = pEntry.PartitionLength;
@@ -84,8 +84,6 @@ namespace KFA.Disks {
 			}
 		}
 
-		#region IFileSystemStore Members
-
 		public StorageType StorageType {
 			get { return StorageType.PhysicalDiskPartition; }
 		}
@@ -94,10 +92,8 @@ namespace KFA.Disks {
 			get { return Attributes; }
 		}
 
-		public FileSystem FS {
+		public IFileSystem FS {
 			get { return m_fileSystem; }
 		}
-
-		#endregion
 	}
 }

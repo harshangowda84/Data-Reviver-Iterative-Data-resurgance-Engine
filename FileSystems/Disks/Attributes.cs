@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,12 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Text;
-using System.Management;
 using System.Collections;
+using System.Linq;
+using System.Management;
 using System.Xml.Serialization;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
+
 	#region Enums
 	public enum Access : ushort {
 		Unknown = 0,
@@ -101,6 +102,7 @@ namespace KFA.Disks {
 			} catch (ManagementException) { }
 			return def;
 		}
+
 		protected T[] GetArray<T>(ManagementObject mo, string name, T[] def) {
 			try {
 				object o = mo[name];
@@ -117,18 +119,9 @@ namespace KFA.Disks {
 		}
 
 		protected string ArrayToString<T>(T[] a) {
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < a.Length; i++) {
-				if (i > 0) sb.Append(", ");
-				sb.Append(a[i].ToString());
-			}
-			return sb.ToString();
+			return string.Join(", ", a.Select(x => x.ToString()));
 		}
 
-		#region IDescribable Members
-
 		public abstract string TextDescription { get; }
-
-		#endregion
 	}
 }

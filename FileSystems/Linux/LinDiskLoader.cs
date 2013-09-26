@@ -1,4 +1,4 @@
-// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ using System.Linq;
 using Mono.Unix;
 #endif
 
-using KFA.Disks;
+using KFS.Disks;
 
-namespace FileSystems {
+namespace KFS.FileSystems {
 	public class LinDiskLoader : DiskLoader {
 		protected override List<Disk> LoadDisksInternal() {
 			throw new NotImplementedException();

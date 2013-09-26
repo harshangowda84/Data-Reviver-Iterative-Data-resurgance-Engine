@@ -1,4 +1,4 @@
-// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,31 +13,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.FileSystems;
 using System;
 using System.IO;
-using System.Management;
-using System.Runtime.InteropServices;
-using KFA.DataStream;
-using FileSystems.FileSystem;
 
-namespace KFA.Disks {
-	public class LinLogicalDisk : LinDisk, IFileSystemStore, IDescribable {
+namespace KFS.Disks {
+
+	public class LinLogicalDisk : LinDisk, ILogicalDisk, IFileSystemStore, IDescribable {
 		public LinLogicalDiskAttributes Attributes { get; private set; }
 
-		private string m_DevName;
-		private ulong m_Size;
-		private FileSystem m_fileSystem;
+		private readonly string _devName;
+		private readonly ulong _size;
+		private readonly FileSystem _fileSystem;
 
 		public LinLogicalDisk(string dev) {
-			m_DevName = dev;
+			_devName = dev;
 			Handle = System.IO.File.Open(dev, FileMode.Open, FileAccess.Read);
 			if (Handle == null) {
 				throw new Exception("Linux Bug!");
 			}
-			m_Size = (ulong)Handle.Length;
+			_size = (ulong)Handle.Length;
 			Attributes = new LinLogicalDiskAttributes();
 			Attributes.FileSystem = Util.DetectFSType(this);
-			m_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
+			_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
 		}
 
 		public string TextDescription {
@@ -45,7 +44,7 @@ namespace KFA.Disks {
 		}
 
 		public override ulong StreamLength {
-			get { return m_Size; }
+			get { return _size; }
 		}
 
 		public override string StreamName {
@@ -60,12 +59,12 @@ namespace KFA.Disks {
 			get { return Attributes; }
 		}
 
-		public FileSystem FS {
-			get { return m_fileSystem; }
+		public IFileSystem FS {
+			get { return _fileSystem; }
 		}
 
 		public override string ToString() {
-			return m_DevName;
+			return _devName;
 		}
 	}
 }

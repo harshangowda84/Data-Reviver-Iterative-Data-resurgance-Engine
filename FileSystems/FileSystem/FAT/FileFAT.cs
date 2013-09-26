@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,16 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.Disks;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using KFA.DataStream;
-using KFA.Disks;
-using FileSystems.FileSystem;
 
-namespace FileSystems.FileSystem.FAT {
+namespace KFS.FileSystems.FAT {
 	public class FileFAT : File, IDescribable {
-		private long m_Length;
+		private long _length;
 
 		public FileAttributesFAT Attributes { get; private set; }
 		public override DateTime LastModified {
@@ -44,7 +42,7 @@ namespace FileSystems.FileSystem.FAT {
 			FileSystem = fileSystem;
 			Name = entry.FileName;
 			Path = path + Name;
-			m_Length = entry.Length;
+			_length = entry.Length;
 			Attributes = new FileAttributesFAT(entry);
 			FirstCluster = entry.ClusterNum;
 			Deleted = Attributes.Deleted;
@@ -55,10 +53,10 @@ namespace FileSystems.FileSystem.FAT {
 			Name = Util.GetRandomString(8);
 			Path = "?/" + Name;
 			long currentCluster = FirstCluster;
-			m_Length = 0;
+			_length = 0;
 			while (currentCluster >= 0) {
 				currentCluster = FileSystem.GetNextCluster(currentCluster);
-				m_Length += FileSystem.BytesPerCluster;
+				_length += FileSystem.BytesPerCluster;
 			}
 			Attributes = new FileAttributesFAT();
 			Deleted = true;
@@ -108,7 +106,7 @@ namespace FileSystems.FileSystem.FAT {
 		}
 
 		public override ulong StreamLength {
-			get { return (ulong)m_Length; }
+			get { return (ulong)_length; }
 		}
 
 		public override String StreamName {

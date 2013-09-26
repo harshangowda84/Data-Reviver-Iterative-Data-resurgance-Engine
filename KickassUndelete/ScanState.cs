@@ -15,13 +15,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using FileSystems.FileSystem;
+using KFS.FileSystems;
 using System.Threading;
-using System.Windows.Forms;
-using System.Collections.ObjectModel;
-using FileSystems.FileSystem.NTFS;
+using KFS.FileSystems.NTFS;
 
 namespace KickassUndelete {
 	/// <summary>
@@ -33,14 +29,14 @@ namespace KickassUndelete {
 		private DateTime m_StartTime;
 		private Thread m_Thread;
 		private bool m_ScanCancelled;
-		private FileSystem m_FileSystem;
+		private IFileSystem m_FileSystem;
 		private string m_DiskName;
 
 		/// <summary>
 		/// Constructs a ScanState on the specified filesystem.
 		/// </summary>
 		/// <param name="fileSystem">The filesystem to scan.</param>
-		public ScanState(string diskName, FileSystem fileSystem) {
+		public ScanState(string diskName, IFileSystem fileSystem) {
 			m_FileSystem = fileSystem;
 			m_DiskName = diskName;
 		}
@@ -117,8 +113,8 @@ namespace KickassUndelete {
 						&& !metadata.Name.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase)
 						&& !metadata.Name.EndsWith(".cat", StringComparison.OrdinalIgnoreCase)
 						&& !metadata.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)) {
-					FileSystemNode node = metadata.GetFileSystemNode();
-					if (node.Type == FileSystemNode.NodeType.File && node.Size > 0) {
+					IFileSystemNode node = metadata.GetFileSystemNode();
+					if (node.Type == FSNodeType.File && node.Size > 0) {
 						lock (m_DeletedFiles) {
 							m_DeletedFiles.Add(metadata);
 						}

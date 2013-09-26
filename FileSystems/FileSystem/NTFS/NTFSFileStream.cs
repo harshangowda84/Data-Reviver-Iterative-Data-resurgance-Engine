@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,18 +13,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using System;
 using System.Collections.Generic;
-using KFA.DataStream;
 using System.Collections.ObjectModel;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	class NTFSFileStream : IDataStream {
 
 		private IDataStream m_partitionStream, m_residentStream;
 		private ulong m_length;
 		private MFTRecord m_record;
-		private List<NTFSDataRun> m_runs;
+		private List<IRun> m_runs;
 		private bool m_nonResident;
 
 		public NTFSFileStream(IDataStream partition, MFTRecord record, MFTAttribute attr) {
@@ -48,8 +48,8 @@ namespace FileSystems.FileSystem.NTFS {
 		/// <summary>
 		/// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
 		/// </summary>
-		public IEnumerable<NTFSDataRun> GetRuns() {
-			return m_nonResident ? new ReadOnlyCollection<NTFSDataRun>(m_runs) : null;
+		public IEnumerable<IRun> GetRuns() {
+			return m_nonResident ? new ReadOnlyCollection<IRun>(m_runs) : null;
 		}
 
 		public byte GetByte(ulong offset) {
@@ -60,7 +60,7 @@ namespace FileSystems.FileSystem.NTFS {
 				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
 				ulong clusterNum = offset / bytesPerCluster;
 				foreach (NTFSDataRun run in m_runs) {
-					if (clusterNum >= run.VCN && clusterNum < run.VCN + run.Length) {
+					if (clusterNum >= run.VCN && clusterNum < run.VCN + run.LengthInClusters) {
 						return run.GetByte(offset - run.VCN * bytesPerCluster);
 					}
 				}
@@ -88,7 +88,7 @@ namespace FileSystems.FileSystem.NTFS {
 				ulong lastCluster = (offset + length - 1) / bytesPerCluster;
 				foreach (NTFSDataRun run in m_runs) {
 					// If this run doesn't overlap the cluster range we want, skip it.
-					if (run.VCN + run.Length <= firstCluster || run.VCN > lastCluster) {
+					if (run.VCN + run.LengthInClusters <= firstCluster || run.VCN > lastCluster) {
 						continue;
 					}
 					ulong offsetInRun, bytesRead, copyLength;
@@ -101,7 +101,7 @@ namespace FileSystems.FileSystem.NTFS {
 						bytesRead = run.VCN * bytesPerCluster - offset;
 					}
 					ulong bytesLeftToRead = length - bytesRead;
-					ulong bytesLeftInRun = run.Length * bytesPerCluster - offsetInRun;
+					ulong bytesLeftInRun = run.LengthInClusters * bytesPerCluster - offsetInRun;
 
 					copyLength = Math.Min(bytesLeftToRead, bytesLeftInRun);
 

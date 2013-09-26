@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.Disks;
 using System;
-using System.Text;
-using KFA.DataStream;
-using KFA.Disks;
 using System.Collections.Generic;
+using System.Text;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public class FileNTFS : File, IDescribable {
 
 		private MFTRecord m_record;
@@ -48,7 +48,7 @@ namespace FileSystems.FileSystem.NTFS {
 		/// <summary>
 		/// Gets a list of the on-disk runs of this NTFSFile. Returns null if resident.
 		/// </summary>
-		public IEnumerable<NTFSDataRun> GetRuns() {
+		public IEnumerable<IRun> GetRuns() {
 			return m_stream.GetRuns();
 		}
 
@@ -112,7 +112,7 @@ namespace FileSystems.FileSystem.NTFS {
 			get {
 				StringBuilder sb = new StringBuilder();
 				sb.AppendFormat("{0}: {1}\r\n", "Name", Name);
-				sb.AppendFormat("{0}: {1}\r\n", "Size", Util.ByteFormat(StreamLength));
+				sb.AppendFormat("{0}: {1}\r\n", "Size", Util.FileSizeToHumanReadableString(StreamLength));
 				sb.AppendFormat("{0}: {1}\r\n", "Deleted", Deleted);
 				sb.AppendFormat("{0}: {1}\r\n", "Created", CreationTime);
 				sb.AppendFormat("{0}: {1}\r\n", "Last Modified", LastModified);

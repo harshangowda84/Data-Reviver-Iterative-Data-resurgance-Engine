@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Windows.Forms;
-using FileSystems.FileSystem;
+using KFS.FileSystems;
 using System.Globalization;
 
 namespace KickassUndelete {

@@ -66,42 +66,50 @@
     <Compile Include="DataStream\SectorStream.cs" />
     <Compile Include="DataStream\SubStream.cs" />
     <Compile Include="DataStream\Util.cs" />
-    <Compile Include="DiskLoader.cs" />
+    <Compile Include="Interface\IFileSystemNode.cs" />
+    <Compile Include="FileSystem\NTFS\IRun.cs" />
+    <Compile Include="FileSystem\NTFS\SparseRun.cs" />
+    <Compile Include="Interface\DiskLoader.cs" />
     <Compile Include="Disks\Attributes.cs" />
     <Compile Include="Disks\Disk.cs" />
-    <Compile Include="Disks\IDescribable.cs" />
-    <Compile Include="Disks\IFileSystemStore.cs" />
-    <Compile Include="Disks\IHasSectors.cs" />
-    <Compile Include="Disks\IImageable.cs" />
+    <Compile Include="Interface\IDescribable.cs" />
+    <Compile Include="Interface\IFile.cs" />
+    <Compile Include="Interface\IFileSystem.cs" />
+    <Compile Include="Interface\IFileSystemStore.cs" />
+    <Compile Include="Interface\IFolder.cs" />
+    <Compile Include="Interface\IHasSectors.cs" />
+    <Compile Include="Interface\IImageable.cs" />
     <Compile Include="Disks\Image.cs" />
-    <Compile Include="Disks\LogicalDisk.cs" />
+    <Compile Include="Interface\INodeMetadata.cs" />
+    <Compile Include="Interface\IPhysicalDisk.cs" />
+    <Compile Include="Windows\WinLogicalDisk.cs" />
     <Compile Include="Disks\LogicalDiskAttributes.cs" />
     <Compile Include="Disks\MasterBootRecord.cs" />
     <Compile Include="Disks\MasterBootRecordAttributes.cs" />
-    <Compile Include="Disks\PhysicalDisk.cs" />
+    <Compile Include="Windows\WinPhysicalDisk.cs" />
     <Compile Include="Disks\PhysicalDiskAttributes.cs" />
     <Compile Include="Disks\PhysicalDiskPartition.cs" />
     <Compile Include="Disks\PhysicalDiskPartitionAttributes.cs" />
     <Compile Include="Disks\PhysicalDiskSection.cs" />
     <Compile Include="Disks\UnallocatedDiskArea.cs" />
     <Compile Include="Disks\UnallocatedDiskAreaAttributes.cs" />
-    <Compile Include="Disks\Win32.cs" />
-    <Compile Include="Disks\WinDisk.cs" />
-    <Compile Include="Exceptions\FileSystemException.cs" />
-    <Compile Include="Exceptions\InvalidFILERecordException.cs" />
-    <Compile Include="Exceptions\NTFSException.cs" />
-    <Compile Include="Exceptions\NTFSFixupException.cs" />
+    <Compile Include="Interface\ILogicalDisk.cs" />
+    <Compile Include="Windows\Win32.cs" />
+    <Compile Include="Windows\WinDisk.cs" />
+    <Compile Include="Interface\Exceptions\FileSystemException.cs" />
+    <Compile Include="Interface\Exceptions\InvalidFileRecordException.cs" />
+    <Compile Include="Interface\Exceptions\NTFSException.cs" />
+    <Compile Include="Interface\Exceptions\NTFSFixupException.cs" />
     <Compile Include="FileSystem\FAT\FileFAT.cs" />
     <Compile Include="FileSystem\FAT\FileSystemFAT.cs" />
     <Compile Include="FileSystem\FAT\FolderFAT.cs" />
     <Compile Include="FileSystem\File.cs" />
     <Compile Include="FileSystem\FileAttributes.cs" />
-    <Compile Include="FileSystem\FileMounted.cs" />
+    <Compile Include="FileSystem\FileFromHostSystem.cs" />
     <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="FileSystem\FileSystemNode.cs" />
     <Compile Include="FileSystem\Folder.cs" />
     <Compile Include="FileSystem\FolderMounted.cs" />
-    <Compile Include="FileSystem\INodeMetadata.cs" />
     <Compile Include="FileSystem\NTFS\FileNTFS.cs" />
     <Compile Include="FileSystem\NTFS\FileSystemNTFS.cs" />
     <Compile Include="FileSystem\NTFS\FixupStream.cs" />
@@ -111,18 +119,19 @@
     <Compile Include="FileSystem\NTFS\MFTRecord.cs" />
     <Compile Include="FileSystem\NTFS\NTFSDataRun.cs" />
     <Compile Include="FileSystem\NTFS\NTFSFileStream.cs" />
-    <Compile Include="FileSystem\ISearchStrategy.cs" />
+    <Compile Include="Interface\ISearchStrategy.cs" />
     <Compile Include="FileSystem\SearchStrategy.cs" />
     <Compile Include="Linux\LinDisk.cs" />
     <Compile Include="Linux\LinDiskLoader.cs" />
     <Compile Include="Linux\LinLogicalDisk.cs" />
     <Compile Include="Linux\LinLogicalDiskAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WinDiskLoader.cs" />
+    <Compile Include="Windows\WinDiskLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="COPYING.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

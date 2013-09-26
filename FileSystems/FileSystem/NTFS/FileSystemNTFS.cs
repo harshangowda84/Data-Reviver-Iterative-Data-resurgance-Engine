@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.Disks;
 using System;
-using KFA.Disks;
-using System.Collections.Generic;
 using System.Collections;
-using System.IO;
+using System.Collections.Generic;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public class FileSystemNTFS : FileSystem {
 		private const int BPB_SIZE = 84;
 		ushort BPB_BytsPerSec;
@@ -54,31 +53,27 @@ namespace FileSystems.FileSystem.NTFS {
 			BPB_SerialNumber = BitConverter.ToUInt64(bpb, 57);
 		}
 
-		private FileSystemNode m_Root = null;
-		private FileNTFS m_MFT = null;
-		private UInt64 m_mftSector;
-		private FileNTFS m_bitmapFile;
-		private byte[] m_Bitmap;
-
-		Dictionary<ulong, ulong> m_ParentLinks = new Dictionary<ulong, ulong>();
-		Dictionary<ulong, string> m_RecordNames = new Dictionary<ulong, string>();
-		Dictionary<ulong, string> m_RecordPaths = new Dictionary<ulong, string>();
+		private FileSystemNode _root = null;
+		private FileNTFS _MFT = null;
+		private UInt64 _mftSector;
+		private FileNTFS _bitmapFile;
+		private byte[] _bitmap;
 
 		public FileSystemNTFS(IFileSystemStore store) {
 			Store = store;
 
 			LoadBPB();
 
-			m_mftSector = (BPB_MFTStartCluster64 * BPB_SecPerClus);
-			m_MFT = new FileNTFS(MFTRecord.Load(0, this), "");
-			m_Root = new FolderNTFS(MFTRecord.Load(5, this), "", true);
+			_mftSector = (BPB_MFTStartCluster64 * BPB_SecPerClus);
+			_MFT = new FileNTFS(MFTRecord.Load(0, this), "");
+			_root = new FolderNTFS(MFTRecord.Load(5, this), "", true);
 
-			m_bitmapFile = new FileNTFS(MFTRecord.Load(6, this), "");
-			m_Bitmap = m_bitmapFile.GetBytes(0, m_bitmapFile.StreamLength);
+			_bitmapFile = new FileNTFS(MFTRecord.Load(6, this), "");
+			_bitmap = _bitmapFile.GetBytes(0, _bitmapFile.StreamLength);
 		}
 
 		public override FileSystemNode GetRoot() {
-			return m_Root;
+			return _root;
 		}
 
 		public override string FileSystemType {
@@ -93,18 +88,18 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private SectorStatus GetClusterStatus(ulong lcn) {
-			if (lcn / 8 >= (ulong)m_Bitmap.Length) {
+			if (lcn / 8 >= (ulong)_bitmap.Length) {
 				Console.Error.WriteLine(string.Format("ERROR: Tried to read off the end of " +
 					"the $Bitmap file. $Bitmap length = {0}, lcn = {1}, lcn / 8 = {2}",
-					m_Bitmap.Length, lcn, lcn / 8));
+					_bitmap.Length, lcn, lcn / 8));
 				return SectorStatus.Unknown;
 			}
-			Byte b = m_Bitmap[lcn / 8];
+			Byte b = _bitmap[lcn / 8];
 			Byte mask = (byte)(0x1 << (int)(lcn % 8));
 			if ((b & mask) > 0) {
-				return SectorStatus.NTFSUsed;
+				return SectorStatus.Used;
 			} else {
-				return SectorStatus.NTFSFree;
+				return SectorStatus.Free;
 			}
 		}
 
@@ -113,7 +108,7 @@ namespace FileSystems.FileSystem.NTFS {
 			if (file == null) {
 				return FileRecoveryStatus.Unknown;
 			} else {
-				IEnumerable<NTFSDataRun> runs = file.GetRuns();
+				IEnumerable<IRun> runs = file.GetRuns();
 				if (runs == null) {
 					// The data stream is resident, so recovery is trivial.
 					return FileRecoveryStatus.Recoverable;
@@ -123,10 +118,10 @@ namespace FileSystems.FileSystem.NTFS {
 					// Check the status of each cluster in the runs.
 					foreach (NTFSDataRun run in runs) {
 						if (run.HasRealClusters) {
-							totalClusters += run.Length;
-							for (ulong i = run.LCN; i < run.Length; i++) {
-								if (GetClusterStatus(run.LCN + i) == SectorStatus.NTFSUsed
-										|| GetClusterStatus(run.LCN + i) == SectorStatus.NTFSBad) {
+							totalClusters += run.LengthInClusters;
+							for (ulong i = run.LCN; i < run.LengthInClusters; i++) {
+								if (GetClusterStatus(run.LCN + i) == SectorStatus.Used
+										|| GetClusterStatus(run.LCN + i) == SectorStatus.Bad) {
 									usedClusters++;
 								}
 							}
@@ -144,11 +139,11 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		public FileNTFS MFT {
-			get { return m_MFT; }
+			get { return _MFT; }
 		}
 
 		public ulong MFTSector {
-			get { return m_mftSector; }
+			get { return _mftSector; }
 		}
 
 		public long BytesPerSector {
@@ -172,7 +167,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		public void SearchByTree(FileSystem.NodeVisitCallback callback, string searchPath) {
-			FileSystemNode searchRoot = this.m_Root;
+			FileSystemNode searchRoot = this._root;
 			if (!string.IsNullOrEmpty(searchPath)) {
 				searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
 			}
@@ -196,7 +191,7 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		private void MftScan(FileSystem.NodeVisitCallback callback) {
-			ulong numFiles = m_MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
+			ulong numFiles = _MFT.StreamLength / (ulong)(SectorsPerMFTRecord * BytesPerSector);
 
 			for (ulong i = 0; i < numFiles; i++) {
 				MFTRecord record = MFTRecord.Load(i, this, MFTLoadDepth.NameAttributeOnly);

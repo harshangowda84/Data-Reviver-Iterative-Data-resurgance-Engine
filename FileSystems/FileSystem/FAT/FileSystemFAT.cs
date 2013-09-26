@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.Disks;
 using System;
-using System.Text;
-using KFA.Disks;
-using FileSystems.FileSystem;
 using System.Collections.Generic;
+using System.Text;
 
-namespace FileSystems.FileSystem.FAT {
+namespace KFS.FileSystems.FAT {
 	/// <summary>
 	/// A FAT filesystem. Only deals with FAT16 for now.
 	/// </summary>
@@ -76,75 +75,75 @@ namespace FileSystems.FileSystem.FAT {
 		}
 		#endregion
 
-		long m_FATLocation; // in bytes
-		long m_RootDirLocation; // in bytes
-		long m_DataLocation; // in bytes
+		long _FATLocation; // in bytes
+		long _rootDirLocation; // in bytes
+		long _dataLocation; // in bytes
 
 		FileSystemNode m_Root = null;
 		public FileSystemFAT(IFileSystemStore store, PartitionType type) {
 			Store = store;
 			Type = type;
 			LoadBPB();
-			m_FATLocation = BPB_RsvdSecCnt * BPB_BytsPerSec;
-			long RootDirSectors = ((BPB_RootEntCnt * 32) + (BPB_BytsPerSec - 1)) / BPB_BytsPerSec;
-			long afterFAT = m_FATLocation + BPB_NumFATs * FATSize * BPB_BytsPerSec;
-			m_DataLocation = afterFAT + RootDirSectors * BPB_BytsPerSec;
+			_FATLocation = BPB_RsvdSecCnt * BPB_BytsPerSec;
+			long rootDirSectors = ((BPB_RootEntCnt * 32) + (BPB_BytsPerSec - 1)) / BPB_BytsPerSec;
+			long afterFAT = _FATLocation + BPB_NumFATs * FATSize * BPB_BytsPerSec;
+			_dataLocation = afterFAT + rootDirSectors * BPB_BytsPerSec;
 			if (Type == PartitionType.FAT32) {
-				m_RootDirLocation = GetDiskOffsetOfFATCluster(BPB_RootClus);
+				_rootDirLocation = GetDiskOffsetOfFATCluster(BPB_RootClus);
 			} else {
-				m_RootDirLocation = afterFAT;
+				_rootDirLocation = afterFAT;
 			}
-			m_Root = new FolderFAT(this, m_RootDirLocation, 2);
+			m_Root = new FolderFAT(this, _rootDirLocation, 2);
 		}
 
 		private uint GetFATEntry(long N) {
-			int EntrySize;
+			int entrySize;
 			if (Type == PartitionType.FAT16) {
-				EntrySize = 2;
+				entrySize = 2;
 			} else {
 				//if (Type == PartitionType.FAT32) {
-				EntrySize = 4;
+				entrySize = 4;
 			}
-			long FATOffset = N * EntrySize;
+			long FATOffset = N * entrySize;
 
 			if (N < 0 || FATOffset > FATSize * SectorsPerCluster) return 0;
 
-			long FATEntryLoc = m_FATLocation + FATOffset;
+			long FATEntryLoc = _FATLocation + FATOffset;
 			byte[] data = new byte[4];
-			for (int i = 0; i < EntrySize; i++) {
+			for (int i = 0; i < entrySize; i++) {
 				data[i] = Store.GetByte((ulong)(FATEntryLoc + i));
 			}
 			return BitConverter.ToUInt32(data, 0);
 		}
 
 		public long GetNextCluster(long N) {
-			uint FATContent = GetFATEntry(N);
+			uint fatContent = GetFATEntry(N);
 
 			bool eof = false;
 			bool bad = false;
-			if (FATContent == 0) {
+			if (fatContent == 0) {
 				eof = true;
 			}
 			if (Type == PartitionType.FAT12) {
-				if (FATContent >= 0x0FF8)
+				if (fatContent >= 0x0FF8)
 					eof = true;
-				if (FATContent == 0x0FF7)
+				if (fatContent == 0x0FF7)
 					bad = true;
 			} else if (Type == PartitionType.FAT16) {
-				if (FATContent >= 0xFFF8)
+				if (fatContent >= 0xFFF8)
 					eof = true;
-				if (FATContent == 0xFFF7)
+				if (fatContent == 0xFFF7)
 					bad = true;
 			} else if (Type == PartitionType.FAT32) {
-				if (FATContent >= 0x0FFFFFF8)
+				if (fatContent >= 0x0FFFFFF8)
 					eof = true;
-				if (FATContent == 0x0FFFFFF7)
+				if (fatContent == 0x0FFFFFF7)
 					bad = true;
 			}
 			if (eof || bad) {
 				return -1;
 			} else {
-				return FATContent;
+				return fatContent;
 			}
 		}
 
@@ -163,8 +162,8 @@ namespace FileSystems.FileSystem.FAT {
 		public override string FileSystemType {
 			get {
 				return Type == PartitionType.FAT32 ? "FAT32" :
-							 Type == PartitionType.FAT16 ? "FAT16" :
-							 "Unknown";
+										 Type == PartitionType.FAT16 ? "FAT16" :
+										 "Unknown";
 			}
 		}
 		public long TotalSectors {
@@ -180,10 +179,10 @@ namespace FileSystems.FileSystem.FAT {
 			get { return BytesPerSector * SectorsPerCluster; }
 		}
 		public long DataSectionOffset {
-			get { return m_DataLocation; }
+			get { return _dataLocation; }
 		}
 		public long FATOffset {
-			get { return m_FATLocation; }
+			get { return _FATLocation; }
 		}
 		public long FATSize {
 			get {
@@ -228,8 +227,8 @@ namespace FileSystems.FileSystem.FAT {
 		private void SectorSearch(FileSystem.NodeVisitCallback callback) {
 			long clusterNum = BPB_RootClus;
 			ulong progress = 0;
-			ulong total = (ulong)(TotalSectors * SectorsPerCluster - (m_RootDirLocation + BPB_RootClus * BytesPerCluster));
-			while (m_RootDirLocation + clusterNum * BytesPerCluster < TotalSectors * SectorsPerCluster) {
+			ulong total = (ulong)(TotalSectors * SectorsPerCluster - (_rootDirLocation + BPB_RootClus * BytesPerCluster));
+			while (_rootDirLocation + clusterNum * BytesPerCluster < TotalSectors * SectorsPerCluster) {
 				progress++;
 				clusterNum++;
 				if (!callback(new FileFAT(this, clusterNum), progress, total)) {
@@ -238,12 +237,12 @@ namespace FileSystems.FileSystem.FAT {
 			}
 		}
 
-		private void Visit(FileSystem.NodeVisitCallback callback, FileSystemNode node, HashSet<long> visitedClusters, double currentProgress, double outerProgress) {
+		private void Visit(NodeVisitCallback callback, IFileSystemNode node, HashSet<long> visitedClusters, double currentProgress, double outerProgress) {
 			if (node is Folder) {  //No zip support yet
-				List<FileSystemNode> children = new List<FileSystemNode>(node.GetChildren());
+				List<IFileSystemNode> children = new List<IFileSystemNode>(node.GetChildren());
 				for (int i = 0; i < children.Count; i++) {
 					double progress = currentProgress + outerProgress * ((double)i / (double)children.Count);
-					FileSystemNode child = children[i];
+					IFileSystemNode child = children[i];
 					if (!callback(child, (ulong)(progress * 1000), 1000)) {
 						break;
 					}
@@ -257,19 +256,19 @@ namespace FileSystems.FileSystem.FAT {
 
 		public override SectorStatus GetSectorStatus(ulong sectorNum) {
 			if (sectorNum < BPB_RsvdSecCnt) {
-				return SectorStatus.FATReserved;
+				return SectorStatus.Reserved;
 			} else if ((long)sectorNum < BPB_RsvdSecCnt + BPB_NumFATs * FATSize) {
-				return SectorStatus.FATFAT;
+				return SectorStatus.FAT;
 			} else {
 				uint FATEntry = GetFATEntry(GetFATClusterFromOffset((long)sectorNum * BytesPerSector));
 				if (FATEntry == 0x0) {
-					return SectorStatus.FATFree;
+					return SectorStatus.Free;
 				} else if (Type == PartitionType.FAT12 && FATEntry == 0x0FF7
 						|| Type == PartitionType.FAT16 && FATEntry == 0xFFF7
 						|| Type == PartitionType.FAT32 && FATEntry == 0x0FFFFFF7) {
-					return SectorStatus.FATBad;
+					return SectorStatus.Bad;
 				} else {
-					return SectorStatus.FATUsed;
+					return SectorStatus.Used;
 				}
 			}
 		}

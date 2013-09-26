@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,9 +15,9 @@
 
 using System.Text;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 	public class UnallocatedDiskArea : PhysicalDiskSection {
-		public UnallocatedDiskArea(PhysicalDisk disk, ulong offset, ulong len) {
+		public UnallocatedDiskArea(IPhysicalDisk disk, ulong offset, ulong len) {
 			PhysicalDisk = disk;
 			Offset = offset;
 			Length = len;

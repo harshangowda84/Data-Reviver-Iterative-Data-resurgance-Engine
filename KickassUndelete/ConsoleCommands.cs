@@ -17,8 +17,8 @@ using System;
 using System.Linq;
 using System.Threading;
 
-using FileSystems;
-using KFA.Disks;
+using KFS.FileSystems;
+using KFS.Disks;
 
 namespace KickassUndelete {
 	public class ConsoleCommands {

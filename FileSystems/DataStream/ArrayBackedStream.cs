@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace KFA.DataStream {
+namespace KFS.DataStream {
 	public class ArrayBackedStream : IDataStream {
 		private uint m_Offset;
 		private uint m_Length;

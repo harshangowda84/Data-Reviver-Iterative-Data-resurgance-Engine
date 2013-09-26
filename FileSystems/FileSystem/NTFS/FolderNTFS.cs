@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
+using KFS.Disks;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using KFA.DataStream;
-using KFA.Disks;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public class FolderNTFS : Folder, IDescribable {
 		private class IndexBuffer {
 			List<IndexEntry> entries = null;
@@ -30,7 +30,7 @@ namespace FileSystems.FileSystem.NTFS {
 			IDataStream m_Stream;
 			public IndexBuffer(IDataStream stream, ulong vcn, FolderNTFS folder) {
 				m_Folder = folder;
-				clusterStart = vcn * (ulong)(m_Folder.m_record.SectorsPerCluster * m_Folder.m_record.BytesPerSector);
+				clusterStart = vcn * (ulong)(m_Folder._record.SectorsPerCluster * m_Folder._record.BytesPerSector);
 				String magic = Util.GetASCIIString(stream, clusterStart + 0x0, 4);
 
 				if (!magic.Equals("INDX")) {
@@ -151,8 +151,8 @@ namespace FileSystems.FileSystem.NTFS {
 							//from the actual mft record at the cost of efficiency.
 						}
 
-						if (recordNum != m_Folder.m_record.RecordNum) {
-							MFTRecord record = MFTRecord.Load(recordNum, m_Folder.m_record.FileSystem);
+						if (recordNum != m_Folder._record.RecordNum) {
+							MFTRecord record = MFTRecord.Load(recordNum, m_Folder._record.FileSystem);
 							if (record.Valid) {
 								node = record.GetFileSystemNode(m_Folder.Path);
 							}
@@ -164,10 +164,10 @@ namespace FileSystems.FileSystem.NTFS {
 
 			public IndexBuffer Child {
 				get {
-					if (child == null && m_Folder.m_indexAllocation != null && (flags & 1) > 0) {
+					if (child == null && m_Folder._indexAllocation != null && (flags & 1) > 0) {
 						//This isn't a leaf - points to more index entries
 						UInt64 vcn = Util.GetUInt32(m_Stream, m_Offset + (ulong)(indexEntryLength - 8));
-						child = new IndexBuffer(m_Folder.m_indexAllocation, vcn, m_Folder);
+						child = new IndexBuffer(m_Folder._indexAllocation, vcn, m_Folder);
 					}
 					return child;
 				}
@@ -209,17 +209,17 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private MFTRecord m_record;
-		private NTFSFileStream m_indexRoot, m_indexAllocation;
-		private List<IndexEntry> m_rootEntries = null;
+		private MFTRecord _record;
+		private NTFSFileStream _indexRoot, _indexAllocation;
+		private List<IndexEntry> _rootEntries = null;
 
 		public FolderNTFS(MFTRecord record, string path, bool isRoot = false) {
-			m_record = record;
-			m_indexRoot = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.IndexRoot);
+			_record = record;
+			_indexRoot = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.IndexRoot);
 
-			MFTAttribute attr = m_record.GetAttribute(AttributeType.IndexAllocation);
+			MFTAttribute attr = _record.GetAttribute(AttributeType.IndexAllocation);
 			if (attr != null) {
-				m_indexAllocation = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.IndexAllocation);
+				_indexAllocation = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.IndexAllocation);
 			}
 			Name = record.FileName;
 			if (path == null) {
@@ -243,20 +243,20 @@ namespace FileSystems.FileSystem.NTFS {
 				}
 			}
 			FileSystem = record.FileSystem;
-			Deleted = m_record.Deleted;
+			Deleted = _record.Deleted;
 		}
 
 		public long BytesPerSector {
-			get { return m_record.BytesPerSector; }
+			get { return _record.BytesPerSector; }
 		}
 
 		public override long Identifier {
-			get { return (long)m_record.MFTRecordNumber; }
+			get { return (long)_record.MFTRecordNumber; }
 		}
 
 		private void loadChildrenIndexRoot() {
-			NTFSFileStream stream = m_indexRoot;
-			m_rootEntries = new List<IndexEntry>();
+			NTFSFileStream stream = _indexRoot;
+			_rootEntries = new List<IndexEntry>();
 
 			//Index Root
 			UInt32 attrTypes = Util.GetUInt32(stream, 0x0);
@@ -270,17 +270,17 @@ namespace FileSystems.FileSystem.NTFS {
 			IndexEntry entry;
 			do {
 				entry = new IndexEntry(stream, offset, this);
-				m_rootEntries.Add(entry);
+				_rootEntries.Add(entry);
 				offset += entry.EntryLength;
 			} while (!entry.LastEntry);
 		}
 
 		private IEnumerable<IndexEntry> RootEntries {
 			get {
-				if (m_rootEntries == null) {
+				if (_rootEntries == null) {
 					loadChildrenIndexRoot();
 				}
-				return m_rootEntries;
+				return _rootEntries;
 			}
 		}
 
@@ -288,7 +288,7 @@ namespace FileSystems.FileSystem.NTFS {
 			loadChildrenIndexRoot();
 		}
 
-		public override IEnumerable<FileSystemNode> GetChildren() {
+		public override IEnumerable<IFileSystemNode> GetChildren() {
 			List<FileSystemNode> res = new List<FileSystemNode>();
 			foreach (IndexEntry entry in RootEntries) {
 				res.AddRange(entry.GetNodes());
@@ -296,11 +296,11 @@ namespace FileSystems.FileSystem.NTFS {
 			return res;
 		}
 
-		public override IEnumerable<FileSystemNode> GetChildren(string name) {
+		public override IEnumerable<IFileSystemNode> GetChildren(string name) {
 			if (name == "*") {
 				return GetChildren();
 			} else {
-				List<FileSystemNode> res = new List<FileSystemNode>();
+				List<IFileSystemNode> res = new List<IFileSystemNode>();
 				// Use the B+ tree to efficiently find the child
 				name = name.ToUpperInvariant();
 				foreach (IndexEntry entry in RootEntries) {
@@ -329,27 +329,27 @@ namespace FileSystems.FileSystem.NTFS {
 		}
 
 		public override byte GetByte(ulong offset) {
-			return m_indexRoot.GetByte(offset);
+			return _indexRoot.GetByte(offset);
 		}
 
 		public override byte[] GetBytes(ulong offset, ulong length) {
-			return m_indexRoot.GetBytes(offset, length);
+			return _indexRoot.GetBytes(offset, length);
 		}
 
 		public override ulong DeviceOffset {
-			get { return m_indexRoot.DeviceOffset; }
+			get { return _indexRoot.DeviceOffset; }
 		}
 
 		public override ulong StreamLength {
-			get { return m_indexRoot.StreamLength; }
+			get { return _indexRoot.StreamLength; }
 		}
 
 		public override String StreamName {
-			get { return "NTFS Directory " + m_record.FileName; }
+			get { return "NTFS Directory " + _record.FileName; }
 		}
 
 		public override IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
+			get { return _record.PartitionStream; }
 		}
 
 		public override void Open() { }
@@ -357,19 +357,19 @@ namespace FileSystems.FileSystem.NTFS {
 		public override void Close() { }
 
 		public DateTime CreationTime {
-			get { return m_record.CreationTime; }
+			get { return _record.CreationTime; }
 		}
 
 		public DateTime LastAccessed {
-			get { return m_record.LastAccessTime; }
+			get { return _record.LastAccessTime; }
 		}
 
 		public override DateTime LastModified {
-			get { return m_record.LastDataChangeTime; }
+			get { return _record.LastDataChangeTime; }
 		}
 
 		public DateTime LastModifiedMFT {
-			get { return m_record.LastMFTChangeTime; }
+			get { return _record.LastMFTChangeTime; }
 		}
 
 		public bool Root {
@@ -383,7 +383,7 @@ namespace FileSystems.FileSystem.NTFS {
 			get {
 				StringBuilder sb = new StringBuilder();
 				sb.AppendFormat("{0}: {1}\r\n", "Name", Name);
-				sb.AppendFormat("{0}: {1}\r\n", "Size", Util.ByteFormat(StreamLength));
+				sb.AppendFormat("{0}: {1}\r\n", "Size", Util.FileSizeToHumanReadableString(StreamLength));
 				sb.AppendFormat("{0}: {1}\r\n", "Deleted", Deleted);
 				sb.AppendFormat("{0}: {1}\r\n", "Created", CreationTime);
 				sb.AppendFormat("{0}: {1}\r\n", "Last Modified", LastModified);

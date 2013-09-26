@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 using System;
 
-namespace KFA.DataStream {
+namespace KFS.DataStream {
 	public interface IDataStream {
 		byte GetByte(ulong offset);
 		byte[] GetBytes(ulong offset, ulong length);

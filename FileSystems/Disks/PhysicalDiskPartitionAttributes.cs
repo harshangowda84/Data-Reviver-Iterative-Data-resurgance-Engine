@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,12 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Text;
-using System.Management;
-using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Management;
+using System.Text;
+using System.Xml.Serialization;
 
-namespace KFA.Disks {
+namespace KFS.Disks {
 
 	public class PhysicalDiskPartitionAttributes : Attributes, IDescribable {
 		public PartitionType PartitionType { get; set; }
@@ -61,7 +61,7 @@ namespace KFA.Disks {
 		public string Type { get; set; }
 
 		public PhysicalDiskPartitionAttributes() { }
-		public PhysicalDiskPartitionAttributes(ManagementObject mo, PhysicalDisk disk) {
+		public PhysicalDiskPartitionAttributes(ManagementObject mo, WinPhysicalDisk disk) {
 			BytesPerSector = disk.Attributes.BytesPerSector;
 			Access = GetProperty<Access>(mo, "Access", Access.Unknown);
 			Availability = GetProperty<Availability>(mo, "Availability", Availability.Unknown);

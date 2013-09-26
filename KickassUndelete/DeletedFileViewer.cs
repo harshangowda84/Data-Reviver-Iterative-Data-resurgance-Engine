@@ -21,9 +21,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using FileSystems.FileSystem;
+using KFS.FileSystems;
 using System.Threading;
-using KFA.DataStream;
+using KFS.DataStream;
 using System.IO;
 using GuiComponents;
 using System.Globalization;
@@ -202,7 +202,7 @@ namespace KickassUndelete {
 		/// <param name="metadata">The metadata to create a view for.</param>
 		/// <returns>The constructed ListViewItem.</returns>
 		private ListViewItem MakeListItem(INodeMetadata metadata) {
-			FileSystemNode node = metadata.GetFileSystemNode();
+			IFileSystemNode node = metadata.GetFileSystemNode();
 			string ext = "";
 			try {
 				ext = Path.GetExtension(metadata.Name);
@@ -219,7 +219,7 @@ namespace KickassUndelete {
 			ListViewItem lvi = new ListViewItem(new string[] {
                 metadata.Name,
                 extInfo.FriendlyName,
-                Util.ByteFormat(node.Size),
+                Util.FileSizeToHumanReadableString(node.Size),
                 metadata.LastModified.ToString(CultureInfo.CurrentCulture),
 				node.Path,
                 m_RecoveryDescriptions[metadata.GetChanceOfRecovery()]
@@ -354,7 +354,7 @@ namespace KickassUndelete {
 						"permanently! Are you sure you wish to continue?", "Warning!",
 						MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
 
-						FileSystemNode node = metadata.GetFileSystemNode();
+						IFileSystemNode node = metadata.GetFileSystemNode();
 						SaveSingleFile(node, saveFileDialog.FileName);
 					}
 				}
@@ -366,7 +366,7 @@ namespace KickassUndelete {
 		/// </summary>
 		/// <param name="node">The file to recover.</param>
 		/// <param name="filePath">The path to save the file to.</param>
-		private void SaveSingleFile(FileSystemNode node, string filePath) {
+		private void SaveSingleFile(IFileSystemNode node, string filePath) {
 			m_MostRecentlySavedFile = filePath;
 			if (!m_ProgressPopup.Visible) {
 				m_ProgressPopup.Show(this);
@@ -385,7 +385,7 @@ namespace KickassUndelete {
 					"permanently! Are you sure you wish to continue?", "Warning!",
 					MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
 
-					List<FileSystemNode> nodes = new List<FileSystemNode>();
+					List<IFileSystemNode> nodes = new List<IFileSystemNode>();
 					foreach (ListViewItem item in items) {
 						INodeMetadata metadata = item.Tag as INodeMetadata;
 						if (metadata != null) {
@@ -402,8 +402,8 @@ namespace KickassUndelete {
 		/// </summary>
 		/// <param name="nodes">The files to recover.</param>
 		/// <param name="folderPath">The folder in which to save the recovered files.</param>
-		private void SaveMultipleFiles(IEnumerable<FileSystemNode> nodes, string folderPath) {
-			foreach (FileSystemNode node in nodes) {
+		private void SaveMultipleFiles(IEnumerable<IFileSystemNode> nodes, string folderPath) {
+			foreach (IFileSystemNode node in nodes) {
 				string file = MakeFileNameValid(node.Name);
 				string fileName = Path.Combine(folderPath, file);
 				if (System.IO.File.Exists(fileName)) {

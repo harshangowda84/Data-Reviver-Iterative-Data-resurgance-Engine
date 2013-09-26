@@ -13,15 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFA.Exceptions;
+using KFS.DataStream;
 using System;
 using System.Collections.Generic;
-using KFA.DataStream;
-using KFA.Exceptions;
-using FileSystems.FileSystem;
-using System.Text;
 using System.Collections.ObjectModel;
+using System.Text;
 
-namespace FileSystems.FileSystem.NTFS {
+namespace KFS.FileSystems.NTFS {
 	public enum MFTLoadDepth {
 		Full = 2,
 		NameAttributeOnly = 1,
@@ -230,7 +229,7 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		public FileSystemNode GetFileSystemNode() {
+		public IFileSystemNode GetFileSystemNode() {
 			if (m_Node == null) {
 				return GetFileSystemNode(m_Path);
 			}
@@ -407,12 +406,10 @@ namespace FileSystems.FileSystem.NTFS {
 			}
 		}
 
-		private void MergeRunLists(ref List<NTFSDataRun> list1, List<NTFSDataRun> list2) {
+		private void MergeRunLists(ref List<IRun> list1, List<IRun> list2) {
 			list1.AddRange(list2);
 			// TODO: Verify that the runlists don't overlap
 		}
-
-		#region INodeMetadata Members
 
 		public string Name {
 			get {
@@ -433,7 +430,5 @@ namespace FileSystems.FileSystem.NTFS {
 		public FileRecoveryStatus GetChanceOfRecovery() {
 			return GetFileSystemNode().GetChanceOfRecovery();
 		}
-
-		#endregion
 	}
 }
