@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using KFS.DataStream;
+using System.Collections.Generic;
 
 namespace KFS.Disks {
 	/// <summary>
@@ -21,5 +22,6 @@ namespace KFS.Disks {
 	/// </summary>
 	public interface IPhysicalDisk : IDataStream {
 		PhysicalDiskAttributes Attributes { get; }
+		IList<PhysicalDiskSection> Sections { get; }
 	}
 }

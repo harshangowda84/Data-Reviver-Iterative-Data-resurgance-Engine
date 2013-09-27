@@ -14,12 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using KFS.Disks;
+using System.Collections.Generic;
 
 namespace KFS.FileSystems {
 	/// <summary>
 	/// An interface representing a loaded filesystem.
 	/// </summary>
 	public interface IFileSystem {
+		IEnumerable<FileSystemNode> GetFile(string path);
+
 		FileSystemNode GetRoot();
 
 		SectorStatus GetSectorStatus(ulong sectorNum);

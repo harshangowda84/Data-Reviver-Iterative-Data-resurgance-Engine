@@ -16,6 +16,7 @@
 using KFS.DataStream;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
@@ -43,8 +44,8 @@ namespace KFS.Disks {
 
 		private List<PhysicalDiskSection> m_Sections;
 		[XmlIgnore]
-		public List<PhysicalDiskSection> Sections {
-			get { return new List<PhysicalDiskSection>(m_Sections); }
+		public IList<PhysicalDiskSection> Sections {
+			get { return new ReadOnlyCollection<PhysicalDiskSection>(m_Sections); }
 		}
 
 		private MasterBootRecord m_MasterBootRecord;
