@@ -28,17 +28,18 @@ namespace KickassUndelete {
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
-#if !MONO
-			AttachConsole(-1);
-#endif
+			if (IsWindows())
+				AttachConsole(-1);
+
 			ParseArgs(args);
 
 			EnsureUserIsAdmin();
 
-#if MONO
-			PrintUsage();
-			Environment.Exit(0);
-#endif
+			if (!IsWindows()) {
+				PrintUsage();
+				Environment.Exit(0);
+			}
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm());
