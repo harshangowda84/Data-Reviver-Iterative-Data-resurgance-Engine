@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Lukas Korsika
+﻿// Copyright (C) 2013  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,23 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using GuiComponents;
+using KFS.DataStream;
+using KFS.FileSystems;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
-using System.Data;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using KFS.FileSystems;
-using System.Threading;
-using KFS.DataStream;
-using System.IO;
-using GuiComponents;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Collections;
-using System.Diagnostics;
 
 namespace KickassUndelete {
 	/// <summary>

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Josh Oosterman
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,19 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
 using KFS.DataStream;
 using KFS.Disks;
 using KFS.FileSystems;
 using KFS.FileSystems.NTFS;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 using File = KFS.FileSystems.File;
 
 namespace KFA.GUI.Explorers {

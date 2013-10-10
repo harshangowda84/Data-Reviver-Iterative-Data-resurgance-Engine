@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr, Lukas Korsika
+﻿// Copyright (C) 2013  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,12 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using System.Security.Principal;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Windows.Forms;
 
 namespace KickassUndelete {
 	static class Program {

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2011  Joey Scarr
+﻿// Copyright (C) 2013  Joey Scarr
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,14 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Collections;
-using System.Windows.Forms;
 using KFS.FileSystems;
+using System.Collections;
 using System.Globalization;
+using System.Windows.Forms;
 
 namespace KickassUndelete {
 	/// <summary>
