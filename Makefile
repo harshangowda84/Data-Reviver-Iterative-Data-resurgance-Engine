@@ -1,7 +1,7 @@
 #SOURCES=./KickassUndelete/ConsoleCommands.cs ./KickassUndelete/DeletedFileViewer.cs ./KickassUndelete/DeletedFileViewer.Designer.cs ./KickassUndelete/ExtensionInfo.cs ./KickassUndelete/ExtensionMethods.cs ./KickassUndelete/FileSavingQueue.cs ./KickassUndelete/ListViewColumnSorter.cs ./KickassUndelete/ListViewNoFlicker.cs ./KickassUndelete/MainForm.cs ./KickassUndelete/MainForm.Designer.cs ./KickassUndelete/Program.cs ./KickassUndelete/Properties/AssemblyInfo.cs ./KickassUndelete/Properties/Resources.Designer.cs ./KickassUndelete/Properties/Settings.Designer.cs ./KickassUndelete/ScanState.cs
 SOURCES=KickassUndelete/*.cs KickassUndelete/*/*.cs
 LIBS=FileSystems/KFA.FileSystems.Lite.dll GuiComponents/KFA.GuiComponents.dll
-RESOURCES=KickassUndelete/DeletedFileViewer.resources KickassUndelete/KickassUndelete.MainForm.resources KickassUndelete/Properties/Resources.resx
+RESOURCES=KickassUndelete/DeletedFileViewer.resources KickassUndelete/MainForm.resources KickassUndelete/Properties/Resources.resx
 .SUFFIXES:
 .SUFFIXES: .resx .resources
 .resx.resources:
