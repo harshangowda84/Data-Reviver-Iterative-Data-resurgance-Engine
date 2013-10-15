@@ -30,7 +30,7 @@ using System.Windows.Forms;
 namespace KickassUndelete {
 	/// <summary>
 	/// A custom GUI control for viewing a list of deleted files.
-	/// Acts as the View to a ScanState object.
+	/// Acts as the View to a Scanner object.
 	/// </summary>
 	public partial class DeletedFileViewer : UserControl {
 		private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
@@ -52,7 +52,7 @@ namespace KickassUndelete {
 		private HashSet<string> m_SystemFileExtensions =
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
-		private ScanState m_ScanState;
+		private Scanner m_Scanner;
 		private FileSavingQueue m_FileSavingQueue;
 		private ProgressPopup m_ProgressPopup;
 		private string m_MostRecentlySavedFile;
@@ -69,10 +69,10 @@ namespace KickassUndelete {
 		private ImageList m_ImageList;
 
 		/// <summary>
-		/// Constructs a DeletedFileViewer, using a given ScanState.
+		/// Constructs a DeletedFileViewer, using a given Scanner.
 		/// </summary>
-		/// <param name="state">The ScanState that will be the model for this DeletedFileViewer.</param>
-		public DeletedFileViewer(ScanState state) {
+		/// <param name="scanner">The Scanner that will be the model for this DeletedFileViewer.</param>
+		public DeletedFileViewer(Scanner scanner) {
 			InitializeComponent();
 
 			lvwColumnSorter = new ListViewColumnSorter();
@@ -81,10 +81,10 @@ namespace KickassUndelete {
 			m_ImageList = new ImageList();
 			fileView.SmallImageList = m_ImageList;
 
-			m_ScanState = state;
-			state.ProgressUpdated += new EventHandler(state_ProgressUpdated);
-			state.ScanStarted += new EventHandler(state_ScanStarted);
-			state.ScanFinished += new EventHandler(state_ScanFinished);
+			m_Scanner = scanner;
+			scanner.ProgressUpdated += new EventHandler(state_ProgressUpdated);
+			scanner.ScanStarted += new EventHandler(state_ScanStarted);
+			scanner.ScanFinished += new EventHandler(state_ScanFinished);
 
 			m_FileSavingQueue = new FileSavingQueue();
 			m_FileSavingQueue.Finished += m_FileSavingQueue_Finished;
@@ -144,12 +144,12 @@ namespace KickassUndelete {
 		}
 
 		/// <summary>
-		/// Handles a progress report from the underlying ScanState.
+		/// Handles a progress report from the underlying Scanner.
 		/// </summary>
 		void state_ProgressUpdated(object sender, EventArgs ea) {
 			try {
 				this.BeginInvoke(new Action(() => {
-					SetProgress(m_ScanState.Progress);
+					SetProgress(m_Scanner.Progress);
 				}));
 			} catch (InvalidOperationException exc) { Console.WriteLine(exc); }
 		}
@@ -174,12 +174,12 @@ namespace KickassUndelete {
 		}
 
 		private void bScan_Click(object sender, EventArgs e) {
-			m_ScanState.StartScan();
+			m_Scanner.StartScan();
 		}
 
 		/// <summary>
 		/// Constructs a list of ListViewItems based on the files retrieved by the
-		/// underlying ScanState.
+		/// underlying Scanner.
 		/// </summary>
 		/// <param name="metadatas">A list of the metadata for each deleted file found.</param>
 		/// <returns>An array of ListViewItems.</returns>
@@ -296,7 +296,7 @@ namespace KickassUndelete {
 		}
 
 		private void UpdateTimer_Tick(object sender, EventArgs e) {
-			IList<INodeMetadata> deletedFiles = m_ScanState.GetDeletedFiles();
+			IList<INodeMetadata> deletedFiles = m_Scanner.GetDeletedFiles();
 			int fileCount = deletedFiles.Count;
 			if (fileCount > m_Files.Count) {
 				var items = MakeListItems(deletedFiles.GetRange(m_Files.Count, fileCount - m_Files.Count));
@@ -344,7 +344,7 @@ namespace KickassUndelete {
 
 				if (saveFileDialog.ShowDialog() == DialogResult.OK) {
 					// Check that the drive isn't the same as the drive being copied from.
-					if (saveFileDialog.FileName[0] != m_ScanState.DiskName[0]
+					if (saveFileDialog.FileName[0] != m_Scanner.DiskName[0]
 						|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
 						"trying to recover from. This may cause recovery to fail, and overwrite your data " +
 						"permanently! Are you sure you wish to continue?", "Warning!",
@@ -375,7 +375,7 @@ namespace KickassUndelete {
 
 			if (folderDialog.ShowDialog() == DialogResult.OK) {
 				// Check that the drive isn't the same as the drive being copied from.
-				if (folderDialog.SelectedPath[0] != m_ScanState.DiskName[0]
+				if (folderDialog.SelectedPath[0] != m_Scanner.DiskName[0]
 					|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
 					"trying to recover from. This may cause recovery to fail, and overwrite your data " +
 					"permanently! Are you sure you wish to continue?", "Warning!",

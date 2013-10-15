@@ -46,13 +46,13 @@ namespace KickassUndelete {
 
 			Console.Error.WriteLine("Deleted files on " + dev);
 			Console.Error.WriteLine("=================" + new String('=', dev.Length));
-			var scan_state = new ScanState(dev, fs);
-			scan_state.ScanFinished += new EventHandler(ScanFinished);
-			scan_state.StartScan();
+			var scanner = new Scanner(dev, fs);
+			scanner.ScanFinished += new EventHandler(ScanFinished);
+			scanner.StartScan();
 			while (!scan_finished) {
 				Thread.Sleep(100);
 			}
-			var files = scan_state.GetDeletedFiles();
+			var files = scanner.GetDeletedFiles();
 			foreach (var file in files) {
 				Console.WriteLine(file.Name);
 			}
@@ -73,7 +73,7 @@ namespace KickassUndelete {
 				return;
 			}
 
-			var scan_state = new ScanState(dev, fs);
+			var scan_state = new Scanner(dev, fs);
 			scan_state.ScanFinished += new EventHandler(ScanFinished);
 			scan_state.StartScan();
 			while (!scan_finished) {
