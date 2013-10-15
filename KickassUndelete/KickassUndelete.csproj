@@ -126,6 +126,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="RangeTree\Range.cs" />
+    <Compile Include="RangeTree\RangeTree.cs" />
+    <Compile Include="RangeTree\RangeTreeNode.cs" />
     <Compile Include="ScanState.cs" />
   </ItemGroup>
   <ItemGroup>
