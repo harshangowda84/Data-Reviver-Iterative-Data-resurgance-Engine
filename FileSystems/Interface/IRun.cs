@@ -15,7 +15,7 @@
 
 using KFS.DataStream;
 
-namespace KFS.FileSystems.NTFS {
+namespace KFS.FileSystems {
 	/// <summary>
 	/// An contiguous block of on-disk data. Used in NTFS.
 	/// </summary>

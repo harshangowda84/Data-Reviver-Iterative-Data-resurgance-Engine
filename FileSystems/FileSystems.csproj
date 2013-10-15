@@ -67,7 +67,7 @@
     <Compile Include="DataStream\SubStream.cs" />
     <Compile Include="DataStream\Util.cs" />
     <Compile Include="Interface\IFileSystemNode.cs" />
-    <Compile Include="FileSystem\NTFS\IRun.cs" />
+    <Compile Include="Interface\IRun.cs" />
     <Compile Include="FileSystem\NTFS\SparseRun.cs" />
     <Compile Include="Interface\DiskLoader.cs" />
     <Compile Include="Disks\Attributes.cs" />
