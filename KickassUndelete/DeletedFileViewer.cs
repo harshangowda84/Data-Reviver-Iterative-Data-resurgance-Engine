@@ -37,17 +37,17 @@ namespace KickassUndelete {
 		private Dictionary<FileRecoveryStatus, string> m_RecoveryDescriptions =
 				new Dictionary<FileRecoveryStatus, string>() {
                 {FileRecoveryStatus.Unknown,"Unknown"},
-                {FileRecoveryStatus.Overwritten,"Impossible"},
                 {FileRecoveryStatus.Recoverable,"Recoverable"},
-                {FileRecoveryStatus.ProbablyRecoverable,"Possibly recoverable"},
-                {FileRecoveryStatus.PartiallyRecoverable,"Partially recoverable (may be corrupt)"}};
+                {FileRecoveryStatus.MaybeOverwritten,"Maybe overwritten (corrupt)"},
+                {FileRecoveryStatus.PartiallyOverwritten,"Partially overwritten (corrupt)"},
+                {FileRecoveryStatus.Overwritten,"Completely overwritten"}};
 		private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
 				new Dictionary<FileRecoveryStatus, Color>() {
                 {FileRecoveryStatus.Unknown,Color.FromArgb(255,222,168)}, // Orange
-                {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)}, // Red
                 {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)}, // Green
-                {FileRecoveryStatus.ProbablyRecoverable,Color.FromArgb(255,222,168)}, // Green
-                {FileRecoveryStatus.PartiallyRecoverable,Color.FromArgb(255,222,168)}}; // Orange
+                {FileRecoveryStatus.MaybeOverwritten,Color.FromArgb(255,222,168)}, // Orange
+                {FileRecoveryStatus.PartiallyOverwritten,Color.FromArgb(255,222,168)}, // Orange
+                {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)}}; // Orange
 
 		private HashSet<string> m_SystemFileExtensions =
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
@@ -125,10 +125,11 @@ namespace KickassUndelete {
 		/// </summary>
 		void state_ScanFinished(object sender, EventArgs ea) {
 			try {
-				this.Invoke(new Action(() =>
-				{
+				this.Invoke(new Action(() => {
 					foreach (ListViewItem item in m_Files) {
 						item.SubItems[4].Text = ((INodeMetadata)item.Tag).GetFileSystemNode().Path;
+						item.SubItems[5].Text = m_RecoveryDescriptions[((INodeMetadata)item.Tag).ChanceOfRecovery];
+						item.BackColor = m_RecoveryColors[((INodeMetadata)item.Tag).ChanceOfRecovery];
 					}
 
 					SetScanButtonFinished();
@@ -217,10 +218,10 @@ namespace KickassUndelete {
                 extInfo.FriendlyName,
                 Util.FileSizeToHumanReadableString(node.Size),
                 metadata.LastModified.ToString(CultureInfo.CurrentCulture),
-				node.Path,
-                m_RecoveryDescriptions[metadata.GetChanceOfRecovery()]
+								node.Path,
+                m_RecoveryDescriptions[metadata.ChanceOfRecovery]
             });
-			lvi.BackColor = m_RecoveryColors[metadata.GetChanceOfRecovery()];
+			lvi.BackColor = m_RecoveryColors[metadata.ChanceOfRecovery];
 
 			lvi.ImageKey = ext;
 			lvi.Tag = metadata;

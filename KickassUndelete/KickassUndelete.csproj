@@ -134,7 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileSystems\FileSystems.csproj">
-      <Project>{30DD8332-FA7A-4BA5-BA90-879C9848CF57}</Project>
+      <Project>{30dd8332-fa7a-4ba5-ba90-879c9848cf57}</Project>
       <Name>FileSystems</Name>
     </ProjectReference>
     <ProjectReference Include="..\GuiComponents\GuiComponents.csproj">

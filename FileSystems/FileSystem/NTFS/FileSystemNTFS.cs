@@ -131,9 +131,9 @@ namespace KFS.FileSystems.NTFS {
 						}
 					}
 					if (usedClusters == 0) {
-						return FileRecoveryStatus.ProbablyRecoverable;
+						return FileRecoveryStatus.MaybeOverwritten;
 					} else if (usedClusters < totalClusters) {
-						return FileRecoveryStatus.PartiallyRecoverable;
+						return FileRecoveryStatus.PartiallyOverwritten;
 					} else {
 						return FileRecoveryStatus.Overwritten;
 					}

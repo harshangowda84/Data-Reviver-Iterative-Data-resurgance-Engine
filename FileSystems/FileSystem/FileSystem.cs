@@ -20,13 +20,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace KFS.FileSystems {
-	public enum FileRecoveryStatus {
-		Unknown = 0,
-		Recoverable = 1,
-		ProbablyRecoverable = 2,
-		PartiallyRecoverable = 3,
-		Overwritten = 4
-	}
 	/// <summary>
 	/// The abstract FileSystem class. Call FileSystem.TryLoad() to load a
 	/// filesystem from an IFileSystemStore.

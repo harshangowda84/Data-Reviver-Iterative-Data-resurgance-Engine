@@ -80,11 +80,16 @@ namespace KFS.FileSystems {
 		}
 
 		private FileRecoveryStatus _recoveryStatus = FileRecoveryStatus.Unknown;
-		public FileRecoveryStatus GetChanceOfRecovery() {
-			if (_recoveryStatus == FileRecoveryStatus.Unknown) {
-				return FileSystem.GetChanceOfRecovery(this);
+		public FileRecoveryStatus ChanceOfRecovery {
+			get {
+				if (_recoveryStatus == FileRecoveryStatus.Unknown) {
+					return FileSystem.GetChanceOfRecovery(this);
+				}
+				return _recoveryStatus;
 			}
-			return _recoveryStatus;
+			set {
+				_recoveryStatus = value;
+			}
 		}
 
 		#region IDataStream Members

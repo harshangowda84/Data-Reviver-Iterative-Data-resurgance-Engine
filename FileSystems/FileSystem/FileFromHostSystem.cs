@@ -46,8 +46,9 @@ namespace KFS.FileSystems {
 			return this;
 		}
 
-		public FileRecoveryStatus GetChanceOfRecovery() {
-			throw new NotImplementedException();
+		public FileRecoveryStatus ChanceOfRecovery {
+			get { throw new NotImplementedException(); }
+			set { throw new NotImplementedException(); }
 		}
 
 		public override String StreamName {

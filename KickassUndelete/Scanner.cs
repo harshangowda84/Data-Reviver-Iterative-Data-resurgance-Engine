@@ -18,6 +18,7 @@ using KFS.FileSystems.NTFS;
 using MB.Algodat;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace KickassUndelete {
@@ -145,6 +146,18 @@ namespace KickassUndelete {
 					var record = file as MFTRecord;
 					var node = file.GetFileSystemNode();
 					node.Path = GetPathForRecord(parentLinks, recordNames, record.RecordNum);
+					if (record.ChanceOfRecovery == FileRecoveryStatus.MaybeOverwritten) {
+						record.ChanceOfRecovery = FileRecoveryStatus.Recoverable;
+						// Query all the runs for this node.
+						foreach (IRun run in record.Runs) {
+							List<RangeItem> overlapping = runIndex.Query(new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters));
+
+							if (overlapping.Count(x => x.Metadata != file) > 0) {
+								record.ChanceOfRecovery = FileRecoveryStatus.PartiallyOverwritten;
+								break;
+							}
+						}
+					}
 				}
 			}
 

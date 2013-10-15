@@ -13,18 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-
 namespace KFS.FileSystems {
-	/// <summary>
-	/// A metadata record for a filesystem node.
-	/// </summary>
-	public interface INodeMetadata {
-		string Name { get; }
-		ulong Size { get; }
-		DateTime LastModified { get; }
-		bool Deleted { get; }
-		IFileSystemNode GetFileSystemNode();
-		FileRecoveryStatus ChanceOfRecovery { get; set; }
+	public enum FileRecoveryStatus {
+		Unknown = 0,
+		Recoverable = 1,
+		MaybeOverwritten = 2,
+		PartiallyOverwritten = 3,
+		Overwritten = 4
 	}
 }

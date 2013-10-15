@@ -139,6 +139,7 @@ namespace KFS.FileSystems.NTFS {
 		private byte[] m_Data;
 		private MFTLoadDepth m_DataLoaded = MFTLoadDepth.None;
 		private string m_Path = "";
+		private FileRecoveryStatus m_ChanceOfRecovery = FileRecoveryStatus.Unknown;
 
 		public static MFTRecord Load(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
@@ -441,8 +442,16 @@ namespace KFS.FileSystems.NTFS {
 			}
 		}
 
-		public FileRecoveryStatus GetChanceOfRecovery() {
-			return GetFileSystemNode().GetChanceOfRecovery();
+		public FileRecoveryStatus ChanceOfRecovery {
+			get {
+				if (m_ChanceOfRecovery == FileRecoveryStatus.Unknown) {
+					m_ChanceOfRecovery = GetFileSystemNode().ChanceOfRecovery;
+				}
+				return m_ChanceOfRecovery;
+			}
+			set {
+				m_ChanceOfRecovery = value;
+			}
 		}
 	}
 }
