@@ -14,12 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using KFS.DataStream;
+using System;
 
 namespace KFS.FileSystems {
 	/// <summary>
 	/// An contiguous block of on-disk data. Used in NTFS.
 	/// </summary>
-	public interface IRun : IDataStream {
+	public interface IRun : IDataStream, IComparable {
 		ulong VCN { get; }
 		ulong LCN { get; }
 		ulong LengthInClusters { get; }

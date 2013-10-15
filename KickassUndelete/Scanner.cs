@@ -15,6 +15,7 @@
 
 using KFS.FileSystems;
 using KFS.FileSystems.NTFS;
+using MB.Algodat;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -81,9 +82,12 @@ namespace KickassUndelete {
 		/// Runs a scan.
 		/// </summary>
 		private void Run() {
+			// Dictionaries to figure out paths.
 			// TODO: This could probably be one record[]
 			Dictionary<ulong, ulong> parentLinks = new Dictionary<ulong, ulong>();
 			Dictionary<ulong, string> recordNames = new Dictionary<ulong, string>();
+
+			IRangeTree<ulong, RangeItem> runIndex = new RangeTree<ulong, RangeItem>(new RangeItemComparer());
 
 			ulong numFiles;
 
@@ -107,6 +111,10 @@ namespace KickassUndelete {
 				if (record != null) {
 					parentLinks[record.RecordNum] = record.ParentDirectory;
 					recordNames[record.RecordNum] = record.Name;
+
+					foreach (IRun run in record.Runs) {
+						runIndex.Add(new RangeItem(run, record));
+					}
 				}
 
 				if (metadata != null && metadata.Deleted && metadata.Name != null

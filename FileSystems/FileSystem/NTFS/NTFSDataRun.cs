@@ -91,5 +91,17 @@ namespace KFS.FileSystems.NTFS {
 		public override string ToString() {
 			return string.Format("Run: VCN {0}, Length {1}, LCN {2}", VCN, LengthInClusters, LCN);
 		}
+
+		public int CompareTo(object obj) {
+			if (obj == null) {
+				return 1;
+			}
+			IRun otherRun = obj as IRun;
+			if (otherRun != null) {
+				return this.LCN.CompareTo(otherRun.LCN);
+			} else {
+				throw new ArgumentException("Object is not an IRun");
+			}
+		}
 	}
 }

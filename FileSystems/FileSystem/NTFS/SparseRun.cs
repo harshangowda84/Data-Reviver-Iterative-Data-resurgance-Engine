@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using KFS.DataStream;
+using System;
 
 namespace KFS.FileSystems.NTFS {
 	/// <summary>
@@ -64,6 +65,18 @@ namespace KFS.FileSystems.NTFS {
 
 		public override string ToString() {
 			return "Sparse " + base.ToString();
+		}
+
+		public int CompareTo(object obj) {
+			if (obj == null) {
+				return 1;
+			}
+			IRun otherRun = obj as IRun;
+			if (otherRun != null) {
+				return this.LCN.CompareTo(otherRun.LCN);
+			} else {
+				throw new ArgumentException("Object is not an IRun");
+			}
 		}
 	}
 }
