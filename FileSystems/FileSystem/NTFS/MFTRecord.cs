@@ -117,6 +117,15 @@ namespace KFS.FileSystems.NTFS {
 				return m_DataAttribute;
 			}
 		}
+		public IList<IRun> Runs {
+			get {
+				var dataAttribute = DataAttribute;
+				if (dataAttribute != null && dataAttribute.Runs != null) {
+					return dataAttribute.Runs;
+				}
+				return new List<IRun>();
+			}
+		}
 		private List<MFTAttribute> m_NamedDataAttributes = new List<MFTAttribute>();
 		public IList<MFTAttribute> NamedDataAttributes {
 			get {
