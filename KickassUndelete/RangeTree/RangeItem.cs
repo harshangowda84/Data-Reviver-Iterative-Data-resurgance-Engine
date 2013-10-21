@@ -23,7 +23,8 @@ namespace KickassUndelete {
 	/// </summary>
 	public class RangeItem : IRangeProvider<ulong> {
 		public RangeItem(IRun run, ulong mftRecordNumber) {
-			Range = new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters);
+			// We subtract 1 below because ranges are inclusive.
+			Range = new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters - 1);
 			MFTRecordNumber = mftRecordNumber;
 		}
 

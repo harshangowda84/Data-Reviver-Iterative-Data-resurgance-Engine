@@ -150,7 +150,7 @@ namespace KickassUndelete {
 						record.ChanceOfRecovery = FileRecoveryStatus.Recoverable;
 						// Query all the runs for this node.
 						foreach (IRun run in record.Runs) {
-							List<RangeItem> overlapping = runIndex.Query(new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters));
+							List<RangeItem> overlapping = runIndex.Query(new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters - 1));
 
 							if (overlapping.Count(x => x.MFTRecordNumber != record.RecordNum) > 0) {
 								record.ChanceOfRecovery = FileRecoveryStatus.PartiallyOverwritten;
