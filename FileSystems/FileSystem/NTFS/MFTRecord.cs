@@ -222,6 +222,11 @@ namespace KFS.FileSystems.NTFS {
 			}
 
 			m_DataLoaded = loadDepth;
+
+			// If we've loaded everything, dispose of the underlying byte array.
+			if (m_DataLoaded == MFTLoadDepth.Full) {
+				m_Data = null;
+			}
 		}
 
 		public static DateTime fromNTFS(ulong time) {
