@@ -28,7 +28,7 @@ namespace KickassUndelete {
 			ParentRecord = record.ParentDirectory;
 		}
 		public string FileName { get; private set; }
-		public string Path { get; private set; }
+		public string Path { get; set; }
 		public bool IsDirectory { get; private set; }
 		public ulong RecordNumber { get; private set; }
 		public ulong ParentRecord { get; private set; }

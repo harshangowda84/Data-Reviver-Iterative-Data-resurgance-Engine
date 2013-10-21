@@ -18,6 +18,7 @@ using KFS.FileSystems.NTFS;
 using MB.Algodat;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -143,7 +144,7 @@ namespace KickassUndelete {
 				foreach (var file in fileList) {
 					var record = file as MFTRecord;
 					var node = file.GetFileSystemNode();
-					node.Path = GetPathForRecord(recordTree, record.ParentDirectory) + "\\" + node.Path;
+					node.Path = Path.Combine(GetPathForRecord(recordTree, record.ParentDirectory), node.Path);
 					if (record.ChanceOfRecovery == FileRecoveryStatus.MaybeOverwritten) {
 						record.ChanceOfRecovery = FileRecoveryStatus.Recoverable;
 						// Query all the runs for this node.
@@ -174,19 +175,22 @@ namespace KickassUndelete {
 			}
 		}
 
-		private string GetPathForRecord(Dictionary<ulong, LightweightMFTRecord> recordTree,
-										ulong recordNum) {
+		private string GetPathForRecord(Dictionary<ulong, LightweightMFTRecord> recordTree, ulong recordNum) {
 			if (recordNum == 0 || !recordTree.ContainsKey(recordNum)
 					|| recordTree[recordNum].ParentRecord == recordNum) {
 				// This is the root record
-				return "";
-			} else if (!recordTree[recordNum].IsDirectory) {
-				// This isn't a directory, so the path must have been broken.
-				return "\\?";
+				return DiskName.Substring(0, 2) + "\\";
 			} else {
 				var record = recordTree[recordNum];
-				return (GetPathForRecord(recordTree, record.ParentRecord)) +
-					"\\" + record.FileName;
+				if (record.Path == null) {
+					if (!record.IsDirectory) {
+						// This isn't a directory, so the path must have been broken.
+						return DiskName.Substring(0, 2) + "\\?";
+					} else {
+						record.Path = System.IO.Path.Combine(GetPathForRecord(recordTree, record.ParentRecord), record.FileName);
+					}
+				}
+				return record.Path;
 			}
 		}
 
