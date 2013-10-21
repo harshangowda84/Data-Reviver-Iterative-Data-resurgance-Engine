@@ -114,7 +114,7 @@ namespace KickassUndelete {
 					recordNames[record.RecordNum] = record.Name;
 
 					foreach (IRun run in record.Runs) {
-						runIndex.Add(new RangeItem(run, record));
+						runIndex.Add(new RangeItem(run, record.RecordNum));
 					}
 				}
 
@@ -152,7 +152,7 @@ namespace KickassUndelete {
 						foreach (IRun run in record.Runs) {
 							List<RangeItem> overlapping = runIndex.Query(new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters));
 
-							if (overlapping.Count(x => x.Metadata != file) > 0) {
+							if (overlapping.Count(x => x.MFTRecordNumber != record.RecordNum) > 0) {
 								record.ChanceOfRecovery = FileRecoveryStatus.PartiallyOverwritten;
 								break;
 							}
@@ -160,6 +160,9 @@ namespace KickassUndelete {
 					}
 				}
 			}
+
+			runIndex.Clear();
+			GC.Collect();
 
 			TimeSpan timeTaken = DateTime.Now - m_StartTime;
 			if (!m_ScanCancelled) {
