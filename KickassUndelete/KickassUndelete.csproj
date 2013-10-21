@@ -85,6 +85,7 @@
     <Compile Include="ExtensionInfo.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="FileSavingQueue.cs" />
+    <Compile Include="LightweightMFTRecord.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="ListViewNoFlicker.cs">
       <SubType>Component</SubType>

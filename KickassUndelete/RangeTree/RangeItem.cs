@@ -22,14 +22,14 @@ namespace KickassUndelete {
 	/// A range item wrapping an IRun.
 	/// </summary>
 	public class RangeItem : IRangeProvider<ulong> {
-		public RangeItem(IRun run, ulong mftRecordNumber) {
+		public RangeItem(IRun run, LightweightMFTRecord record) {
 			// We subtract 1 below because ranges are inclusive.
 			Range = new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters - 1);
-			MFTRecordNumber = mftRecordNumber;
+			Record = record;
 		}
 
 		public Range<ulong> Range { get; private set; }
-		public ulong MFTRecordNumber { get; private set; }
+		public LightweightMFTRecord Record { get; private set; }
 	}
 
 	/// <summary>

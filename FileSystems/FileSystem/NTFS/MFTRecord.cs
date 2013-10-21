@@ -243,6 +243,12 @@ namespace KFS.FileSystems.NTFS {
 			}
 		}
 
+		public bool IsDirectory {
+			get {
+				return (Flags & RecordFlags.Directory) > 0;
+			}
+		}
+
 		public DateTime LastModified {
 			get {
 				return LastDataChangeTime;
@@ -259,7 +265,7 @@ namespace KFS.FileSystems.NTFS {
 		public FileSystemNode GetFileSystemNode(String path) {
 			LoadData();
 			if (m_Node == null) {
-				if ((Flags & RecordFlags.Directory) > 0) {
+				if (IsDirectory) {
 					m_Node = new FolderNTFS(this, path);
 				} else if (m_NamedDataAttributes.Count > 0) {
 					m_Node = new HiddenDataStreamFileNTFS(this, path);

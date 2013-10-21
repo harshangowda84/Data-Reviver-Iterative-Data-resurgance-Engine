@@ -83,12 +83,10 @@ namespace KickassUndelete {
 		/// Runs a scan.
 		/// </summary>
 		private void Run() {
-			// Dictionaries to figure out paths.
-			// TODO: This could probably be one record[]
-			Dictionary<ulong, ulong> parentLinks = new Dictionary<ulong, ulong>();
-			Dictionary<ulong, string> recordNames = new Dictionary<ulong, string>();
-
-			IRangeTree<ulong, RangeItem> runIndex = new RangeTree<ulong, RangeItem>(new RangeItemComparer());
+			// Dictionary storing a tree that allows us to rebuild deleted file paths.
+			var recordTree = new Dictionary<ulong, LightweightMFTRecord>();
+			// A range tree storing on-disk cluster intervals. Allows us to tell whether files are overwritten.
+			var runIndex = new RangeTree<ulong, RangeItem>(new RangeItemComparer());
 
 			ulong numFiles;
 
@@ -110,11 +108,11 @@ namespace KickassUndelete {
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
 				var record = metadata as MFTRecord;
 				if (record != null) {
-					parentLinks[record.RecordNum] = record.ParentDirectory;
-					recordNames[record.RecordNum] = record.Name;
+					var lightweightRecord = new LightweightMFTRecord(record);
+					recordTree[record.RecordNum] = lightweightRecord;
 
 					foreach (IRun run in record.Runs) {
-						runIndex.Add(new RangeItem(run, record.RecordNum));
+						runIndex.Add(new RangeItem(run, lightweightRecord));
 					}
 				}
 
@@ -145,14 +143,14 @@ namespace KickassUndelete {
 				foreach (var file in fileList) {
 					var record = file as MFTRecord;
 					var node = file.GetFileSystemNode();
-					node.Path = GetPathForRecord(parentLinks, recordNames, record.RecordNum);
+					node.Path = GetPathForRecord(recordTree, record.ParentDirectory) + "\\" + node.Path;
 					if (record.ChanceOfRecovery == FileRecoveryStatus.MaybeOverwritten) {
 						record.ChanceOfRecovery = FileRecoveryStatus.Recoverable;
 						// Query all the runs for this node.
 						foreach (IRun run in record.Runs) {
 							List<RangeItem> overlapping = runIndex.Query(new Range<ulong>(run.LCN, run.LCN + run.LengthInClusters - 1));
 
-							if (overlapping.Count(x => x.MFTRecordNumber != record.RecordNum) > 0) {
+							if (overlapping.Count(x => x.Record.RecordNumber != record.RecordNum) > 0) {
 								record.ChanceOfRecovery = FileRecoveryStatus.PartiallyOverwritten;
 								break;
 							}
@@ -162,6 +160,7 @@ namespace KickassUndelete {
 			}
 
 			runIndex.Clear();
+			recordTree.Clear();
 			GC.Collect();
 
 			TimeSpan timeTaken = DateTime.Now - m_StartTime;
@@ -175,16 +174,19 @@ namespace KickassUndelete {
 			}
 		}
 
-		private string GetPathForRecord(Dictionary<ulong, ulong> parentLinks,
-										Dictionary<ulong, string> recordNames,
+		private string GetPathForRecord(Dictionary<ulong, LightweightMFTRecord> recordTree,
 										ulong recordNum) {
-			if (recordNum == 0 || !parentLinks.ContainsKey(recordNum) || parentLinks[recordNum] == recordNum) {
+			if (recordNum == 0 || !recordTree.ContainsKey(recordNum)
+					|| recordTree[recordNum].ParentRecord == recordNum) {
+				// This is the root record
 				return "";
+			} else if (!recordTree[recordNum].IsDirectory) {
+				// This isn't a directory, so the path must have been broken.
+				return "\\?";
 			} else {
-				if (!recordNames.ContainsKey(recordNum))
-					throw new Exception("Record name not found: " + recordNum);
-				return (GetPathForRecord(parentLinks, recordNames, parentLinks[recordNum])) +
-					"\\" + recordNames[recordNum];
+				var record = recordTree[recordNum];
+				return (GetPathForRecord(recordTree, record.ParentRecord)) +
+					"\\" + record.FileName;
 			}
 		}
 
