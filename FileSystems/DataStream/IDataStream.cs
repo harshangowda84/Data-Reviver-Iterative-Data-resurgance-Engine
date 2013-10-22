@@ -20,7 +20,6 @@ namespace KFS.DataStream {
 	/// An interface for interacting with streams of data.
 	/// </summary>
 	public interface IDataStream {
-		byte GetByte(ulong offset);
 		byte[] GetBytes(ulong offset, ulong length);
 		ulong DeviceOffset { get; }
 		ulong StreamLength { get; }

@@ -29,10 +29,6 @@ namespace KFS.DataStream {
 			m_length = length;
 		}
 
-		public virtual byte GetByte(ulong offset) {
-			return m_stream.GetByte(m_start + offset);
-		}
-
 		public virtual byte[] GetBytes(ulong offset, ulong length) {
 			return m_stream.GetBytes(m_start + offset, length);
 		}

@@ -67,10 +67,6 @@ namespace KFS.FileSystems.FAT {
 
 		private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
 
-		public override byte GetByte(ulong offset) {
-			return GetBytes(offset, 1)[0];
-		}
-
 		public override byte[] GetBytes(ulong _offset, ulong _length) {
 			long offset = (long)_offset;
 			long length = (long)_length;

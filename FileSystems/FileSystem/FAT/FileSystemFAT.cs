@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using KFS.DataStream;
 using KFS.Disks;
 using System;
 using System.Collections.Generic;
@@ -47,10 +48,7 @@ namespace KFS.FileSystems.FAT {
 		ushort BPB_BkBootSec;
 
 		private void LoadBPB() {
-			byte[] bpb = new byte[BPB_SIZE];
-			for (int i = 0; i < BPB_SIZE; i++) {
-				bpb[i] = Store.GetByte((ulong)i);
-			}
+			byte[] bpb = Store.GetBytes(0, BPB_SIZE);
 			BS_OEMName = ASCIIEncoding.ASCII.GetString(bpb, 3, 8);
 			BPB_BytsPerSec = BitConverter.ToUInt16(bpb, 11);
 			BPB_SecPerClus = bpb[13];
@@ -109,11 +107,7 @@ namespace KFS.FileSystems.FAT {
 			if (N < 0 || FATOffset > FATSize * SectorsPerCluster) return 0;
 
 			long FATEntryLoc = _FATLocation + FATOffset;
-			byte[] data = new byte[4];
-			for (int i = 0; i < entrySize; i++) {
-				data[i] = Store.GetByte((ulong)(FATEntryLoc + i));
-			}
-			return BitConverter.ToUInt32(data, 0);
+			return (uint)Util.GetArbitraryUInt(Store, (ulong)FATEntryLoc, entrySize);
 		}
 
 		public long GetNextCluster(long N) {

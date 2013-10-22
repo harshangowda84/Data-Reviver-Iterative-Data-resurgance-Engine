@@ -58,16 +58,6 @@ namespace KFS.FileSystems.NTFS {
 			m_SectorSize = sectorSize;
 		}
 
-		public override byte GetByte(ulong offset) {
-			if (offset % m_SectorSize == m_SectorSize - 2) {
-				return (byte)(m_Array[offset / m_SectorSize] & 0xFF);
-			} else if (offset % m_SectorSize == m_SectorSize - 1) {
-				return (byte)((m_Array[offset / m_SectorSize] >> 8) & 0xFF);
-			} else {
-				return base.GetByte(offset);
-			}
-		}
-
 		public override byte[] GetBytes(ulong offset, ulong length) {
 			byte[] res = base.GetBytes(offset, length);
 			ulong current = offset - (offset % m_SectorSize) + m_SectorSize - 2;

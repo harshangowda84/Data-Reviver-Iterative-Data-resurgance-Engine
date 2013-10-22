@@ -64,6 +64,10 @@ namespace KFS.DataStream {
 			return stream.GetBytes(0, stream.StreamLength);
 		}
 
+		public static byte GetByte(IDataStream stream, ulong offset) {
+			return stream.GetBytes(offset, 1)[0];
+		}
+
 		public static int GetInt32(IDataStream stream, ulong offset) {
 			return BitConverter.ToInt32(stream.GetBytes(offset, 4), 0);
 		}
@@ -107,6 +111,10 @@ namespace KFS.DataStream {
 			return BitConverter.ToUInt64(stream.GetBytes(offset, 8), 0);
 		}
 
+		public static ulong GetArbitraryUInt(IDataStream stream, ulong offset, int intSize) {
+			return GetArbitraryUInt(stream.GetBytes(offset, (ulong)intSize), 0, intSize);
+		}
+
 		public static ulong GetArbitraryUInt(byte[] data, int offset, int intSize) {
 			if (intSize > 8) throw new Exception("We can't get numbers bigger than ulongs");
 
@@ -141,15 +149,9 @@ namespace KFS.DataStream {
 			}
 		}
 
-		public static ulong StrLen(IDataStream stream, ulong offset) {
-			ulong i = 0;
-			while (offset + i < stream.StreamLength && stream.GetByte(offset + i) != 0) i++;
-			return i;
-		}
-
 		public static ulong StrLen(IDataStream stream, ulong offset, ulong max) {
 			ulong i = 0;
-			while (i < max && offset + i < stream.StreamLength && stream.GetByte(offset + i) != 0) i++;
+			while (i < max && offset + i < stream.StreamLength && Util.GetByte(stream, offset + i) != 0) i++;
 			return i;
 		}
 

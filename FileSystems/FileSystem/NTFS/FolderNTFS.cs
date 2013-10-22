@@ -110,9 +110,9 @@ namespace KFS.FileSystems.NTFS {
 				indexedFile = Util.GetUInt64(stream, offset);
 				indexEntryLength = Util.GetUInt16(stream, offset + 8);
 				filenameOffset = Util.GetUInt16(stream, offset + 10);
-				flags = stream.GetByte(offset + 12);
+				flags = Util.GetByte(stream, offset + 12);
 				if (indexEntryLength > 0x50) {
-					filenameLength = stream.GetByte(offset + 0x50);
+					filenameLength = Util.GetByte(stream, offset + 0x50);
 					Name = Util.GetUnicodeString(stream, offset + 0x52, (ulong)filenameLength * 2);
 					DummyEntry = false;
 				} else {
@@ -264,7 +264,7 @@ namespace KFS.FileSystems.NTFS {
 			//Index Root
 			UInt32 attrTypes = Util.GetUInt32(stream, 0x0);
 			UInt32 indexBufferSize = Util.GetUInt32(stream, 0x8);
-			Byte clustersPerIndexBuffer = stream.GetByte(0xC);
+			Byte clustersPerIndexBuffer = Util.GetByte(stream, 0xC);
 			UInt32 size = Util.GetUInt32(stream, 0x14);
 			UInt32 size2 = Util.GetUInt32(stream, 0x18);
 			UInt32 flags = Util.GetUInt32(stream, 0x1C);
@@ -329,10 +329,6 @@ namespace KFS.FileSystems.NTFS {
 				}
 				return res;
 			}
-		}
-
-		public override byte GetByte(ulong offset) {
-			return _indexRoot.GetByte(offset);
 		}
 
 		public override byte[] GetBytes(ulong offset, ulong length) {

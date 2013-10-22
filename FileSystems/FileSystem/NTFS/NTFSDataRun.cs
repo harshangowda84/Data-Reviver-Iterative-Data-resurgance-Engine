@@ -46,14 +46,6 @@ namespace KFS.FileSystems.NTFS {
 
 		#region IDataStream Members
 
-		public virtual byte GetByte(ulong offset) {
-			if (offset < m_lengthInBytes) {
-				return m_record.PartitionStream.GetByte(LCN * m_bytesPerCluster + offset);
-			} else {
-				throw new Exception("Offset does not exist in this run!");
-			}
-		}
-
 		public virtual byte[] GetBytes(ulong offset, ulong length) {
 			if (offset + length - 1 < m_lengthInBytes) {
 				return m_record.PartitionStream.GetBytes(LCN * m_bytesPerCluster + offset, length);

@@ -52,10 +52,6 @@ namespace KFS.FileSystems {
 			}
 		}
 
-		public override byte GetByte(ulong offset) {
-			return 0;
-		}
-
 		public override byte[] GetBytes(ulong offset, ulong length) {
 			return new byte[length];
 		}

@@ -129,10 +129,7 @@ namespace KFS.FileSystems.FAT {
 			}
 
 			public DirectoryEntry(FileSystemFAT fileSystem, long offset) {
-				byte[] data = new byte[DIR_ENTRY_SIZE];
-				for (int i = 0; i < DIR_ENTRY_SIZE; i++) {
-					data[i] = fileSystem.Store.GetByte((ulong)(offset + i));
-				}
+				byte[] data = fileSystem.Store.GetBytes((ulong)offset, DIR_ENTRY_SIZE);
 				DIR_Name = ASCIIEncoding.ASCII.GetString(data, 0, 11);
 				DIR_Attr = (FATDirectoryAttributes)data[11];
 				DIR_NTRes = data[12];
@@ -292,7 +289,7 @@ namespace KFS.FileSystems.FAT {
 
 		private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
 
-		public override byte GetByte(ulong _offset) {
+		public byte GetByte(ulong _offset) {
 			long offset = (long)_offset;
 			long desiredCluster = FirstCluster + offset / FileSystem.BytesPerCluster;
 			long modOffset = offset % FileSystem.BytesPerCluster;
@@ -314,10 +311,7 @@ namespace KFS.FileSystems.FAT {
 				} else {
 					size = FileSystem.BytesPerCluster;
 				}
-				byte[] data = new byte[size];
-				for (int i = 0; i < size; i++) {
-					data[i] = FileSystem.Store.GetByte((ulong)(FileSystem.GetDiskOffsetOfFATCluster(currentCluster) + i));
-				}
+				byte[] data = FileSystem.Store.GetBytes((ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster), (ulong)size);
 				m_ClusterCache[desiredCluster] = data;
 			}
 			if (m_ClusterCache[desiredCluster] == null) {

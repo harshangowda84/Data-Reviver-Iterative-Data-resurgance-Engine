@@ -27,13 +27,6 @@ namespace KFS.Disks {
 
 		#region IDataStream Members
 
-		public byte GetByte(ulong offset) {
-			if ((ulong)offset >= Length) {
-				throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");
-			}
-			return PhysicalDisk.GetByte(offset + Offset);
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			if ((ulong)offset + length - 1 >= Length) {
 				throw new IndexOutOfRangeException("Tried to read off the end of the physical disk!");

@@ -54,25 +54,6 @@ namespace KFS.FileSystems.NTFS {
 			return m_nonResident ? new ReadOnlyCollection<IRun>(m_runs) : null;
 		}
 
-		public byte GetByte(ulong offset) {
-			if (offset >= m_length) {
-				throw new Exception("Offset was off the end of the file!");
-			}
-			if (m_nonResident) {
-				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
-				ulong clusterNum = offset / bytesPerCluster;
-				foreach (NTFSDataRun run in m_runs) {
-					if (clusterNum >= run.VCN && clusterNum < run.VCN + run.LengthInClusters) {
-						return run.GetByte(offset - run.VCN * bytesPerCluster);
-					}
-				}
-				//throw new Exception("No run contained the requested offset!");
-				return 0;
-			} else {
-				return m_residentStream.GetByte(offset);
-			}
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			if (offset + length > m_length) {
 				throw new ArgumentOutOfRangeException(string.Format("Tried to read off the end of the file! offset = {0}, length = {1}, file length = {2}", offset, length, m_length));

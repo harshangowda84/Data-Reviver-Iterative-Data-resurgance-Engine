@@ -59,10 +59,6 @@ namespace KFS.FileSystems.NTFS {
 			return new List<IFileSystemNode>();
 		}
 
-		public override byte GetByte(ulong offset) {
-			return 0;
-		}
-
 		public override byte[] GetBytes(ulong offset, ulong length) {
 			return new byte[length];
 		}

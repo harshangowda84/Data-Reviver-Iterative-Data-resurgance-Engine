@@ -94,8 +94,6 @@ namespace KFS.FileSystems {
 
 		#region IDataStream Members
 
-		public abstract byte GetByte(ulong offset);
-
 		public abstract byte[] GetBytes(ulong offset, ulong length);
 
 		public abstract ulong StreamLength { get; }
