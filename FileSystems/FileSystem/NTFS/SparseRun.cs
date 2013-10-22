@@ -29,10 +29,6 @@ namespace KFS.FileSystems.NTFS {
 			StreamLength = lengthInClusters * clusterSize;
 		}
 
-		public byte GetByte(ulong offset) {
-			return 0;
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			return new byte[length];
 		}

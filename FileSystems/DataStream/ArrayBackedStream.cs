@@ -33,10 +33,6 @@ namespace KFS.DataStream {
 			m_Length = length;
 		}
 
-		public byte GetByte(ulong offset) {
-			return m_Data[(int)(m_Offset + offset)];
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			byte[] result = new byte[length];
 			Array.Copy(m_Data, (int)(m_Offset + offset), result, 0, (int)length);

@@ -89,13 +89,6 @@ namespace KFS.Disks {
 
 		FileDataStream fileStream = null;
 
-		public byte GetByte(ulong offset) {
-			if (fileStream == null) {
-				Open();
-			}
-			return fileStream.GetByte(offset);
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			if (fileStream == null) {
 				Open();

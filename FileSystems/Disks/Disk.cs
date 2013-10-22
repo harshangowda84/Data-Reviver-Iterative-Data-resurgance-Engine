@@ -23,10 +23,6 @@ namespace KFS.Disks {
 	public abstract class Disk : IDataStream {
 		#region IDataStream Members
 
-		public byte GetByte(ulong offset) {
-			return GetBytes(offset, 1)[0];
-		}
-
 		private object padlock = new object();
 		private const ulong CACHE_LINE_SIZE = 64 * 1024; // Read 64KB at a time from disk
 		private ulong current_cache_line = ulong.MaxValue;

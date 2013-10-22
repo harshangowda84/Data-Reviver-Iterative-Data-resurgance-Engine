@@ -30,15 +30,6 @@ namespace KFS.DataStream {
 			Open();
 		}
 
-		public byte GetByte(ulong offset) {
-			if (fs != null) {
-				fs.Seek((long)offset, SeekOrigin.Begin);
-				return (byte)fs.ReadByte();
-			} else {
-				throw new Exception("FileDataStream was closed");
-			}
-		}
-
 		public byte[] GetBytes(ulong offset, ulong length) {
 			if (fs != null) {
 				fs.Seek((long)offset, SeekOrigin.Begin);
