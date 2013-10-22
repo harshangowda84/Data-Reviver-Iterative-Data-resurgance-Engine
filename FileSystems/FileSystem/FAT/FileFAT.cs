@@ -95,7 +95,15 @@ namespace KFS.FileSystems.FAT {
 					offset = 0;
 					length -= read;
 					resindex += read;
-					currentCluster = FileSystem.GetNextCluster(currentCluster);
+					if (Deleted) {
+						// Just try reading contiguous blocks until we run out of space.
+						// When a file is deleted in FAT, its entries are removed from
+						// the allocation table. This code allows us to recover contiguous
+						// deleted files.
+						currentCluster++;
+					} else {
+						currentCluster = FileSystem.GetNextCluster(currentCluster);
+					}
 				}
 				return res;
 			}
