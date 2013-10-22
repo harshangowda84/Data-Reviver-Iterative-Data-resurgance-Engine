@@ -94,6 +94,7 @@ namespace KFS.FileSystems.FAT {
 					Array.Copy(m_ClusterCache[currentCluster], offset, res, resindex, read);
 					offset = 0;
 					length -= read;
+					resindex += read;
 					currentCluster = FileSystem.GetNextCluster(currentCluster);
 				}
 				return res;
