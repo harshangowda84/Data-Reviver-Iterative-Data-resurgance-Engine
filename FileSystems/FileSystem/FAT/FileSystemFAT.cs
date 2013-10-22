@@ -104,7 +104,7 @@ namespace KFS.FileSystems.FAT {
 			}
 			long FATOffset = N * entrySize;
 
-			if (N < 0 || FATOffset > FATSize * BytesPerCluster) return 0;
+			if (N < 0 || FATOffset > FATSize * BytesPerSector) return 0;
 
 			long FATEntryLoc = _FATLocation + FATOffset;
 			return (uint)Util.GetArbitraryUInt(Store, (ulong)FATEntryLoc, entrySize);
