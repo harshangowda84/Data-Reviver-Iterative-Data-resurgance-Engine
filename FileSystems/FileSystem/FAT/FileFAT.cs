@@ -58,6 +58,7 @@ namespace KFS.FileSystems.FAT {
 			long currentCluster = FirstCluster;
 			_length = 0;
 			while (currentCluster >= 0) {
+				// Note: This won't correctly calculate the length of a deleted file.
 				currentCluster = FileSystem.GetNextCluster(currentCluster);
 				_length += FileSystem.BytesPerCluster;
 			}

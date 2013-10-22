@@ -268,7 +268,7 @@ namespace KFS.FileSystems.FAT {
 						pos += DIR_ENTRY_SIZE;
 					} else {
 						// check the FAT
-						currentCluster = FileSystem.GetNextCluster(currentCluster);
+						currentCluster = GetNextCluster(currentCluster);
 						if (currentCluster < 0) break;
 						pos = clusterStart = FileSystem.GetDiskOffsetOfFATCluster(currentCluster);
 					}
@@ -289,44 +289,63 @@ namespace KFS.FileSystems.FAT {
 
 		private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
 
-		public byte GetByte(ulong _offset) {
+		public override byte[] GetBytes(ulong _offset, ulong _length) {
 			long offset = (long)_offset;
-			long desiredCluster = FirstCluster + offset / FileSystem.BytesPerCluster;
-			long modOffset = offset % FileSystem.BytesPerCluster;
-			if (!m_ClusterCache.ContainsKey(desiredCluster)) {
-				long currentCluster = FirstCluster;
-				if (!(root && FileSystem.Type == PartitionType.FAT16)) {
-					while (offset >= FileSystem.BytesPerCluster) {
-						currentCluster = FileSystem.GetNextCluster(currentCluster);
-						if (currentCluster < 0) {
-							m_ClusterCache[desiredCluster] = null;
-						}
+			long length = (long)_length;
+			long currentCluster = FirstCluster;
+
+			lock (m_ClusterCache) {
+				byte[] res = new byte[length];
+
+				// First, handle the case in FAT16 where the root directory is fixed.
+				if (root && FileSystem.Type == PartitionType.FAT16) {
+					if (!m_ClusterCache.ContainsKey(currentCluster)) {
+						m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+									(ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
+									(ulong)FileSystem.RootEntryCount * DIR_ENTRY_SIZE);
+					}
+					// Read the cached data.
+					Array.Copy(m_ClusterCache[currentCluster], offset, res, 0, length);
+				} else { // Now handle the general case.
+					long resindex = 0;
+					// Find the first cluster we want to read.
+					while (offset >= FileSystem.BytesPerCluster && currentCluster >= 0) {
+						currentCluster = GetNextCluster(currentCluster);
 						offset -= FileSystem.BytesPerCluster;
 					}
-					Debug.Assert(offset == modOffset);
+					// Cache and retrieve the data for each cluster until we get all we need.
+					while (length > 0 && currentCluster >= 0) {
+						// Cache the current cluster.
+						if (!m_ClusterCache.ContainsKey(currentCluster)) {
+							m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+									(ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
+									(ulong)FileSystem.BytesPerCluster);
+						}
+
+						// Read the cached data.
+						long read = Math.Min(length, FileSystem.BytesPerCluster - offset);
+						Array.Copy(m_ClusterCache[currentCluster], offset, res, resindex, read);
+						offset = 0;
+						length -= read;
+						resindex += read;
+						currentCluster = GetNextCluster(currentCluster);
+					}
 				}
-				long size;
-				if (root && FileSystem.Type == PartitionType.FAT16) {
-					size = FileSystem.RootEntryCount * DIR_ENTRY_SIZE;
-				} else {
-					size = FileSystem.BytesPerCluster;
-				}
-				byte[] data = FileSystem.Store.GetBytes((ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster), (ulong)size);
-				m_ClusterCache[desiredCluster] = data;
-			}
-			if (m_ClusterCache[desiredCluster] == null) {
-				return 0; // deleted file
-			} else {
-				return m_ClusterCache[desiredCluster][modOffset];
+				return res;
 			}
 		}
 
-		public override byte[] GetBytes(ulong offset, ulong length) {
-			byte[] res = new byte[length];
-			for (uint i = 0; i < length; i++) {
-				res[i] = GetByte(offset + i);
+		private long GetNextCluster(long currentCluster) {
+			var nextCluster = FileSystem.GetNextCluster(currentCluster);
+			if (nextCluster < 0) {
+				// Just try reading contiguous blocks until we run out of space.
+				// When a file is deleted in FAT, its entries are removed from
+				// the allocation table. This code allows us to recover contiguous
+				// deleted files.
+				return currentCluster + 1;
+			} else {
+				return nextCluster;
 			}
-			return res;
 		}
 
 		ulong m_StreamLength = ulong.MaxValue;
@@ -359,7 +378,7 @@ namespace KFS.FileSystems.FAT {
 								pos += DIR_ENTRY_SIZE;
 							} else {
 								// check the FAT
-								currentCluster = FileSystem.GetNextCluster(currentCluster);
+								currentCluster = GetNextCluster(currentCluster);
 								if (currentCluster < 0) break;
 								pos = clusterStart = FileSystem.GetDiskOffsetOfFATCluster(currentCluster);
 							}
