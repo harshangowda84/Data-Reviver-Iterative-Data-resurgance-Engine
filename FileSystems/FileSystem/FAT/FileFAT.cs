@@ -77,7 +77,7 @@ namespace KFS.FileSystems.FAT {
 				long resindex = 0;
 				// Find the first cluster we want to read.
 				while (offset >= FileSystem.BytesPerCluster && currentCluster >= 0) {
-					currentCluster = FileSystem.GetNextCluster(currentCluster);
+					currentCluster = GetNextCluster(currentCluster);
 					offset -= FileSystem.BytesPerCluster;
 				}
 				// Cache and retrieve the data for each cluster until we get all we need.
@@ -95,17 +95,21 @@ namespace KFS.FileSystems.FAT {
 					offset = 0;
 					length -= read;
 					resindex += read;
-					if (Deleted) {
-						// Just try reading contiguous blocks until we run out of space.
-						// When a file is deleted in FAT, its entries are removed from
-						// the allocation table. This code allows us to recover contiguous
-						// deleted files.
-						currentCluster++;
-					} else {
-						currentCluster = FileSystem.GetNextCluster(currentCluster);
-					}
+					currentCluster = GetNextCluster(currentCluster);
 				}
 				return res;
+			}
+		}
+
+		private long GetNextCluster(long currentCluster) {
+			if (Deleted) {
+				// Just try reading contiguous blocks until we run out of space.
+				// When a file is deleted in FAT, its entries are removed from
+				// the allocation table. This code allows us to recover contiguous
+				// deleted files.
+				return currentCluster + 1;
+			} else {
+				return FileSystem.GetNextCluster(currentCluster);
 			}
 		}
 
