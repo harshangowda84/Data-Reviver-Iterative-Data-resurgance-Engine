@@ -114,7 +114,7 @@ namespace KFS.FileSystems.NTFS {
 				IEnumerable<IRun> runs = file.GetRuns();
 				if (runs == null) {
 					// The data stream is resident, so recovery is trivial.
-					return FileRecoveryStatus.Recoverable;
+					return FileRecoveryStatus.Resident;
 				} else {
 					ulong totalClusters = 0;
 					ulong usedClusters = 0;

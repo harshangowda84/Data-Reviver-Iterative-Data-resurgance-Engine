@@ -37,13 +37,15 @@ namespace KickassUndelete {
 		private Dictionary<FileRecoveryStatus, string> m_RecoveryDescriptions =
 				new Dictionary<FileRecoveryStatus, string>() {
                 {FileRecoveryStatus.Unknown,"Unknown"},
-                {FileRecoveryStatus.Recoverable,"Recoverable"},
-                {FileRecoveryStatus.MaybeOverwritten,"Maybe overwritten (corrupt)"},
-                {FileRecoveryStatus.PartiallyOverwritten,"Partially overwritten (corrupt)"},
-                {FileRecoveryStatus.Overwritten,"Completely overwritten"}};
+                {FileRecoveryStatus.Resident,"Excellent"},
+                {FileRecoveryStatus.Recoverable,"Good (no data loss detected)"},
+                {FileRecoveryStatus.MaybeOverwritten,"Calculating..."},
+                {FileRecoveryStatus.PartiallyOverwritten,"Bad (data partially overwritten)"},
+                {FileRecoveryStatus.Overwritten,"Bad (data completely overwritten)"}};
 		private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
 				new Dictionary<FileRecoveryStatus, Color>() {
                 {FileRecoveryStatus.Unknown,Color.FromArgb(255,222,168)}, // Orange
+                {FileRecoveryStatus.Resident,Color.FromArgb(190,255,180)}, // Green
                 {FileRecoveryStatus.Recoverable,Color.FromArgb(190,255,180)}, // Green
                 {FileRecoveryStatus.MaybeOverwritten,Color.FromArgb(255,222,168)}, // Orange
                 {FileRecoveryStatus.PartiallyOverwritten,Color.FromArgb(255,222,168)}, // Orange

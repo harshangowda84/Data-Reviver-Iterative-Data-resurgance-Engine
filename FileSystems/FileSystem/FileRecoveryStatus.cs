@@ -16,9 +16,10 @@
 namespace KFS.FileSystems {
 	public enum FileRecoveryStatus {
 		Unknown = 0,
-		Recoverable = 1,
-		MaybeOverwritten = 2,
-		PartiallyOverwritten = 3,
-		Overwritten = 4
+		Resident = 1,
+		Recoverable = 2,
+		MaybeOverwritten = 3,
+		PartiallyOverwritten = 4,
+		Overwritten = 5
 	}
 }
