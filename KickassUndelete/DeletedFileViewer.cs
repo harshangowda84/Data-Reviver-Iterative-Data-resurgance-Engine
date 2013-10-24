@@ -60,6 +60,7 @@ namespace KickassUndelete {
 		private string m_MostRecentlySavedFile;
 		private string m_Filter = "";
 		private int m_NumCheckedItems = 0;
+		private int m_NumSelectedItems = 0;
 		private bool m_MatchUnknownFileTypes = false;
 		private bool m_Scanning;
 
@@ -486,6 +487,10 @@ namespace KickassUndelete {
 				PromptUserToSaveFile(fileView.CheckedItems[0].Tag as INodeMetadata);
 			} else if (m_NumCheckedItems > 1) {
 				PromptUserToSaveFiles(fileView.CheckedItems);
+			} else if (m_NumSelectedItems == 1) {
+				PromptUserToSaveFile(fileView.SelectedItems[0].Tag as INodeMetadata);
+			} else if (m_NumSelectedItems > 1) {
+				PromptUserToSaveFiles(fileView.SelectedItems);
 			}
 		}
 
@@ -494,13 +499,18 @@ namespace KickassUndelete {
 		/// </summary>
 		private void UpdateRestoreButton() {
 			if (!m_Scanning) {
-				bRestoreFiles.Enabled = m_NumCheckedItems > 0;
+				bRestoreFiles.Enabled = m_NumCheckedItems > 0 || m_NumSelectedItems > 0;
 			}
 		}
 
 		private void fileView_ItemCheck(object sender, ItemCheckEventArgs e) {
 			// Update the number of checked items
 			m_NumCheckedItems += e.NewValue == CheckState.Checked ? 1 : -1;
+			UpdateRestoreButton();
+		}
+
+		private void fileView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
+			m_NumSelectedItems += e.IsSelected ? 1 : -1;
 			UpdateRestoreButton();
 		}
 	}
