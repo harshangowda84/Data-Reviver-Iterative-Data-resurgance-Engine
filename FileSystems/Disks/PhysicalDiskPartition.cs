@@ -84,6 +84,10 @@ namespace KFS.Disks {
 			}
 		}
 
+		public string DeviceID {
+			get { return Attributes.DeviceID; }
+		}
+
 		public StorageType StorageType {
 			get { return StorageType.PhysicalDiskPartition; }
 		}

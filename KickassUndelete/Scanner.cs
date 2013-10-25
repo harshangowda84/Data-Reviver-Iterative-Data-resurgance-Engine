@@ -53,8 +53,18 @@ namespace KickassUndelete {
 			}
 		}
 
+		/// <summary>
+		/// The human-readable device label, e.g. "C: Local Disk (NTFS)".
+		/// </summary>
 		public string DiskName {
 			get { return m_DiskName; }
+		}
+
+		/// <summary>
+		/// The Device ID, e.g. "C:".
+		/// </summary>
+		public string DeviceID {
+			get { return m_FileSystem.Store.DeviceID; }
 		}
 
 		/// <summary>
@@ -144,7 +154,7 @@ namespace KickassUndelete {
 				foreach (var file in fileList) {
 					var record = file as MFTRecord;
 					var node = file.GetFileSystemNode();
-					node.Path = Path.Combine(GetPathForRecord(recordTree, record.ParentDirectory), node.Path);
+					node.Path = PathUtils.Combine(GetPathForRecord(recordTree, record.ParentDirectory), node.Name);
 					if (record.ChanceOfRecovery == FileRecoveryStatus.MaybeOverwritten) {
 						record.ChanceOfRecovery = FileRecoveryStatus.Recoverable;
 						// Query all the runs for this node.
@@ -179,15 +189,15 @@ namespace KickassUndelete {
 			if (recordNum == 0 || !recordTree.ContainsKey(recordNum)
 					|| recordTree[recordNum].ParentRecord == recordNum) {
 				// This is the root record
-				return DiskName.Substring(0, 2) + "\\";
+				return DeviceID;
 			} else {
 				var record = recordTree[recordNum];
 				if (record.Path == null) {
 					if (!record.IsDirectory) {
 						// This isn't a directory, so the path must have been broken.
-						return DiskName.Substring(0, 2) + "\\?";
+						return PathUtils.Combine(DeviceID, "?");
 					} else {
-						record.Path = System.IO.Path.Combine(GetPathForRecord(recordTree, record.ParentRecord), record.FileName);
+						record.Path = PathUtils.Combine(GetPathForRecord(recordTree, record.ParentRecord), record.FileName);
 					}
 				}
 				return record.Path;

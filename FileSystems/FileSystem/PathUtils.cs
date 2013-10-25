@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
+﻿// Copyright (C) 2013  Joey Scarr
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,24 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using KFS.Disks;
-using System.Collections.Generic;
-
+using System.IO;
 namespace KFS.FileSystems {
-	/// <summary>
-	/// An interface representing a loaded filesystem.
-	/// </summary>
-	public interface IFileSystem {
-		IEnumerable<FileSystemNode> GetFile(string path);
-
-		FileSystemNode GetRoot();
-
-		SectorStatus GetSectorStatus(ulong sectorNum);
-
-		string FileSystemType { get; }
-
-		IFileSystemStore Store { get; }
-
-		ISearchStrategy GetDefaultSearchStrategy();
+	public class PathUtils {
+		public static string Combine(params string[] paths) {
+			// If the first path is a drive letter and colon (e.g. "C:"), append a
+			// separator before calling Path.Combine.
+			if (paths[0].Length == 2 && paths[0][1] == ':') {
+				paths[0] += Path.DirectorySeparatorChar;
+			}
+			return Path.Combine(paths);
+		}
 	}
 }

@@ -66,6 +66,7 @@
     <Compile Include="DataStream\SectorStream.cs" />
     <Compile Include="DataStream\SubStream.cs" />
     <Compile Include="DataStream\Util.cs" />
+    <Compile Include="FileSystem\PathUtils.cs" />
     <Compile Include="FileSystem\FileRecoveryStatus.cs" />
     <Compile Include="Interface\IFileSystemNode.cs" />
     <Compile Include="Interface\IRun.cs" />

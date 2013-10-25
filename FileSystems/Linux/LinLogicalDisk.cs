@@ -65,6 +65,10 @@ namespace KFS.Disks {
 			get { return _fileSystem; }
 		}
 
+		public string DeviceID {
+			get { return _devName; }
+		}
+
 		public override string ToString() {
 			return _devName;
 		}

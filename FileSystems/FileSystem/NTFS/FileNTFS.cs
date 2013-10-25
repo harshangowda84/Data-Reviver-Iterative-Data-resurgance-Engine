@@ -33,19 +33,27 @@ namespace KFS.FileSystems.NTFS {
 			if (m_record.DataAttribute != null) {
 				m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.Data);
 			}
-			Name = record.FileName;
-			Path = path + Name;
 			FileSystem = record.FileSystem;
 			Deleted = m_record.Deleted;
+			Name = record.FileName;
+			if (!string.IsNullOrEmpty(path)) {
+				Path = PathUtils.Combine(path, Name);
+			} else {
+				// We don't know the path.
+				Path = PathUtils.Combine(FileSystem.Store.DeviceID, "?", Name);
+			}
 		}
 
+		/// <summary>
+		/// The constructor for a file contained as a hidden data stream.
+		/// </summary>
 		public FileNTFS(MFTRecord record, MFTAttribute attr, string path) {
 			m_record = record;
 			m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, attr);
-			Name = record.FileName + ":" + attr.Name;
-			Path = path + Name;
 			FileSystem = record.FileSystem;
 			Deleted = m_record.Deleted;
+			Name = record.FileName + ":" + attr.Name;
+			Path = PathUtils.Combine(path, Name);
 		}
 
 		/// <summary>

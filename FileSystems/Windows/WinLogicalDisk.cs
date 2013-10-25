@@ -63,6 +63,10 @@ namespace KFS.Disks {
 			get { return _fileSystem; }
 		}
 
+		public string DeviceID {
+			get { return Attributes.DeviceID; }
+		}
+
 		public override string ToString() {
 			string volume;
 			if (string.IsNullOrEmpty(Attributes.VolumeName.Trim())) {

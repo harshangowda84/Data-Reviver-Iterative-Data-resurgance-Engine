@@ -27,8 +27,14 @@ namespace KFS.FileSystems.NTFS {
 
 		public HiddenDataStreamFileNTFS(MFTRecord record, string path) {
 			m_record = record;
+			FileSystem = m_record.FileSystem;
 			Name = record.FileName + "(Hidden Streams)";
-			Path = path + Name + "/";
+			if (!string.IsNullOrEmpty(path)) {
+				Path = PathUtils.Combine(path, Name);
+			} else {
+				// We don't know the path.
+				Path = PathUtils.Combine(FileSystem.Store.DeviceID, "?", Name);
+			}
 			children = new List<IFileSystemNode>();
 			children.Add(new FileNTFS(m_record, Path));
 			foreach (MFTAttribute attr in m_record.NamedDataAttributes) {

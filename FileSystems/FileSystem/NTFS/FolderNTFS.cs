@@ -218,6 +218,8 @@ namespace KFS.FileSystems.NTFS {
 
 		public FolderNTFS(MFTRecord record, string path, bool isRoot = false) {
 			_record = record;
+			FileSystem = record.FileSystem;
+			Deleted = _record.Deleted;
 			_indexRoot = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.IndexRoot);
 
 			MFTAttribute attr = _record.GetAttribute(AttributeType.IndexAllocation);
@@ -225,12 +227,9 @@ namespace KFS.FileSystems.NTFS {
 				_indexAllocation = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.IndexAllocation);
 			}
 			Name = record.FileName;
-			if (path == null) {
-				Path = "";
-			}
 			if (isRoot) { // root
 				Root = true;
-				Path = "\\";
+				Path = FileSystem.Store.DeviceID;
 				foreach (FileSystemNode node in GetChildren("$Volume")) {
 					FileNTFS file = node as FileNTFS;
 					if (file != null && file.VolumeLabel != "") {
@@ -240,13 +239,12 @@ namespace KFS.FileSystems.NTFS {
 				}
 			} else {
 				if (!string.IsNullOrEmpty(path)) {
-					Path = path + Name + "/";
+					Path = PathUtils.Combine(path, Name);
 				} else {
-					Path = Name + "/";
+					// We don't know the path
+					Path = PathUtils.Combine(FileSystem.Store.DeviceID, "?", Name);
 				}
 			}
-			FileSystem = record.FileSystem;
-			Deleted = _record.Deleted;
 		}
 
 		public long BytesPerSector {

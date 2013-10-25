@@ -41,6 +41,10 @@ namespace KFS.Disks {
 			}
 		}
 
+		public string DeviceID {
+			get { return Name; }
+		}
+
 		private IFileSystem m_fileSystem;
 		[XmlIgnore]
 		public IFileSystem FS {

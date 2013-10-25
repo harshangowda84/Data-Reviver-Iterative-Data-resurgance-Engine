@@ -34,5 +34,10 @@ namespace KFS.Disks {
 		StorageType StorageType { get; }
 		Attributes Attributes { get; }
 		IFileSystem FS { get; }
+		/// <summary>
+		/// The ID of the device (such as "C:" on Windows). Used to construct
+		/// file paths.
+		/// </summary>
+		string DeviceID { get; }
 	}
 }

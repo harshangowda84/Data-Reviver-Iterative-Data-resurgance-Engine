@@ -190,7 +190,7 @@ namespace KFS.FileSystems.FAT {
 			FileSystem = fileSystem;
 			FirstCluster = cluster;
 			Name = GetVolumeName();
-			Path = "/";
+			Path = FileSystem.Store.DeviceID;
 			Loaded = false;
 			Attributes = new FileAttributesFAT();
 			Deleted = Attributes.Deleted;
@@ -201,7 +201,7 @@ namespace KFS.FileSystems.FAT {
 			Offset = entry.Offset;
 			FirstCluster = entry.ClusterNum;
 			Name = entry.FileName;
-			Path = path + Name + "/";
+			Path = PathUtils.Combine(path, Name);
 			Loaded = false;
 			Attributes = new FileAttributesFAT(entry);
 			Deleted = Attributes.Deleted;
@@ -227,7 +227,7 @@ namespace KFS.FileSystems.FAT {
 					return entry.FileName.ToUpper();
 				}
 			}
-			return "\\";
+			return FileSystem.Store.DeviceID;
 		}
 		private IEnumerable<DirectoryEntry> GetDirectoryEntries() {
 			// read all directory entries

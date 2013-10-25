@@ -99,6 +99,7 @@ namespace KFS.FileSystems {
 
 		public IEnumerable<FileSystemNode> GetFile(string path) {
 			if (GetRoot() != null) {
+				// GetChildrenAtPath requires forward slashes.
 				path = path.Replace('\\', '/');
 				foreach (FileSystemNode node in GetRoot().GetChildrenAtPath(path)) {
 					yield return node;

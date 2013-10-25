@@ -44,7 +44,7 @@ namespace KFS.FileSystems.FAT {
 		public FileFAT(FileSystemFAT fileSystem, FolderFAT.DirectoryEntry entry, string path) {
 			FileSystem = fileSystem;
 			Name = entry.FileName;
-			Path = path + Name;
+			Path = PathUtils.Combine(path, Name);
 			_length = entry.Length;
 			Attributes = new FileAttributesFAT(entry);
 			FirstCluster = entry.ClusterNum;
@@ -54,7 +54,7 @@ namespace KFS.FileSystems.FAT {
 			FileSystem = fileSystem;
 			FirstCluster = firstCluster;
 			Name = Util.GetRandomString(8);
-			Path = "?/" + Name;
+			Path = PathUtils.Combine(FileSystem.Store.DeviceID, "?", Name);
 			long currentCluster = FirstCluster;
 			_length = 0;
 			while (currentCluster >= 0) {
