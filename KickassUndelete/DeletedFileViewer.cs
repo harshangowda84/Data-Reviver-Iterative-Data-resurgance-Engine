@@ -404,7 +404,7 @@ namespace KickassUndelete {
 		/// <param name="folderPath">The folder in which to save the recovered files.</param>
 		private void SaveMultipleFiles(IEnumerable<IFileSystemNode> nodes, string folderPath) {
 			foreach (IFileSystemNode node in nodes) {
-				string file = MakeFileNameValid(node.Name);
+				string file = PathUtils.MakeFileNameValid(node.Name);
 				string fileName = Path.Combine(folderPath, file);
 				if (System.IO.File.Exists(fileName)) {
 					int copyNum = 1;
@@ -419,14 +419,6 @@ namespace KickassUndelete {
 				}
 				SaveSingleFile(node, fileName);
 			}
-		}
-
-		private string MakeFileNameValid(string filename) {
-			StringBuilder sb = new StringBuilder(filename);
-			foreach (char c in Path.GetInvalidFileNameChars()) {
-				sb.Replace(c, '_');
-			}
-			return sb.ToString();
 		}
 
 		private void m_FileSavingQueue_Finished() {

@@ -43,7 +43,7 @@ namespace KFS.FileSystems.FAT {
 		}
 		public FileFAT(FileSystemFAT fileSystem, FolderFAT.DirectoryEntry entry, string path) {
 			FileSystem = fileSystem;
-			Name = entry.FileName;
+			Name = PathUtils.MakeFileNameValid(entry.FileName);
 			Path = PathUtils.Combine(path, Name);
 			_length = entry.Length;
 			Attributes = new FileAttributesFAT(entry);

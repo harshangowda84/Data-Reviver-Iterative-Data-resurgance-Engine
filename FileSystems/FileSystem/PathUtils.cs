@@ -14,6 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.IO;
+using System.Text;
+
 namespace KFS.FileSystems {
 	public class PathUtils {
 		public static string Combine(params string[] paths) {
@@ -23,6 +25,14 @@ namespace KFS.FileSystems {
 				paths[0] += Path.DirectorySeparatorChar;
 			}
 			return Path.Combine(paths);
+		}
+
+		public static string MakeFileNameValid(string filename) {
+			StringBuilder sb = new StringBuilder(filename);
+			foreach (char c in Path.GetInvalidFileNameChars()) {
+				sb.Replace(c, '_');
+			}
+			return sb.ToString();
 		}
 	}
 }

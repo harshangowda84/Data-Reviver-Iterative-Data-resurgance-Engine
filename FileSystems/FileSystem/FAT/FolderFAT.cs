@@ -200,7 +200,7 @@ namespace KFS.FileSystems.FAT {
 			FileSystem = fileSystem;
 			Offset = entry.Offset;
 			FirstCluster = entry.ClusterNum;
-			Name = entry.FileName;
+			Name = PathUtils.MakeFileNameValid(entry.FileName);
 			Path = PathUtils.Combine(path, Name);
 			Loaded = false;
 			Attributes = new FileAttributesFAT(entry);
