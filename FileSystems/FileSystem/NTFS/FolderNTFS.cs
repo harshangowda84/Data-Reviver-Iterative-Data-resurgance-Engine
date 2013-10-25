@@ -226,9 +226,9 @@ namespace KFS.FileSystems.NTFS {
 			if (attr != null) {
 				_indexAllocation = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.IndexAllocation);
 			}
-			Name = record.FileName;
 			if (isRoot) { // root
 				Root = true;
+				Name = FileSystem.Store.DeviceID;
 				Path = FileSystem.Store.DeviceID;
 				foreach (FileSystemNode node in GetChildren("$Volume")) {
 					FileNTFS file = node as FileNTFS;
@@ -238,6 +238,7 @@ namespace KFS.FileSystems.NTFS {
 					}
 				}
 			} else {
+				Name = record.FileName;
 				if (!string.IsNullOrEmpty(path)) {
 					Path = PathUtils.Combine(path, Name);
 				} else {
