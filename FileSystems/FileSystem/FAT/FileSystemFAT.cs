@@ -133,8 +133,8 @@ namespace KFS.FileSystems.FAT {
 			return DataSectionOffset + (N - 2) * BytesPerCluster;
 		}
 
-		public long GetFATClusterFromOffset(long cluster) {
-			return (cluster - DataSectionOffset) / BytesPerCluster + 2;
+		public long GetFATClusterFromOffset(long diskOffset) {
+			return (diskOffset - DataSectionOffset) / BytesPerCluster + 2;
 		}
 
 		public PartitionType Type { get; private set; }

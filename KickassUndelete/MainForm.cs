@@ -26,7 +26,7 @@ namespace KickassUndelete {
 	/// </summary>
 	public partial class MainForm : Form {
 		IFileSystem m_FileSystem;
-		Dictionary<IFileSystem, Scanner> m_ScanStates = new Dictionary<IFileSystem, Scanner>();
+		Dictionary<IFileSystem, Scanner> m_Scanners = new Dictionary<IFileSystem, Scanner>();
 		Dictionary<IFileSystem, DeletedFileViewer> m_DeletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
 
 		/// <summary>
@@ -59,12 +59,12 @@ namespace KickassUndelete {
 
 		private void SetFileSystem(IFileSystemStore logicalDisk) {
 			if (logicalDisk.FS != null) {
-				if (!m_ScanStates.ContainsKey(logicalDisk.FS)) {
-					m_ScanStates[logicalDisk.FS] = new Scanner(logicalDisk.ToString(), logicalDisk.FS);
-					m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_ScanStates[logicalDisk.FS]);
+				if (!m_Scanners.ContainsKey(logicalDisk.FS)) {
+					m_Scanners[logicalDisk.FS] = new Scanner(logicalDisk.ToString(), logicalDisk.FS);
+					m_DeletedViewers[logicalDisk.FS] = new DeletedFileViewer(m_Scanners[logicalDisk.FS]);
 					AddDeletedFileViewer(m_DeletedViewers[logicalDisk.FS]);
 				}
-				if (m_FileSystem != null && m_ScanStates.ContainsKey(m_FileSystem)) {
+				if (m_FileSystem != null && m_Scanners.ContainsKey(m_FileSystem)) {
 					m_DeletedViewers[m_FileSystem].Hide();
 				}
 				m_FileSystem = logicalDisk.FS;
@@ -82,7 +82,7 @@ namespace KickassUndelete {
 		}
 
 		private void MainForm_FormClosed(object sender, FormClosedEventArgs e) {
-			foreach (Scanner state in m_ScanStates.Values) {
+			foreach (Scanner state in m_Scanners.Values) {
 				state.CancelScan();
 			}
 		}
