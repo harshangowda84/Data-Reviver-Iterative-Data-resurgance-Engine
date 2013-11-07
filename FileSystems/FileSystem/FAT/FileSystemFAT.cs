@@ -77,12 +77,16 @@ namespace KFS.FileSystems.FAT {
 		long _rootDirLocation; // in bytes
 		long _dataLocation; // in bytes
 
+		private FileAllocationTable _fileAllocationTable;
+
 		FileSystemNode m_Root = null;
 		public FileSystemFAT(IFileSystemStore store, PartitionType type) {
 			Store = store;
 			Type = type;
 			LoadBPB();
 			_FATLocation = BPB_RsvdSecCnt * BPB_BytsPerSec;
+			// Load the FAT.
+			_fileAllocationTable = new FileAllocationTable(store, _FATLocation, FATSize * BytesPerSector, type);
 			long rootDirSectors = ((BPB_RootEntCnt * 32) + (BPB_BytsPerSec - 1)) / BPB_BytsPerSec;
 			long afterFAT = _FATLocation + BPB_NumFATs * FATSize * BPB_BytsPerSec;
 			_dataLocation = afterFAT + rootDirSectors * BPB_BytsPerSec;
@@ -94,24 +98,8 @@ namespace KFS.FileSystems.FAT {
 			m_Root = new FolderFAT(this, _rootDirLocation, 2);
 		}
 
-		private uint GetFATEntry(long N) {
-			int entrySize;
-			if (Type == PartitionType.FAT16) {
-				entrySize = 2;
-			} else {
-				//if (Type == PartitionType.FAT32) {
-				entrySize = 4;
-			}
-			long FATOffset = N * entrySize;
-
-			if (N < 0 || FATOffset > FATSize * BytesPerSector) return 0;
-
-			long FATEntryLoc = _FATLocation + FATOffset;
-			return (uint)Util.GetArbitraryUInt(Store, (ulong)FATEntryLoc, entrySize);
-		}
-
 		public long GetNextCluster(long N) {
-			uint fatContent = GetFATEntry(N);
+			uint fatContent = _fileAllocationTable.GetEntry(N);
 
 			bool eof = false;
 			bool bad = false;
@@ -254,7 +242,7 @@ namespace KFS.FileSystems.FAT {
 			} else if ((long)sectorNum < BPB_RsvdSecCnt + BPB_NumFATs * FATSize) {
 				return SectorStatus.FAT;
 			} else {
-				uint FATEntry = GetFATEntry(GetFATClusterFromOffset((long)sectorNum * BytesPerSector));
+				uint FATEntry = _fileAllocationTable.GetEntry(GetFATClusterFromOffset((long)sectorNum * BytesPerSector));
 				if (FATEntry == 0x0) {
 					return SectorStatus.Free;
 				} else if (Type == PartitionType.FAT12 && FATEntry == 0x0FF7
