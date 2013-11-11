@@ -2,6 +2,17 @@
 Kickass Undelete Release Notes
 ==================================================
 
+Version 1.5 beta
+Changes:
+ * Better estimation of recovery chances for both FAT and NTFS
+ * Fixed a bug that was causing some FAT files to be recovered incorrectly
+ * Show the drive letter in file paths
+ * Replace paths that are clearly incorrect with a "?"
+ * Performance improvements in long lists of files
+ * Now requires only the .NET 4.0 Client Profile
+ * Allow user to save selected files if no files are checked
+ * Remove invalid characters from FAT filenames
+
 Version 1.4 beta
 Changes:
  * Allow running from command line
