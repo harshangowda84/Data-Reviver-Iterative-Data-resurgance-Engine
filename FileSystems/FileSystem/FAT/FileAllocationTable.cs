@@ -19,7 +19,7 @@ using KFS.Disks;
 
 namespace KFS.FileSystems.FAT {
 	/// <summary>
-	/// A FAT16 or FAT32 filesystem.
+	/// Represents the File Allocation Table (FAT) in a FAT filesystem.
 	/// </summary>
 	public class FileAllocationTable {
 		private uint[] _fatEntries;
@@ -60,6 +60,11 @@ namespace KFS.FileSystems.FAT {
 		}
 
 		public uint GetEntry(long N) {
+			if (N < 0 || N >= _numEntries) {
+				Console.Error.WriteLine("Error: Tried to read off the end of the FAT. Requested entry: {0}; FAT size: {1}", N, _numEntries);
+				return 0;
+			}
+
 			if (_inMemory) {
 				return _fatEntries[N];
 			} else {
@@ -69,10 +74,6 @@ namespace KFS.FileSystems.FAT {
 
 		private uint GetEntryFromDisk(long N) {
 			long offset = N * _entrySize;
-
-			if (N < 0 || N >= _numEntries) {
-				Console.Error.WriteLine("Error: Tried to read off the end of the FAT. Requested entry: {0}; FAT size: {1}", N, _numEntries);
-			}
 
 			long entryLoc = _fatOffset + offset;
 			return (uint)Util.GetArbitraryUInt(_store, (ulong)entryLoc, _entrySize);
