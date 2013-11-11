@@ -37,7 +37,7 @@ namespace KFS.FileSystems.FAT {
 	/// <summary>
 	/// A folder (directory) node in the FAT filesystem.
 	/// </summary>
-	public class FolderFAT : Folder, IDescribable {
+	public class FolderFAT : Folder, IFATNode, IDescribable {
 		public long Offset { get; protected set; }
 		private const int DIR_ENTRY_SIZE = 32;
 		public class DirectoryEntry {

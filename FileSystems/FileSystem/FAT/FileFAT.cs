@@ -22,7 +22,7 @@ namespace KFS.FileSystems.FAT {
 	/// <summary>
 	/// A file node in the FAT filesystem.
 	/// </summary>
-	public class FileFAT : File, IDescribable {
+	public class FileFAT : File, IFATNode, IDescribable {
 		private long _length;
 
 		public FileAttributesFAT Attributes { get; private set; }
@@ -30,6 +30,9 @@ namespace KFS.FileSystems.FAT {
 			get { return Attributes.LastModified; }
 		}
 		public long FirstCluster { get; private set; }
+		public long Length {
+			get { return _length; }
+		}
 		public override long Identifier {
 			get { return FirstCluster; }
 		}
