@@ -121,7 +121,7 @@ namespace KFS.FileSystems {
 			return SectorStatus.Unknown;
 		}
 
-		public virtual FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
+		internal virtual FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
 			return FileRecoveryStatus.Unknown;
 		}
 

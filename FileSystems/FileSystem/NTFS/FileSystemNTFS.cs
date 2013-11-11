@@ -106,7 +106,7 @@ namespace KFS.FileSystems.NTFS {
 			}
 		}
 
-		public override FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
+		internal override FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
 			FileNTFS file = node as FileNTFS;
 			if (file == null) {
 				return FileRecoveryStatus.Unknown;

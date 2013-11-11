@@ -254,5 +254,70 @@ namespace KFS.FileSystems.FAT {
 				}
 			}
 		}
+
+		internal override FileRecoveryStatus GetChanceOfRecovery(FileSystemNode node) {
+			FileFAT file = node as FileFAT;
+			if (file == null) {
+				return FileRecoveryStatus.Unknown;
+			} else {
+				int numZeroLinks;
+				if (IsFatChainOverwritten(file, out numZeroLinks)) {
+					return numZeroLinks == 0 ? FileRecoveryStatus.Overwritten : FileRecoveryStatus.PartiallyOverwritten;
+				} else {
+					BuildFirstClusterIndex();
+					// Check to see if the first cluster is also allocated to something more recent
+					if (_firstClusterIndex.ContainsKey(file.FirstCluster)) {
+						return _firstClusterIndex[file.FirstCluster].Name == file.Name ? FileRecoveryStatus.Recoverable : FileRecoveryStatus.Overwritten;
+					} else {
+						Console.Error.WriteLine("ERROR: File {0} at cluster {1} was missing from the first cluster index.", file.Name, file.FirstCluster);
+						return FileRecoveryStatus.Unknown;
+					}
+				}
+			}
+		}
+
+		private bool IsFatChainOverwritten(FileFAT file, out int numZeroLinks) {
+			// Iterate through the FAT links to see if any of them are non-zero.
+			long remainingLength = file.Length;
+			var currentCluster = file.FirstCluster;
+			numZeroLinks = 0;
+			while (remainingLength > 0) {
+				if (_fileAllocationTable.GetEntry(currentCluster) != 0) {
+					return true;
+				}
+				remainingLength -= BytesPerCluster;
+				currentCluster++;
+				numZeroLinks++;
+			}
+			return false;
+		}
+
+		private Dictionary<long, IFATNode> _firstClusterIndex = null;
+		private void BuildFirstClusterIndex() {
+			if (_firstClusterIndex == null) {
+				// Iterate over all files on the drive and record their first cluster.
+				// Newer files overwrite older files.
+				_firstClusterIndex = new Dictionary<long, IFATNode>();
+				SearchByTree(new NodeVisitCallback(delegate(INodeMetadata metadata, ulong progress, ulong total) {
+					// Handle files
+					FileFAT file = metadata as FileFAT;
+					if (file != null) {
+						if (!_firstClusterIndex.ContainsKey(file.FirstCluster)
+								|| _firstClusterIndex[file.FirstCluster].LastModified < file.LastModified) {
+							_firstClusterIndex[file.FirstCluster] = file;
+						}
+					}
+					// Handle folders
+					FolderFAT folder = metadata as FolderFAT;
+					if (folder != null) {
+						if (!_firstClusterIndex.ContainsKey(folder.FirstCluster)
+								|| _firstClusterIndex[folder.FirstCluster].LastModified < folder.LastModified) {
+							_firstClusterIndex[folder.FirstCluster] = folder;
+						}
+					}
+					return true;
+				}), null);
+			}
+		}
 	}
 }
