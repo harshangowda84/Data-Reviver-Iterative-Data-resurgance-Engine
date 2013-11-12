@@ -4,7 +4,7 @@ import os
 import shutil
 import sys
 
-VERSION = "1.5 beta"
+VERSION = "1.6 beta"
 EXE_NAME = "KickassUndelete_{0}.exe".format(VERSION.replace(' ','_'))
 ZIP_NAME = "KickassUndelete_{0}.zip".format(VERSION.replace(' ','_'))
 
