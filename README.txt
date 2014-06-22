@@ -2,6 +2,11 @@
 Kickass Undelete Release Notes
 ==================================================
 
+Version 1.5.1
+Changes:
+ * Fixed startup crash on Windows XP
+ * Removed beta label
+
 Version 1.5 beta
 Changes:
  * Better estimation of recovery chances for both FAT and NTFS

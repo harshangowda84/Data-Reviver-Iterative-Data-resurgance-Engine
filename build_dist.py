@@ -4,12 +4,12 @@ import os
 import shutil
 import sys
 
-VERSION = "1.6 beta"
+VERSION = "1.6"
 EXE_NAME = "KickassUndelete_{0}.exe".format(VERSION.replace(' ','_'))
 ZIP_NAME = "KickassUndelete_{0}.zip".format(VERSION.replace(' ','_'))
 
-FRAMEWORK = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319"
-MSBUILD = FRAMEWORK + "\\msbuild.exe"
+FRAMEWORK = "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0"
+MSBUILD = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\msbuild.exe"
 ILMERGE = "C:\\Program Files (x86)\\Microsoft\\ILMerge\\ILMerge.exe"
 
 SOLUTION = "KickassUndelete/KickassUndelete.sln"
