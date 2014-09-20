@@ -211,7 +211,7 @@ namespace KickassUndelete {
 				m_ExtensionMap[ext] = new ExtensionInfo(ext);
 			}
 			ExtensionInfo extInfo = m_ExtensionMap[ext];
-			if (extInfo.Image != null) {
+			if (extInfo.Image != null && !extInfo.Image.Size.IsEmpty) {
 				if (!m_ImageList.Images.ContainsKey(ext)) {
 					m_ImageList.Images.Add(ext, extInfo.Image);
 				}
