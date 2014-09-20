@@ -23,11 +23,11 @@ namespace KFS.DataStream {
 	/// An adapter that allows an IDataStream to be treated as a System.IO.Stream.
 	/// </summary>
 	public class ForensicsAppStream : System.IO.Stream {
-		IDataStream m_Stream = null;
-		ulong m_Position = 0;
+		IDataStream _stream = null;
+		ulong _position = 0;
 		public ForensicsAppStream(IDataStream stream) {
-			m_Stream = stream;
-			m_Stream.Open();
+			_stream = stream;
+			_stream.Open();
 		}
 
 		public override bool CanRead { get { return true; } }
@@ -37,31 +37,31 @@ namespace KFS.DataStream {
 		public override void Flush() { }
 
 		public override long Length {
-			get { return (long)m_Stream.StreamLength; }
+			get { return (long)_stream.StreamLength; }
 		}
 
 		public override long Position {
-			get { return (long)m_Position; }
-			set { m_Position = (ulong)Math.Max(0, value); }
+			get { return (long)_position; }
+			set { _position = (ulong)Math.Max(0, value); }
 		}
 
 		public override int Read(byte[] buffer, int offset, int count) {
-			ulong read = Math.Min((ulong)count, m_Stream.StreamLength - m_Position);
-			m_Stream.GetBytes(m_Position, read);
-			m_Position += read;
+			ulong read = Math.Min((ulong)count, _stream.StreamLength - _position);
+			_stream.GetBytes(_position, read);
+			_position += read;
 			return (int)read;
 		}
 
 		public override long Seek(long offset, System.IO.SeekOrigin origin) {
 			switch (origin) {
 				case System.IO.SeekOrigin.Begin:
-					m_Position = (ulong)offset;
+					_position = (ulong)offset;
 					break;
 				case System.IO.SeekOrigin.Current:
-					m_Position = (ulong)((long)m_Position + offset);
+					_position = (ulong)((long)_position + offset);
 					break;
 				case System.IO.SeekOrigin.End:
-					m_Position = (ulong)((long)m_Stream.StreamLength + offset);
+					_position = (ulong)((long)_stream.StreamLength + offset);
 					break;
 			}
 			return Position;
@@ -72,7 +72,7 @@ namespace KFS.DataStream {
 		public override void Write(byte[] buffer, int offset, int count) { }
 
 		public override void Close() {
-			m_Stream.Close();
+			_stream.Close();
 		}
 	}
 }

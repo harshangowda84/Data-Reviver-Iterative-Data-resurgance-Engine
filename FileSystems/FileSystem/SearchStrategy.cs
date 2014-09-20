@@ -21,21 +21,21 @@ namespace KFS.FileSystems {
 	/// constructor.
 	/// </summary>
 	public class SearchStrategy : ISearchStrategy {
-		private SearchFunction m_Func;
+		private SearchFunction _func;
 
 		public SearchStrategy(string name, SearchFunction func) {
 			Name = name;
-			m_Func = func;
+			_func = func;
 		}
 
 		public string Name { get; set; }
 
 		public void Search(FileSystem.NodeVisitCallback callback, string searchPath) {
-			m_Func(callback, searchPath);
+			_func(callback, searchPath);
 		}
 
 		public void Search(FileSystem.NodeVisitCallback callback) {
-			m_Func(callback, null);
+			_func(callback, null);
 		}
 	}
 }

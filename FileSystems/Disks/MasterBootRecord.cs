@@ -74,7 +74,7 @@ namespace KFS.Disks {
 			}
 		}
 
-		private byte[] m_Data;
+		private byte[] _data;
 
 		public MasterBootRecord(WinPhysicalDisk disk) {
 			PhysicalDisk = disk;
@@ -84,7 +84,7 @@ namespace KFS.Disks {
 			_partitionEntries = new List<PartitionEntry>();
 
 			try {
-				m_Data = disk.GetBytes(0, MBR_SIZE);
+				_data = disk.GetBytes(0, MBR_SIZE);
 			} catch (Exception e) {
 				throw new Exception("Failed to load the Master Boot Record!", e);
 			}
@@ -92,7 +92,7 @@ namespace KFS.Disks {
 			for (int i = 0; i < MAX_PARTITIONS; i++) {
 				int offset = 0x1BE + 16 * i;
 				if (PartitionEntryExistsAt(offset, 16)) {
-					_partitionEntries.Add(new PartitionEntry(m_Data, offset, (int)disk.Attributes.BytesPerSector, i));
+					_partitionEntries.Add(new PartitionEntry(_data, offset, (int)disk.Attributes.BytesPerSector, i));
 				}
 			}
 
@@ -104,7 +104,7 @@ namespace KFS.Disks {
 		private bool PartitionEntryExistsAt(int offset, int len) {
 			byte total = 0;
 			for (int i = offset; i < offset + len; i++) {
-				total |= m_Data[i];
+				total |= _data[i];
 			}
 			return total != 0;
 		}

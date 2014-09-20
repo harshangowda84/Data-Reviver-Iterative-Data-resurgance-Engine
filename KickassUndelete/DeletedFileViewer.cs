@@ -34,7 +34,7 @@ namespace KickassUndelete {
 	/// </summary>
 	public partial class DeletedFileViewer : UserControl {
 		private const string EMPTY_FILTER_TEXT = "Enter filter text here...";
-		private Dictionary<FileRecoveryStatus, string> m_RecoveryDescriptions =
+		private Dictionary<FileRecoveryStatus, string> _recoveryDescriptions =
 				new Dictionary<FileRecoveryStatus, string>() {
                 {FileRecoveryStatus.Unknown,"Unknown"},
                 {FileRecoveryStatus.Resident,"Excellent"},
@@ -42,7 +42,7 @@ namespace KickassUndelete {
                 {FileRecoveryStatus.MaybeOverwritten,"Calculating..."},
                 {FileRecoveryStatus.PartiallyOverwritten,"Bad (data partially overwritten)"},
                 {FileRecoveryStatus.Overwritten,"Bad (data completely overwritten)"}};
-		private Dictionary<FileRecoveryStatus, Color> m_RecoveryColors =
+		private Dictionary<FileRecoveryStatus, Color> _recoveryColors =
 				new Dictionary<FileRecoveryStatus, Color>() {
                 {FileRecoveryStatus.Unknown,Color.FromArgb(255,222,168)}, // Orange
                 {FileRecoveryStatus.Resident,Color.FromArgb(190,255,180)}, // Green
@@ -51,25 +51,25 @@ namespace KickassUndelete {
                 {FileRecoveryStatus.PartiallyOverwritten,Color.FromArgb(255,222,168)}, // Orange
                 {FileRecoveryStatus.Overwritten,Color.FromArgb(255,130,130)}}; // Orange
 
-		private HashSet<string> m_SystemFileExtensions =
+		private HashSet<string> _systemFileExtensions =
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
-		private Scanner m_Scanner;
-		private FileSavingQueue m_FileSavingQueue;
-		private ProgressPopup m_ProgressPopup;
-		private string m_MostRecentlySavedFile;
-		private string m_Filter = "";
-		private int m_NumCheckedItems = 0;
-		private int m_NumSelectedItems = 0;
-		private bool m_MatchUnknownFileTypes = false;
-		private bool m_Scanning;
+		private Scanner _scanner;
+		private FileSavingQueue _fileSavingQueue;
+		private ProgressPopup _progressPopup;
+		private string _mostRecentlySavedFile;
+		private string _filter = "";
+		private int _numCheckedItems = 0;
+		private int _numSelectedItems = 0;
+		private bool _matchUnknownFileTypes = false;
+		private bool _scanning;
 
-		private List<ListViewItem> m_Files = new List<ListViewItem>();
+		private List<ListViewItem> _files = new List<ListViewItem>();
 
-		private ListViewColumnSorter lvwColumnSorter;
+		private ListViewColumnSorter _lvwColumnSorter;
 
-		private Dictionary<string, ExtensionInfo> m_ExtensionMap;
-		private ImageList m_ImageList;
+		private Dictionary<string, ExtensionInfo> _extensionMap;
+		private ImageList _imageList;
 
 		/// <summary>
 		/// Constructs a DeletedFileViewer, using a given Scanner.
@@ -78,20 +78,20 @@ namespace KickassUndelete {
 		public DeletedFileViewer(Scanner scanner) {
 			InitializeComponent();
 
-			lvwColumnSorter = new ListViewColumnSorter();
-			fileView.ListViewItemSorter = lvwColumnSorter;
-			m_ExtensionMap = new Dictionary<string, ExtensionInfo>();
-			m_ImageList = new ImageList();
-			fileView.SmallImageList = m_ImageList;
+			_lvwColumnSorter = new ListViewColumnSorter();
+			fileView.ListViewItemSorter = _lvwColumnSorter;
+			_extensionMap = new Dictionary<string, ExtensionInfo>();
+			_imageList = new ImageList();
+			fileView.SmallImageList = _imageList;
 
-			m_Scanner = scanner;
+			_scanner = scanner;
 			scanner.ProgressUpdated += new EventHandler(state_ProgressUpdated);
 			scanner.ScanStarted += new EventHandler(state_ScanStarted);
 			scanner.ScanFinished += new EventHandler(state_ScanFinished);
 
-			m_FileSavingQueue = new FileSavingQueue();
-			m_FileSavingQueue.Finished += m_FileSavingQueue_Finished;
-			m_ProgressPopup = new ProgressPopup(m_FileSavingQueue);
+			_fileSavingQueue = new FileSavingQueue();
+			_fileSavingQueue.Finished += FileSavingQueue_Finished;
+			_progressPopup = new ProgressPopup(_fileSavingQueue);
 
 			UpdateFilterTextBox();
 		}
@@ -114,7 +114,7 @@ namespace KickassUndelete {
 		/// Handles a scan starting.
 		/// </summary>
 		void state_ScanStarted(object sender, EventArgs ea) {
-			m_Scanning = true;
+			_scanning = true;
 			try {
 				this.Invoke(new Action(() => {
 					SetScanButtonScanning();
@@ -129,10 +129,10 @@ namespace KickassUndelete {
 		void state_ScanFinished(object sender, EventArgs ea) {
 			try {
 				this.Invoke(new Action(() => {
-					foreach (ListViewItem item in m_Files) {
+					foreach (ListViewItem item in _files) {
 						item.SubItems[4].Text = ((INodeMetadata)item.Tag).GetFileSystemNode().Path;
-						item.SubItems[5].Text = m_RecoveryDescriptions[((INodeMetadata)item.Tag).ChanceOfRecovery];
-						item.BackColor = m_RecoveryColors[((INodeMetadata)item.Tag).ChanceOfRecovery];
+						item.SubItems[5].Text = _recoveryDescriptions[((INodeMetadata)item.Tag).ChanceOfRecovery];
+						item.BackColor = _recoveryColors[((INodeMetadata)item.Tag).ChanceOfRecovery];
 					}
 
 					SetScanButtonFinished();
@@ -140,10 +140,10 @@ namespace KickassUndelete {
 					UpdateTimer_Tick(null, null);
 					fileView.BeginUpdate();
 					fileView.Items.Clear();
-					fileView.Items.AddRange(m_Files.Where(FilterMatches).ToArray());
+					fileView.Items.AddRange(_files.Where(FilterMatches).ToArray());
 					fileView.EndUpdate();
 				}));
-				m_Scanning = false;
+				_scanning = false;
 			} catch (InvalidOperationException exc) { Console.WriteLine(exc); }
 		}
 
@@ -153,7 +153,7 @@ namespace KickassUndelete {
 		void state_ProgressUpdated(object sender, EventArgs ea) {
 			try {
 				this.BeginInvoke(new Action(() => {
-					SetProgress(m_Scanner.Progress);
+					SetProgress(_scanner.Progress);
 				}));
 			} catch (InvalidOperationException exc) { Console.WriteLine(exc); }
 		}
@@ -178,7 +178,7 @@ namespace KickassUndelete {
 		}
 
 		private void bScan_Click(object sender, EventArgs e) {
-			m_Scanner.StartScan();
+			_scanner.StartScan();
 		}
 
 		/// <summary>
@@ -207,13 +207,13 @@ namespace KickassUndelete {
 			try {
 				ext = Path.GetExtension(metadata.Name);
 			} catch (ArgumentException exc) { Console.WriteLine(exc); }
-			if (!m_ExtensionMap.ContainsKey(ext)) {
-				m_ExtensionMap[ext] = new ExtensionInfo(ext);
+			if (!_extensionMap.ContainsKey(ext)) {
+				_extensionMap[ext] = new ExtensionInfo(ext);
 			}
-			ExtensionInfo extInfo = m_ExtensionMap[ext];
+			ExtensionInfo extInfo = _extensionMap[ext];
 			if (extInfo.Image != null && !extInfo.Image.Size.IsEmpty) {
-				if (!m_ImageList.Images.ContainsKey(ext)) {
-					m_ImageList.Images.Add(ext, extInfo.Image);
+				if (!_imageList.Images.ContainsKey(ext)) {
+					_imageList.Images.Add(ext, extInfo.Image);
 				}
 			}
 			ListViewItem lvi = new ListViewItem(new string[] {
@@ -222,9 +222,9 @@ namespace KickassUndelete {
                 Util.FileSizeToHumanReadableString(node.Size),
                 metadata.LastModified.ToString(CultureInfo.CurrentCulture),
 								node.Path,
-                m_RecoveryDescriptions[metadata.ChanceOfRecovery]
+                _recoveryDescriptions[metadata.ChanceOfRecovery]
             });
-			lvi.BackColor = m_RecoveryColors[metadata.ChanceOfRecovery];
+			lvi.BackColor = _recoveryColors[metadata.ChanceOfRecovery];
 
 			lvi.ImageKey = ext;
 			lvi.Tag = metadata;
@@ -246,13 +246,13 @@ namespace KickassUndelete {
 		/// <param name="showUnknownFileTypes">Whether to show unknown file types.</param>
 		private void FilterBy(string filter, bool showUnknownFileTypes) {
 			string upperFilter = filter.ToUpperInvariant();
-			if (m_Filter != upperFilter
-					|| showUnknownFileTypes != m_MatchUnknownFileTypes) {
+			if (_filter != upperFilter
+					|| showUnknownFileTypes != _matchUnknownFileTypes) {
 				// Check whether the new filter is more restrictive than the old filter.
 				// If so, only iterate over the displayed list items and remove the ones that don't match.
-				if (upperFilter.StartsWith(m_Filter) && (showUnknownFileTypes == m_MatchUnknownFileTypes || !showUnknownFileTypes)) {
-					m_Filter = upperFilter;
-					m_MatchUnknownFileTypes = showUnknownFileTypes;
+				if (upperFilter.StartsWith(_filter) && (showUnknownFileTypes == _matchUnknownFileTypes || !showUnknownFileTypes)) {
+					_filter = upperFilter;
+					_matchUnknownFileTypes = showUnknownFileTypes;
 
 					fileView.BeginUpdate();
 					// THis is premature optimization
@@ -265,12 +265,12 @@ namespace KickassUndelete {
 					fileView.EndUpdate();
 				} else {
 
-					m_Filter = upperFilter;
-					m_MatchUnknownFileTypes = showUnknownFileTypes;
+					_filter = upperFilter;
+					_matchUnknownFileTypes = showUnknownFileTypes;
 
 					fileView.BeginUpdate();
 					fileView.Items.Clear();
-					fileView.Items.AddRange(m_Files.Where(FilterMatches).ToArray());
+					fileView.Items.AddRange(_files.Where(FilterMatches).ToArray());
 					fileView.EndUpdate();
 				}
 			}
@@ -282,29 +282,29 @@ namespace KickassUndelete {
 		/// <param name="item">The list item to check.</param>
 		/// <returns>Whether this list item matches the filter text.</returns>
 		private bool FilterMatches(ListViewItem item) {
-			return (item.SubItems[0].Text.ToUpperInvariant().Contains(m_Filter)
-							|| item.SubItems[1].Text.ToUpperInvariant().Contains(m_Filter))
-					&& (m_MatchUnknownFileTypes
+			return (item.SubItems[0].Text.ToUpperInvariant().Contains(_filter)
+							|| item.SubItems[1].Text.ToUpperInvariant().Contains(_filter))
+					&& (_matchUnknownFileTypes
 							|| !IsSystemOrUnknownFile(item));
 		}
 
 		private bool IsSystemOrUnknownFile(ListViewItem item) {
 			try {
 				string ext = Path.GetExtension(item.SubItems[0].Text);
-				return !m_ExtensionMap.ContainsKey(ext)
-						|| m_ExtensionMap[ext].UnrecognisedExtension
-						|| m_SystemFileExtensions.Contains(ext.ToUpper());
+				return !_extensionMap.ContainsKey(ext)
+						|| _extensionMap[ext].UnrecognisedExtension
+						|| _systemFileExtensions.Contains(ext.ToUpper());
 			} catch (ArgumentException) {
 				return true;
 			}
 		}
 
 		private void UpdateTimer_Tick(object sender, EventArgs e) {
-			IList<INodeMetadata> deletedFiles = m_Scanner.GetDeletedFiles();
+			IList<INodeMetadata> deletedFiles = _scanner.GetDeletedFiles();
 			int fileCount = deletedFiles.Count;
-			if (fileCount > m_Files.Count) {
-				var items = MakeListItems(deletedFiles.GetRange(m_Files.Count, fileCount - m_Files.Count));
-				m_Files.AddRange(items);
+			if (fileCount > _files.Count) {
+				var items = MakeListItems(deletedFiles.GetRange(_files.Count, fileCount - _files.Count));
+				_files.AddRange(items);
 				fileView.BeginUpdate();
 				fileView.Items.AddRange(items.Where(FilterMatches).ToArray());
 				fileView.EndUpdate();
@@ -320,7 +320,7 @@ namespace KickassUndelete {
 						MenuItem recoverFile = new MenuItem("Recover File...", new EventHandler(delegate(object o, EventArgs ea) {
 							PromptUserToSaveFile(metadata);
 						}));
-						recoverFile.Enabled = !m_Scanning;
+						recoverFile.Enabled = !_scanning;
 						menu.MenuItems.Add(recoverFile);
 						menu.Show(fileView, e.Location);
 					}
@@ -330,7 +330,7 @@ namespace KickassUndelete {
 					MenuItem recoverFiles = new MenuItem("Recover Files...", new EventHandler(delegate(object o, EventArgs ea) {
 						PromptUserToSaveFiles(fileView.SelectedItems);
 					}));
-					recoverFiles.Enabled = !m_Scanning;
+					recoverFiles.Enabled = !_scanning;
 					menu.MenuItems.Add(recoverFiles);
 					menu.Show(fileView, e.Location);
 				}
@@ -348,7 +348,7 @@ namespace KickassUndelete {
 
 				if (saveFileDialog.ShowDialog() == DialogResult.OK) {
 					// Check that the drive isn't the same as the drive being copied from.
-					if (saveFileDialog.FileName[0] != m_Scanner.DiskName[0]
+					if (saveFileDialog.FileName[0] != _scanner.DiskName[0]
 						|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
 						"trying to recover from. This may cause recovery to fail, and overwrite your data " +
 						"permanently! Are you sure you wish to continue?", "Warning!",
@@ -367,11 +367,11 @@ namespace KickassUndelete {
 		/// <param name="node">The file to recover.</param>
 		/// <param name="filePath">The path to save the file to.</param>
 		private void SaveSingleFile(IFileSystemNode node, string filePath) {
-			m_MostRecentlySavedFile = filePath;
-			if (!m_ProgressPopup.Visible) {
-				m_ProgressPopup.Show(this);
+			_mostRecentlySavedFile = filePath;
+			if (!_progressPopup.Visible) {
+				_progressPopup.Show(this);
 			}
-			m_FileSavingQueue.Push(filePath, node);
+			_fileSavingQueue.Push(filePath, node);
 		}
 
 		private void PromptUserToSaveFiles(IEnumerable items) {
@@ -379,7 +379,7 @@ namespace KickassUndelete {
 
 			if (folderDialog.ShowDialog() == DialogResult.OK) {
 				// Check that the drive isn't the same as the drive being copied from.
-				if (folderDialog.SelectedPath[0] != m_Scanner.DiskName[0]
+				if (folderDialog.SelectedPath[0] != _scanner.DiskName[0]
 					|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
 					"trying to recover from. This may cause recovery to fail, and overwrite your data " +
 					"permanently! Are you sure you wish to continue?", "Warning!",
@@ -421,25 +421,25 @@ namespace KickassUndelete {
 			}
 		}
 
-		private void m_FileSavingQueue_Finished() {
-			if (!string.IsNullOrEmpty(m_MostRecentlySavedFile)) {
-				Process.Start("explorer.exe", "/select, \"" + m_MostRecentlySavedFile + '"');
+		private void FileSavingQueue_Finished() {
+			if (!string.IsNullOrEmpty(_mostRecentlySavedFile)) {
+				Process.Start("explorer.exe", "/select, \"" + _mostRecentlySavedFile + '"');
 			}
 		}
 
 		private void fileView_ColumnClick(object sender, ColumnClickEventArgs e) {
 			// Determine if clicked column is already the column that is being sorted.
-			if (e.Column == lvwColumnSorter.SortColumn) {
+			if (e.Column == _lvwColumnSorter.SortColumn) {
 				// Reverse the current sort direction for this column.
-				if (lvwColumnSorter.Order == SortOrder.Ascending) {
-					lvwColumnSorter.Order = SortOrder.Descending;
+				if (_lvwColumnSorter.Order == SortOrder.Ascending) {
+					_lvwColumnSorter.Order = SortOrder.Descending;
 				} else {
-					lvwColumnSorter.Order = SortOrder.Ascending;
+					_lvwColumnSorter.Order = SortOrder.Ascending;
 				}
 			} else {
 				// Set the column number that is to be sorted; default to ascending.
-				lvwColumnSorter.SortColumn = e.Column;
-				lvwColumnSorter.Order = SortOrder.Ascending;
+				_lvwColumnSorter.SortColumn = e.Column;
+				_lvwColumnSorter.Order = SortOrder.Ascending;
 			}
 
 			// Perform the sort with these new sort options.
@@ -475,13 +475,13 @@ namespace KickassUndelete {
 		}
 
 		private void bRestoreFiles_Click(object sender, EventArgs e) {
-			if (m_NumCheckedItems == 1) {
+			if (_numCheckedItems == 1) {
 				PromptUserToSaveFile(fileView.CheckedItems[0].Tag as INodeMetadata);
-			} else if (m_NumCheckedItems > 1) {
+			} else if (_numCheckedItems > 1) {
 				PromptUserToSaveFiles(fileView.CheckedItems);
-			} else if (m_NumSelectedItems == 1) {
+			} else if (_numSelectedItems == 1) {
 				PromptUserToSaveFile(fileView.SelectedItems[0].Tag as INodeMetadata);
-			} else if (m_NumSelectedItems > 1) {
+			} else if (_numSelectedItems > 1) {
 				PromptUserToSaveFiles(fileView.SelectedItems);
 			}
 		}
@@ -490,19 +490,19 @@ namespace KickassUndelete {
 		/// Sets the restore button to be enabled if there are list items checked.
 		/// </summary>
 		private void UpdateRestoreButton() {
-			if (!m_Scanning) {
-				bRestoreFiles.Enabled = m_NumCheckedItems > 0 || m_NumSelectedItems > 0;
+			if (!_scanning) {
+				bRestoreFiles.Enabled = _numCheckedItems > 0 || _numSelectedItems > 0;
 			}
 		}
 
 		private void fileView_ItemCheck(object sender, ItemCheckEventArgs e) {
 			// Update the number of checked items
-			m_NumCheckedItems += e.NewValue == CheckState.Checked ? 1 : -1;
+			_numCheckedItems += e.NewValue == CheckState.Checked ? 1 : -1;
 			UpdateRestoreButton();
 		}
 
 		private void fileView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
-			m_NumSelectedItems += e.IsSelected ? 1 : -1;
+			_numSelectedItems += e.IsSelected ? 1 : -1;
 			UpdateRestoreButton();
 		}
 	}

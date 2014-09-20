@@ -23,23 +23,23 @@ namespace KFS.Disks {
 	public abstract class Disk : IDataStream {
 		#region IDataStream Members
 
-		private object padlock = new object();
+		private object _padlock = new object();
 		private const ulong CACHE_LINE_SIZE = 64 * 1024; // Read 64KB at a time from disk
-		private ulong current_cache_line = ulong.MaxValue;
-		private byte[] cache = new byte[CACHE_LINE_SIZE];
+		private ulong _currentCacheLine = ulong.MaxValue;
+		private byte[] _cache = new byte[CACHE_LINE_SIZE];
 		public byte[] GetBytes(ulong offset, ulong length) {
 			byte[] result = new byte[length];
 			if (length > 0) {
 				ulong bytes_read = 0;
 				while (bytes_read < length) {
 					ulong cache_line = offset / CACHE_LINE_SIZE;
-					lock (padlock) {
-						if (current_cache_line != cache_line) {
+					lock (_padlock) {
+						if (_currentCacheLine != cache_line) {
 							LoadCacheLine(cache_line);
 						}
 						ulong offset_in_cache_line = offset % CACHE_LINE_SIZE;
 						ulong num_to_read = Math.Min(CACHE_LINE_SIZE - offset_in_cache_line, length - bytes_read);
-						Array.Copy(cache, (int)offset_in_cache_line, result, (int)bytes_read, (int)num_to_read);
+						Array.Copy(_cache, (int)offset_in_cache_line, result, (int)bytes_read, (int)num_to_read);
 						bytes_read += num_to_read;
 						offset += num_to_read;
 					}
@@ -49,8 +49,8 @@ namespace KFS.Disks {
 		}
 
 		protected void LoadCacheLine(ulong cache_line) {
-			current_cache_line = cache_line;
-			ForceReadBytes(cache, cache_line * CACHE_LINE_SIZE, CACHE_LINE_SIZE);
+			_currentCacheLine = cache_line;
+			ForceReadBytes(_cache, cache_line * CACHE_LINE_SIZE, CACHE_LINE_SIZE);
 		}
 
 		protected abstract void ForceReadBytes(byte[] buffer, ulong offset, ulong length);

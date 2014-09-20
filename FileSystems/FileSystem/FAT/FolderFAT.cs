@@ -182,10 +182,10 @@ namespace KFS.FileSystems.FAT {
 			}
 		}
 
-		private bool root;
+		private bool _root;
 
 		public FolderFAT(FileSystemFAT fileSystem, long offset, long cluster) {
-			root = true;
+			_root = true;
 			Offset = offset;
 			FileSystem = fileSystem;
 			FirstCluster = cluster;
@@ -196,7 +196,7 @@ namespace KFS.FileSystems.FAT {
 			Deleted = Attributes.Deleted;
 		}
 		public FolderFAT(FileSystemFAT fileSystem, DirectoryEntry entry, string path) {
-			root = false;
+			_root = false;
 			FileSystem = fileSystem;
 			Offset = entry.Offset;
 			FirstCluster = entry.ClusterNum;
@@ -238,14 +238,14 @@ namespace KFS.FileSystems.FAT {
 			List<DirectoryEntry> res = new List<DirectoryEntry>();
 
 			// check if this is pointing at the root dir and is obviously not supposed to be
-			if (root || FirstCluster != FileSystem.RootCluster) {
+			if (_root || FirstCluster != FileSystem.RootCluster) {
 
 				DirectoryEntry current = new DirectoryEntry(FileSystem, pos);
 				while (!current.Last) {
 					if (current.LongNameEntry) {
 						longName = current.LongName + longName;
 					} else {
-						if (!(root && FileSystem.Type == PartitionType.FAT16) && current.Invalid) {
+						if (!(_root && FileSystem.Type == PartitionType.FAT16) && current.Invalid) {
 							// this is an invalid entry, so the whole directory is probably invalid
 							break;
 						}
@@ -260,10 +260,10 @@ namespace KFS.FileSystems.FAT {
 						longName = "";
 					}
 
-					if (root && FileSystem.Type == PartitionType.FAT16 &&
+					if (_root && FileSystem.Type == PartitionType.FAT16 &&
 							pos - clusterStart >= FileSystem.RootEntryCount * DIR_ENTRY_SIZE) {
 						break;
-					} else if ((root && FileSystem.Type == PartitionType.FAT16)
+					} else if ((_root && FileSystem.Type == PartitionType.FAT16)
 							|| pos - clusterStart < FileSystem.BytesPerCluster) {
 						pos += DIR_ENTRY_SIZE;
 					} else {
@@ -287,25 +287,25 @@ namespace KFS.FileSystems.FAT {
 		#endregion
 
 
-		private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
+		private Dictionary<long, byte[]> _clusterCache = new Dictionary<long, byte[]>();
 
 		public override byte[] GetBytes(ulong _offset, ulong _length) {
 			long offset = (long)_offset;
 			long length = (long)_length;
 			long currentCluster = FirstCluster;
 
-			lock (m_ClusterCache) {
+			lock (_clusterCache) {
 				byte[] res = new byte[length];
 
 				// First, handle the case in FAT16 where the root directory is fixed.
-				if (root && FileSystem.Type == PartitionType.FAT16) {
-					if (!m_ClusterCache.ContainsKey(currentCluster)) {
-						m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+				if (_root && FileSystem.Type == PartitionType.FAT16) {
+					if (!_clusterCache.ContainsKey(currentCluster)) {
+						_clusterCache[currentCluster] = FileSystem.Store.GetBytes(
 									(ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
 									(ulong)FileSystem.RootEntryCount * DIR_ENTRY_SIZE);
 					}
 					// Read the cached data.
-					Array.Copy(m_ClusterCache[currentCluster], offset, res, 0, length);
+					Array.Copy(_clusterCache[currentCluster], offset, res, 0, length);
 				} else { // Now handle the general case.
 					long resindex = 0;
 					// Find the first cluster we want to read.
@@ -316,15 +316,15 @@ namespace KFS.FileSystems.FAT {
 					// Cache and retrieve the data for each cluster until we get all we need.
 					while (length > 0 && currentCluster >= 0) {
 						// Cache the current cluster.
-						if (!m_ClusterCache.ContainsKey(currentCluster)) {
-							m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+						if (!_clusterCache.ContainsKey(currentCluster)) {
+							_clusterCache[currentCluster] = FileSystem.Store.GetBytes(
 									(ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
 									(ulong)FileSystem.BytesPerCluster);
 						}
 
 						// Read the cached data.
 						long read = Math.Min(length, FileSystem.BytesPerCluster - offset);
-						Array.Copy(m_ClusterCache[currentCluster], offset, res, resindex, read);
+						Array.Copy(_clusterCache[currentCluster], offset, res, resindex, read);
 						offset = 0;
 						length -= read;
 						resindex += read;
@@ -348,11 +348,11 @@ namespace KFS.FileSystems.FAT {
 			}
 		}
 
-		ulong m_StreamLength = ulong.MaxValue;
+		ulong _streamLength = ulong.MaxValue;
 
 		public override ulong StreamLength {
 			get {
-				if (m_StreamLength == ulong.MaxValue) {
+				if (_streamLength == ulong.MaxValue) {
 					// read all directory entries
 					long pos = Offset;
 					long clusterStart = Offset;
@@ -360,20 +360,20 @@ namespace KFS.FileSystems.FAT {
 					ulong count = DIR_ENTRY_SIZE;
 
 					// check if this is pointing at the root dir and is obviously not supposed to be
-					if (root || FirstCluster != FileSystem.RootCluster) {
+					if (_root || FirstCluster != FileSystem.RootCluster) {
 
 						DirectoryEntry current = new DirectoryEntry(FileSystem, pos);
 						while (!current.Last) {
-							if (!(root && FileSystem.Type == PartitionType.FAT16) && current.Invalid) {
+							if (!(_root && FileSystem.Type == PartitionType.FAT16) && current.Invalid) {
 								// this is an invalid entry, so the whole directory is probably invalid
 								break;
 							}
 							count += DIR_ENTRY_SIZE;
 
-							if (root && FileSystem.Type == PartitionType.FAT16 &&
+							if (_root && FileSystem.Type == PartitionType.FAT16 &&
 									pos - clusterStart >= FileSystem.RootEntryCount * DIR_ENTRY_SIZE) {
 								break;
-							} else if ((root && FileSystem.Type == PartitionType.FAT16)
+							} else if ((_root && FileSystem.Type == PartitionType.FAT16)
 									|| pos - clusterStart < FileSystem.BytesPerCluster) {
 								pos += DIR_ENTRY_SIZE;
 							} else {
@@ -385,9 +385,9 @@ namespace KFS.FileSystems.FAT {
 							current = new DirectoryEntry(FileSystem, pos);
 						}
 					}
-					m_StreamLength = count;
+					_streamLength = count;
 				}
-				return m_StreamLength;
+				return _streamLength;
 			}
 		}
 

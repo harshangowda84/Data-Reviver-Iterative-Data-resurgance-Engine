@@ -20,15 +20,15 @@ namespace KFS.DataStream {
 	/// A data stream representing a single disk sector.
 	/// </summary>
 	public class SectorStream : SubStream {
-		private ulong m_sectorNum;
+		private ulong _sectorNum;
 
 		public SectorStream(IDataStream stream, ulong start, ulong length, ulong sectorNum) :
 			base(stream, start, length) {
-			m_sectorNum = sectorNum;
+			_sectorNum = sectorNum;
 		}
 
 		public override String StreamName {
-			get { return string.Concat("Sector ", m_sectorNum, " of ", ParentStream.StreamName); }
+			get { return string.Concat("Sector ", _sectorNum, " of ", ParentStream.StreamName); }
 		}
 	}
 }

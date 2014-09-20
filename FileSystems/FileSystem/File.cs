@@ -25,8 +25,8 @@ namespace KFS.FileSystems {
 	/// </summary>
 	public abstract class File : FileSystemNode, IFile {
 #if !KFS_LEAN_AND_MEAN
-		private bool m_IsZip = false;
-		private bool m_Known = false;
+		private bool _isZip = false;
+		private bool _known = false;
 #endif
 
 		public bool IsZip {
@@ -34,12 +34,12 @@ namespace KFS.FileSystems {
 #if KFS_LEAN_AND_MEAN
 				return false;
 #else
-				if (!m_Known) {
-					//m_Known = ZipFile.IsZipFile(new ForensicsAppStream(this), false);
-					m_IsZip = Name.Trim().ToLower().EndsWith("zip");
-					m_Known = true;
+				if (!_known) {
+					//_known = ZipFile.IsZipFile(new ForensicsAppStream(this), false);
+					_isZip = Name.Trim().ToLower().EndsWith("zip");
+					_known = true;
 				}
-				return m_IsZip;
+				return _isZip;
 #endif
 			}
 		}

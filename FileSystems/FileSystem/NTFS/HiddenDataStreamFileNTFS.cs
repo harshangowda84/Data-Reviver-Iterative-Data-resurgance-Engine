@@ -22,12 +22,12 @@ namespace KFS.FileSystems.NTFS {
 	/// An NTFS file that contains alternate (named) data streams.
 	/// </summary>
 	public class HiddenDataStreamFileNTFS : Folder {
-		private List<IFileSystemNode> children;
-		private MFTRecord m_record;
+		private List<IFileSystemNode> _children;
+		private MFTRecord _record;
 
 		public HiddenDataStreamFileNTFS(MFTRecord record, string path) {
-			m_record = record;
-			FileSystem = m_record.FileSystem;
+			_record = record;
+			FileSystem = _record.FileSystem;
 			Name = record.FileName + "(Hidden Streams)";
 			if (!string.IsNullOrEmpty(path)) {
 				Path = PathUtils.Combine(path, Name);
@@ -35,30 +35,30 @@ namespace KFS.FileSystems.NTFS {
 				// We don't know the path.
 				Path = PathUtils.Combine(FileSystem.Store.DeviceID, "?", Name);
 			}
-			children = new List<IFileSystemNode>();
-			children.Add(new FileNTFS(m_record, Path));
-			foreach (MFTAttribute attr in m_record.NamedDataAttributes) {
-				children.Add(new FileNTFS(m_record, attr, Path));
+			_children = new List<IFileSystemNode>();
+			_children.Add(new FileNTFS(_record, Path));
+			foreach (MFTAttribute attr in _record.NamedDataAttributes) {
+				_children.Add(new FileNTFS(_record, attr, Path));
 			}
 		}
 
 		public override DateTime LastModified {
-			get { return m_record.LastDataChangeTime; }
+			get { return _record.LastDataChangeTime; }
 		}
 
 		public override long Identifier {
 			// TODO: This needs rethinking, since it'll have the same identifier as its base stream.
 			// Not a problem until Identifier starts actually being used in NTFS searches.
-			get { return (long)m_record.MFTRecordNumber; }
+			get { return (long)_record.MFTRecordNumber; }
 		}
 
 		public IList<MFTAttribute> GetHiddenDataStreams() {
-			return m_record.NamedDataAttributes;
+			return _record.NamedDataAttributes;
 		}
 
 
 		public override IEnumerable<IFileSystemNode> GetChildren() {
-			return children;
+			return _children;
 		}
 
 		public override IEnumerable<IFileSystemNode> GetChildren(string path) {
@@ -82,7 +82,7 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		public override IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
+			get { return _record.PartitionStream; }
 		}
 
 		public override void Open() {

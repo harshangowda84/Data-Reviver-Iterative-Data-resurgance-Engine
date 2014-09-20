@@ -47,31 +47,31 @@ namespace KFS.FileSystems.NTFS {
 
 
 
-		ushort m_Number;
-		ushort[] m_Array;
-		ulong m_SectorSize;
+		ushort _number;
+		ushort[] _array;
+		ulong _sectorSize;
 		public FixupStream(IDataStream stream, ulong start, ulong length,
 						ushort updateSequenceNumber, ushort[] updateSequenceArray, ulong sectorSize)
 			: base(stream, start, length) {
-			m_Number = updateSequenceNumber;
-			m_Array = updateSequenceArray;
-			m_SectorSize = sectorSize;
+			_number = updateSequenceNumber;
+			_array = updateSequenceArray;
+			_sectorSize = sectorSize;
 		}
 
 		public override byte[] GetBytes(ulong offset, ulong length) {
 			byte[] res = base.GetBytes(offset, length);
-			ulong current = offset - (offset % m_SectorSize) + m_SectorSize - 2;
+			ulong current = offset - (offset % _sectorSize) + _sectorSize - 2;
 			while (current < offset + length) {
 				if (current >= offset) {
-					res[current - offset] = (byte)(m_Array[current / m_SectorSize] & 0xFF);
+					res[current - offset] = (byte)(_array[current / _sectorSize] & 0xFF);
 				}
 				// We don't need to check that current + 1 >= offset here, because if it were
 				// less than offset, current would've been rounded to the next sector up.
 				if (current + 1 < offset + length) {
-					res[current + 1 - offset] = (byte)((m_Array[current / m_SectorSize] >> 8) & 0xFF);
+					res[current + 1 - offset] = (byte)((_array[current / _sectorSize] >> 8) & 0xFF);
 				}
 
-				current += m_SectorSize;
+				current += _sectorSize;
 			}
 			return res;
 		}

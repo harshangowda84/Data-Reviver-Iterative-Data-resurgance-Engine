@@ -28,7 +28,7 @@ namespace KFS.Disks {
 	public class WinPhysicalDisk : WinDisk, IPhysicalDisk, IImageable, IDescribable {
 		public PhysicalDiskAttributes Attributes { get; private set; }
 
-		private ulong m_Size;
+		private ulong _size;
 		public WinPhysicalDisk(ManagementObject mo) {
 			Attributes = new PhysicalDiskAttributes(mo);
 
@@ -37,38 +37,38 @@ namespace KFS.Disks {
 			if (Handle.IsInvalid) {
 				throw new Exception("Failed to get a handle to the physical disk. " + Marshal.GetLastWin32Error());
 			}
-			m_Size = Util.GetDiskSize(Handle);
+			_size = Util.GetDiskSize(Handle);
 
 			GetDiskSections();
 		}
 
-		private List<PhysicalDiskSection> m_Sections;
+		private List<PhysicalDiskSection> _sections;
 		[XmlIgnore]
 		public IList<PhysicalDiskSection> Sections {
-			get { return new ReadOnlyCollection<PhysicalDiskSection>(m_Sections); }
+			get { return new ReadOnlyCollection<PhysicalDiskSection>(_sections); }
 		}
 
-		private MasterBootRecord m_MasterBootRecord;
+		private MasterBootRecord _masterBootRecord;
 		private void GetDiskSections() {
-			m_Sections = new List<PhysicalDiskSection>();
+			_sections = new List<PhysicalDiskSection>();
 			try {
-				m_MasterBootRecord = new MasterBootRecord(this);
-				m_Sections.Add(m_MasterBootRecord);
+				_masterBootRecord = new MasterBootRecord(this);
+				_sections.Add(_masterBootRecord);
 				ulong offset = MasterBootRecord.MBR_SIZE;
-				foreach (MasterBootRecord.PartitionEntry pEntry in m_MasterBootRecord.PartitionEntries) {
+				foreach (MasterBootRecord.PartitionEntry pEntry in _masterBootRecord.PartitionEntries) {
 					if (pEntry.PartitionOffset > offset) {
-						m_Sections.Add(new UnallocatedDiskArea(this, offset, pEntry.PartitionOffset - offset));
+						_sections.Add(new UnallocatedDiskArea(this, offset, pEntry.PartitionOffset - offset));
 					}
 					if (offset > pEntry.PartitionOffset) {
 						throw new Exception("Something went wrong!");
 					}
 
-					m_Sections.Add(new PhysicalDiskPartition(this, pEntry));
+					_sections.Add(new PhysicalDiskPartition(this, pEntry));
 
 					offset = pEntry.PartitionOffset + pEntry.PartitionLength;
 				}
 				if (StreamLength > offset) {
-					m_Sections.Add(new UnallocatedDiskArea(this, offset, StreamLength - offset));
+					_sections.Add(new UnallocatedDiskArea(this, offset, StreamLength - offset));
 				}
 			} catch (Exception) { }
 		}
@@ -80,7 +80,7 @@ namespace KFS.Disks {
 		#region IDataStream Members
 
 		public override ulong StreamLength {
-			get { return m_Size; }
+			get { return _size; }
 		}
 
 		public override String StreamName {
@@ -110,7 +110,7 @@ namespace KFS.Disks {
 		}
 
 		public SectorStatus GetSectorStatus(ulong sectorNum) {
-			foreach (PhysicalDiskSection section in m_Sections) {
+			foreach (PhysicalDiskSection section in _sections) {
 				if (section.Offset / Attributes.BytesPerSector <= sectorNum
 						&& (section.Offset + section.Length) / Attributes.BytesPerSector > sectorNum) {
 					return section.GetSectorStatus(sectorNum - section.Offset / Attributes.BytesPerSector);

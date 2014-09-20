@@ -23,25 +23,25 @@ namespace KFS.FileSystems.NTFS {
 	/// An NTFS data stream comprising multiple data runs.
 	/// </summary>
 	class NTFSFileStream : IDataStream {
-		private IDataStream m_partitionStream, m_residentStream;
-		private ulong m_length;
-		private MFTRecord m_record;
-		private List<IRun> m_runs;
-		private bool m_nonResident;
+		private IDataStream _partitionStream, _residentStream;
+		private ulong _length;
+		private MFTRecord _record;
+		private List<IRun> _runs;
+		private bool _nonResident;
 
 		public NTFSFileStream(IDataStream partition, MFTRecord record, MFTAttribute attr) {
 			if (attr != null) {
-				m_nonResident = attr.NonResident;
-				if (m_nonResident) {
-					m_runs = attr.Runs;
-					m_length = attr.DataSize;
+				_nonResident = attr.NonResident;
+				if (_nonResident) {
+					_runs = attr.Runs;
+					_length = attr.DataSize;
 				} else {
-					m_residentStream = attr.ResidentData;
-					m_length = attr.ResidentData.StreamLength;
+					_residentStream = attr.ResidentData;
+					_length = attr.ResidentData.StreamLength;
 				}
 			}
-			m_record = record;
-			m_partitionStream = partition;
+			_record = record;
+			_partitionStream = partition;
 		}
 
 		public NTFSFileStream(IDataStream partition, MFTRecord record, AttributeType attrType) :
@@ -51,25 +51,25 @@ namespace KFS.FileSystems.NTFS {
 		/// Gets a list of the on-disk runs of this NTFSFileStream. Returns null if resident.
 		/// </summary>
 		public IEnumerable<IRun> GetRuns() {
-			return m_nonResident ? new ReadOnlyCollection<IRun>(m_runs) : null;
+			return _nonResident ? new ReadOnlyCollection<IRun>(_runs) : null;
 		}
 
 		public byte[] GetBytes(ulong offset, ulong length) {
-			if (offset + length > m_length) {
-				throw new ArgumentOutOfRangeException(string.Format("Tried to read off the end of the file! offset = {0}, length = {1}, file length = {2}", offset, length, m_length));
+			if (offset + length > _length) {
+				throw new ArgumentOutOfRangeException(string.Format("Tried to read off the end of the file! offset = {0}, length = {1}, file length = {2}", offset, length, _length));
 			}
-			if (m_nonResident) {
+			if (_nonResident) {
 				// Special case for only 1 run (by far the most common occurrence).
 				// Avoids the loop logic and Array.Copy.
-				if (m_runs.Count == 1) {
-					return m_runs[0].GetBytes(offset, length);
+				if (_runs.Count == 1) {
+					return _runs[0].GetBytes(offset, length);
 				}
 
 				byte[] res = new byte[length];
-				ulong bytesPerCluster = (ulong)(m_record.SectorsPerCluster * m_record.BytesPerSector);
+				ulong bytesPerCluster = (ulong)(_record.SectorsPerCluster * _record.BytesPerSector);
 				ulong firstCluster = offset / bytesPerCluster;
 				ulong lastCluster = (offset + length - 1) / bytesPerCluster;
-				foreach (NTFSDataRun run in m_runs) {
+				foreach (NTFSDataRun run in _runs) {
 					// If this run doesn't overlap the cluster range we want, skip it.
 					if (run.VCN + run.LengthInClusters <= firstCluster || run.VCN > lastCluster) {
 						continue;
@@ -94,7 +94,7 @@ namespace KFS.FileSystems.NTFS {
 				}
 				return res;
 			} else {
-				return m_residentStream.GetBytes(offset, length);
+				return _residentStream.GetBytes(offset, length);
 			}
 		}
 
@@ -104,31 +104,31 @@ namespace KFS.FileSystems.NTFS {
 
 		public ulong StreamLength {
 			get {
-				return m_length;
+				return _length;
 			}
 		}
 
 		public String StreamName {
-			get { return "NTFS File " + m_record.FileName; }
+			get { return "NTFS File " + _record.FileName; }
 		}
 
 		public IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
+			get { return _record.PartitionStream; }
 		}
 
 		public void Open() {
-			if (m_nonResident) {
-				m_partitionStream.Open();
+			if (_nonResident) {
+				_partitionStream.Open();
 			} else {
-				m_residentStream.Open();
+				_residentStream.Open();
 			}
 		}
 
 		public void Close() {
-			if (m_nonResident) {
-				m_partitionStream.Close();
+			if (_nonResident) {
+				_partitionStream.Close();
 			} else {
-				m_residentStream.Close();
+				_residentStream.Close();
 			}
 		}
 	}

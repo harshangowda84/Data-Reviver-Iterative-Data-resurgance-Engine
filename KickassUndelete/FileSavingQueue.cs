@@ -22,41 +22,41 @@ using System.Threading;
 
 namespace KickassUndelete {
 	public class FileSavingQueue : IProgressable {
-		private bool m_Saving = false;
-		private Thread m_ProcessingThread;
-		private Queue<KeyValuePair<string, IFileSystemNode>> m_Queue = new Queue<KeyValuePair<string, IFileSystemNode>>();
+		private bool _saving = false;
+		private Thread _processingThread;
+		private Queue<KeyValuePair<string, IFileSystemNode>> _queue = new Queue<KeyValuePair<string, IFileSystemNode>>();
 
 		public FileSavingQueue() { }
 
 		public void Push(string filepath, IFileSystemNode fileNode) {
-			lock (m_Queue) {
-				m_Queue.Enqueue(new KeyValuePair<string, IFileSystemNode>(filepath, fileNode));
-				if (!m_Saving) {
-					m_Saving = true;
-					m_ProcessingThread = new Thread(delegate() {
+			lock (_queue) {
+				_queue.Enqueue(new KeyValuePair<string, IFileSystemNode>(filepath, fileNode));
+				if (!_saving) {
+					_saving = true;
+					_processingThread = new Thread(delegate() {
 						int remaining = 0;
-						lock (m_Queue) {
-							remaining = m_Queue.Count;
+						lock (_queue) {
+							remaining = _queue.Count;
 						}
 						while (remaining > 0) {
 							KeyValuePair<string, IFileSystemNode> nextFile;
-							lock (m_Queue) {
-								nextFile = m_Queue.Dequeue();
+							lock (_queue) {
+								nextFile = _queue.Dequeue();
 							}
 							var filePath = nextFile.Key;
 							var node = nextFile.Value;
 							WriteFileToDisk(filePath, node);
-							lock (m_Queue) {
-								remaining = m_Queue.Count;
+							lock (_queue) {
+								remaining = _queue.Count;
 								if (remaining == 0) {
-									m_Saving = false;
+									_saving = false;
 									OnFinished();
 									return;
 								}
 							}
 						}
 					});
-					m_ProcessingThread.Start();
+					_processingThread.Start();
 				}
 			}
 		}

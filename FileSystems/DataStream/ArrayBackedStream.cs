@@ -23,28 +23,28 @@ namespace KFS.DataStream {
 	/// A data stream wrapper for an array of bytes.
 	/// </summary>
 	public class ArrayBackedStream : IDataStream {
-		private uint m_Offset;
-		private uint m_Length;
-		private byte[] m_Data;
+		private uint _offset;
+		private uint _length;
+		private byte[] _data;
 
 		public ArrayBackedStream(byte[] data, uint offset, uint length) {
-			m_Data = data;
-			m_Offset = offset;
-			m_Length = length;
+			_data = data;
+			_offset = offset;
+			_length = length;
 		}
 
 		public byte[] GetBytes(ulong offset, ulong length) {
 			byte[] result = new byte[length];
-			Array.Copy(m_Data, (int)(m_Offset + offset), result, 0, (int)length);
+			Array.Copy(_data, (int)(_offset + offset), result, 0, (int)length);
 			return result;
 		}
 
 		public ulong DeviceOffset {
-			get { return m_Offset; }
+			get { return _offset; }
 		}
 
 		public ulong StreamLength {
-			get { return m_Length; }
+			get { return _length; }
 		}
 
 		public string StreamName {
@@ -59,7 +59,7 @@ namespace KFS.DataStream {
 
 		public void Close() {
 			// Remove reference to the array.
-			m_Data = null;
+			_data = null;
 		}
 	}
 }

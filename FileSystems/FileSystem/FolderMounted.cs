@@ -23,19 +23,19 @@ namespace KFS.FileSystems {
 	/// Allows a folder on the host system to be treated as an IFolder.
 	/// </summary>
 	public class FolderMounted : Folder {
-		private string m_Path;
-		private IDataStream m_Parent;
-		private DirectoryInfo m_Info;
+		private string _path;
+		private IDataStream _parent;
+		private DirectoryInfo _info;
 
 		public FolderMounted(string filePath, IDataStream parent) {
-			m_Path = filePath;
-			m_Parent = parent;
-			m_Info = new DirectoryInfo(m_Path);
-			Name = m_Info.Name;
+			_path = filePath;
+			_parent = parent;
+			_info = new DirectoryInfo(_path);
+			Name = _info.Name;
 		}
 
 		public override DateTime LastModified {
-			get { return m_Info.LastWriteTime; }
+			get { return _info.LastWriteTime; }
 		}
 
 		public override long Identifier {
@@ -43,7 +43,7 @@ namespace KFS.FileSystems {
 		}
 
 		public override IEnumerable<IFileSystemNode> GetChildren() {
-			foreach (FileSystemInfo entry in m_Info.GetFileSystemInfos()) {
+			foreach (FileSystemInfo entry in _info.GetFileSystemInfos()) {
 				if ((entry.Attributes & FileAttributes.Directory) != 0) {
 					yield return new FolderMounted(entry.FullName, this);
 				} else {
@@ -69,7 +69,7 @@ namespace KFS.FileSystems {
 		}
 
 		public override IDataStream ParentStream {
-			get { return m_Parent; }
+			get { return _parent; }
 		}
 
 		public override void Open() { }

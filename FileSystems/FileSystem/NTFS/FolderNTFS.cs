@@ -25,114 +25,114 @@ namespace KFS.FileSystems.NTFS {
 	/// </summary>
 	public class FolderNTFS : Folder, IDescribable {
 		private class IndexBuffer {
-			List<IndexEntry> entries = null;
-			ulong clusterStart;
-			UInt16 entriesStart;
-			UInt16 entriesEnd;
-			FolderNTFS m_Folder;
-			IDataStream m_Stream;
+			List<IndexEntry> _entries = null;
+			ulong _clusterStart;
+			UInt16 _entriesStart;
+			UInt16 _entriesEnd;
+			FolderNTFS _folder;
+			IDataStream _stream;
 			public IndexBuffer(IDataStream stream, ulong vcn, FolderNTFS folder) {
-				m_Folder = folder;
-				clusterStart = vcn * (ulong)(m_Folder._record.SectorsPerCluster * m_Folder._record.BytesPerSector);
-				String magic = Util.GetASCIIString(stream, clusterStart + 0x0, 4);
+				_folder = folder;
+				_clusterStart = vcn * (ulong)(_folder._record.SectorsPerCluster * _folder._record.BytesPerSector);
+				String magic = Util.GetASCIIString(stream, _clusterStart + 0x0, 4);
 
 				if (!magic.Equals("INDX")) {
 					throw new Exception("Magic INDX value not present");
 				}
 
-				entriesStart = (ushort)(Util.GetUInt16(stream, clusterStart + 0x18) + 0x18);
-				entriesEnd = (ushort)(Util.GetUInt16(stream, clusterStart + 0x1c) + entriesStart);
+				_entriesStart = (ushort)(Util.GetUInt16(stream, _clusterStart + 0x18) + 0x18);
+				_entriesEnd = (ushort)(Util.GetUInt16(stream, _clusterStart + 0x1c) + _entriesStart);
 
-				ushort updateSequenceOffset = Util.GetUInt16(stream, clusterStart + 0x04);
-				ushort updateSequenceLength = Util.GetUInt16(stream, clusterStart + 0x06);
+				ushort updateSequenceOffset = Util.GetUInt16(stream, _clusterStart + 0x04);
+				ushort updateSequenceLength = Util.GetUInt16(stream, _clusterStart + 0x06);
 
-				ushort updateSequenceNumber = Util.GetUInt16(stream, clusterStart + updateSequenceOffset);
+				ushort updateSequenceNumber = Util.GetUInt16(stream, _clusterStart + updateSequenceOffset);
 				ushort[] updateSequenceArray = new ushort[updateSequenceLength - 1];
 				ushort read = 1;
 				while (read < updateSequenceLength) {
-					updateSequenceArray[read - 1] = Util.GetUInt16(stream, clusterStart + updateSequenceOffset + (ushort)(read * 2));
+					updateSequenceArray[read - 1] = Util.GetUInt16(stream, _clusterStart + updateSequenceOffset + (ushort)(read * 2));
 					read++;
 				}
 
-				m_Stream = new FixupStream(stream, clusterStart, entriesEnd, updateSequenceNumber, updateSequenceArray, (ulong)folder.BytesPerSector);
+				_stream = new FixupStream(stream, _clusterStart, _entriesEnd, updateSequenceNumber, updateSequenceArray, (ulong)folder.BytesPerSector);
 
-				if (entriesEnd == entriesStart) {
+				if (_entriesEnd == _entriesStart) {
 					throw new Exception("Entry size was 0");
 				}
 			}
 
 			private void LoadEntries() {
-				entries = new List<IndexEntry>();
+				_entries = new List<IndexEntry>();
 				HashSet<ulong> recordNumbers = new HashSet<ulong>(); // to check for dupes
-				ulong offset = entriesStart;
+				ulong offset = _entriesStart;
 				IndexEntry entry;
 				do {
-					entry = new IndexEntry(m_Stream, offset, m_Folder);
+					entry = new IndexEntry(_stream, offset, _folder);
 					if (!recordNumbers.Contains(entry.RecordNum)) {
 						// check for dupes
-						entries.Add(entry);
+						_entries.Add(entry);
 						if (!entry.DummyEntry) {
 							recordNumbers.Add(entry.RecordNum);
 						}
 					}
 					offset += entry.EntryLength;
-				} while (!entry.LastEntry && offset < entriesEnd);
+				} while (!entry.LastEntry && offset < _entriesEnd);
 			}
 
 			public List<IndexEntry> GetEntries() {
-				if (entries == null) {
+				if (_entries == null) {
 					LoadEntries();
 				}
-				return entries;
+				return _entries;
 			}
 		}
 		private class IndexEntry {
-			private UInt64 indexedFile;
-			private UInt16 indexEntryLength;
-			private UInt16 filenameOffset;
-			private Byte filenameLength;
-			private UInt16 flags;
-			private UInt64 recordNum;
+			private UInt64 _indexedFile;
+			private UInt16 _indexEntryLength;
+			private UInt16 _filenameOffset;
+			private Byte _filenameLength;
+			private UInt16 _flags;
+			private UInt64 _recordNum;
 
-			private IndexBuffer child = null;
-			private FileSystemNode node = null;
+			private IndexBuffer _child = null;
+			private FileSystemNode _node = null;
 
-			private FolderNTFS m_Folder;
-			private ulong m_Offset;
-			private IDataStream m_Stream;
+			private FolderNTFS _folder;
+			private ulong _offset;
+			private IDataStream _stream;
 
 			public IndexEntry(IDataStream stream, ulong offset, FolderNTFS folder) {
-				m_Folder = folder;
-				m_Stream = stream;
-				m_Offset = offset;
+				_folder = folder;
+				_stream = stream;
+				_offset = offset;
 				ulong mask = 0x0000ffffffffffff; // This is a hack
 
-				indexedFile = Util.GetUInt64(stream, offset);
-				indexEntryLength = Util.GetUInt16(stream, offset + 8);
-				filenameOffset = Util.GetUInt16(stream, offset + 10);
-				flags = Util.GetByte(stream, offset + 12);
-				if (indexEntryLength > 0x50) {
-					filenameLength = Util.GetByte(stream, offset + 0x50);
-					Name = Util.GetUnicodeString(stream, offset + 0x52, (ulong)filenameLength * 2);
+				_indexedFile = Util.GetUInt64(stream, offset);
+				_indexEntryLength = Util.GetUInt16(stream, offset + 8);
+				_filenameOffset = Util.GetUInt16(stream, offset + 10);
+				_flags = Util.GetByte(stream, offset + 12);
+				if (_indexEntryLength > 0x50) {
+					_filenameLength = Util.GetByte(stream, offset + 0x50);
+					Name = Util.GetUnicodeString(stream, offset + 0x52, (ulong)_filenameLength * 2);
 					DummyEntry = false;
 				} else {
 					// no filename, dummy entry
 					DummyEntry = true;
 				}
 
-				recordNum = (indexedFile & mask);
+				_recordNum = (_indexedFile & mask);
 			}
 
 			public bool LastEntry {
-				get { return (flags & 2) == 2; }
+				get { return (_flags & 2) == 2; }
 			}
 
 			public ushort EntryLength {
-				get { return indexEntryLength; }
+				get { return _indexEntryLength; }
 			}
 
 			public ulong RecordNum {
-				get { return recordNum; }
+				get { return _recordNum; }
 			}
 
 			public bool DummyEntry {
@@ -147,32 +147,32 @@ namespace KFS.FileSystems.NTFS {
 
 			public FileSystemNode FileSystemNode {
 				get {
-					if (node == null && !DummyEntry) {
+					if (_node == null && !DummyEntry) {
 						//Not last entry
-						if ((flags & 2) == 0) {
+						if ((_flags & 2) == 0) {
 							//Could read index stream here (i.e. file name etc - but we can just grab the info
 							//from the actual mft record at the cost of efficiency.
 						}
 
-						if (recordNum != m_Folder._record.RecordNum) {
-							MFTRecord record = MFTRecord.Load(recordNum, m_Folder._record.FileSystem);
+						if (_recordNum != _folder._record.RecordNum) {
+							MFTRecord record = MFTRecord.Load(_recordNum, _folder._record.FileSystem);
 							if (record.Valid) {
-								node = record.GetFileSystemNode(m_Folder.Path);
+								_node = record.GetFileSystemNode(_folder.Path);
 							}
 						}
 					}
-					return node;
+					return _node;
 				}
 			}
 
 			public IndexBuffer Child {
 				get {
-					if (child == null && m_Folder._indexAllocation != null && (flags & 1) > 0) {
+					if (_child == null && _folder._indexAllocation != null && (_flags & 1) > 0) {
 						//This isn't a leaf - points to more index entries
-						UInt64 vcn = Util.GetUInt32(m_Stream, m_Offset + (ulong)(indexEntryLength - 8));
-						child = new IndexBuffer(m_Folder._indexAllocation, vcn, m_Folder);
+						UInt64 vcn = Util.GetUInt32(_stream, _offset + (ulong)(_indexEntryLength - 8));
+						_child = new IndexBuffer(_folder._indexAllocation, vcn, _folder);
 					}
-					return child;
+					return _child;
 				}
 			}
 

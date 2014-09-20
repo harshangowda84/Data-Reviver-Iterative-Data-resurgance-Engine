@@ -69,14 +69,14 @@ namespace KFS.FileSystems.FAT {
 			Deleted = true;
 		}
 
-		private Dictionary<long, byte[]> m_ClusterCache = new Dictionary<long, byte[]>();
+		private Dictionary<long, byte[]> _clusterCache = new Dictionary<long, byte[]>();
 
 		public override byte[] GetBytes(ulong _offset, ulong _length) {
 			long offset = (long)_offset;
 			long length = (long)_length;
 			long currentCluster = FirstCluster;
 
-			lock (m_ClusterCache) {
+			lock (_clusterCache) {
 				byte[] res = new byte[length];
 				long resindex = 0;
 				// Find the first cluster we want to read.
@@ -87,15 +87,15 @@ namespace KFS.FileSystems.FAT {
 				// Cache and retrieve the data for each cluster until we get all we need.
 				while (length > 0 && currentCluster >= 0) {
 					// Cache the current cluster.
-					if (!m_ClusterCache.ContainsKey(currentCluster)) {
-						m_ClusterCache[currentCluster] = FileSystem.Store.GetBytes(
+					if (!_clusterCache.ContainsKey(currentCluster)) {
+						_clusterCache[currentCluster] = FileSystem.Store.GetBytes(
 								(ulong)FileSystem.GetDiskOffsetOfFATCluster(currentCluster),
 								(ulong)FileSystem.BytesPerCluster);
 					}
 
 					// Read the cached data.
 					long read = Math.Min(length, FileSystem.BytesPerCluster - offset);
-					Array.Copy(m_ClusterCache[currentCluster], offset, res, resindex, read);
+					Array.Copy(_clusterCache[currentCluster], offset, res, resindex, read);
 					offset = 0;
 					length -= read;
 					resindex += read;

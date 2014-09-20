@@ -45,10 +45,10 @@ namespace KFS.Disks {
 			get { return Name; }
 		}
 
-		private IFileSystem m_fileSystem;
+		private IFileSystem _fileSystem;
 		[XmlIgnore]
 		public IFileSystem FS {
-			get { return m_fileSystem; }
+			get { return _fileSystem; }
 		}
 
 		public static Image CreateImage(IImageable stream, String path, ImageCallback callback) {
@@ -82,7 +82,7 @@ namespace KFS.Disks {
 		private Image() { }
 
 		public void LoadFileSystem() {
-			m_fileSystem = FileSystem.TryLoad(this);
+			_fileSystem = FileSystem.TryLoad(this);
 		}
 
 		public override string ToString() {

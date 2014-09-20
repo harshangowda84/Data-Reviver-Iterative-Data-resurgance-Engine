@@ -22,18 +22,18 @@ namespace KFS.FileSystems.NTFS {
 	/// block of data stored on disk.
 	/// </summary>
 	public class NTFSDataRun : IRun {
-		private ulong m_vcn, m_lcn, m_bytesPerCluster, m_lengthInBytes;
-		private MFTRecord m_record;
-		public ulong VCN { get { return m_vcn; } }
-		public ulong LCN { get { return m_lcn; } }
+		private ulong _vcn, _lcn, _bytesPerCluster, _lengthInBytes;
+		private MFTRecord _record;
+		public ulong VCN { get { return _vcn; } }
+		public ulong LCN { get { return _lcn; } }
 		public ulong LengthInClusters { get; private set; }
 		public NTFSDataRun(ulong vcn, ulong lcn, ulong lengthInClusters, MFTRecord record) {
-			m_vcn = vcn;
-			m_lcn = lcn;
+			_vcn = vcn;
+			_lcn = lcn;
 			LengthInClusters = lengthInClusters;
-			m_record = record;
-			m_bytesPerCluster = (ulong)(m_record.BytesPerSector * m_record.SectorsPerCluster);
-			m_lengthInBytes = LengthInClusters * m_bytesPerCluster;
+			_record = record;
+			_bytesPerCluster = (ulong)(_record.BytesPerSector * _record.SectorsPerCluster);
+			_lengthInBytes = LengthInClusters * _bytesPerCluster;
 		}
 
 		public bool Contains(ulong vcn) {
@@ -47,15 +47,15 @@ namespace KFS.FileSystems.NTFS {
 		#region IDataStream Members
 
 		public virtual byte[] GetBytes(ulong offset, ulong length) {
-			if (offset + length - 1 < m_lengthInBytes) {
-				return m_record.PartitionStream.GetBytes(LCN * m_bytesPerCluster + offset, length);
+			if (offset + length - 1 < _lengthInBytes) {
+				return _record.PartitionStream.GetBytes(LCN * _bytesPerCluster + offset, length);
 			} else {
 				throw new Exception("Offset does not exist in this run!");
 			}
 		}
 
 		public ulong StreamLength {
-			get { return m_lengthInBytes; }
+			get { return _lengthInBytes; }
 		}
 
 		public string StreamName {
@@ -63,19 +63,19 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		public IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
+			get { return _record.PartitionStream; }
 		}
 
 		public ulong DeviceOffset {
-			get { return ParentStream.DeviceOffset + LCN * m_bytesPerCluster; }
+			get { return ParentStream.DeviceOffset + LCN * _bytesPerCluster; }
 		}
 
 		public void Open() {
-			m_record.PartitionStream.Open();
+			_record.PartitionStream.Open();
 		}
 
 		public void Close() {
-			m_record.PartitionStream.Close();
+			_record.PartitionStream.Close();
 		}
 
 		#endregion

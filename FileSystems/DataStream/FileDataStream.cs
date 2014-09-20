@@ -21,20 +21,20 @@ namespace KFS.DataStream {
 	/// A data stream wrapper for a file on the host system, such as a disk image.
 	/// </summary>
 	public class FileDataStream : IDataStream {
-		private FileStream fs = null;
-		private string path;
+		private FileStream _fs = null;
+		private string _path;
 
 		public FileDataStream(String filePath, IDataStream parentStream) {
-			path = filePath;
+			_path = filePath;
 			ParentStream = parentStream;
 			Open();
 		}
 
 		public byte[] GetBytes(ulong offset, ulong length) {
-			if (fs != null) {
-				fs.Seek((long)offset, SeekOrigin.Begin);
+			if (_fs != null) {
+				_fs.Seek((long)offset, SeekOrigin.Begin);
 				byte[] res = new byte[length];
-				fs.Read(res, (int)offset, (int)length);
+				_fs.Read(res, (int)offset, (int)length);
 				return res;
 			} else {
 				throw new Exception("FileDataStream was closed");
@@ -47,7 +47,7 @@ namespace KFS.DataStream {
 
 		public ulong StreamLength {
 			get {
-				return (ulong)fs.Length;
+				return (ulong)_fs.Length;
 			}
 		}
 
@@ -62,15 +62,15 @@ namespace KFS.DataStream {
 		public IDataStream ParentStream { get; private set; }
 
 		public void Open() {
-			if (fs == null) {
-				fs = File.OpenRead(path);
+			if (_fs == null) {
+				_fs = File.OpenRead(_path);
 			}
 		}
 
 		public void Close() {
-			if (fs != null) {
-				fs.Close();
-				fs = null;
+			if (_fs != null) {
+				_fs.Close();
+				_fs = null;
 			}
 		}
 	}

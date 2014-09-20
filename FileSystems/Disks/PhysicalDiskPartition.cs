@@ -21,7 +21,7 @@ using System.Text;
 namespace KFS.Disks {
 	public class PhysicalDiskPartition : PhysicalDiskSection, IFileSystemStore {
 		public PhysicalDiskPartitionAttributes Attributes { get; private set; }
-		private IFileSystem m_fileSystem;
+		private IFileSystem _fileSystem;
 
 		public PhysicalDiskPartition(WinPhysicalDisk disk, MasterBootRecord.PartitionEntry pEntry) {
 			PhysicalDisk = disk;
@@ -43,7 +43,7 @@ namespace KFS.Disks {
 			}
 			Attributes.PartitionType = pEntry.PartitionType;
 
-			m_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
+			_fileSystem = FileSystem.TryLoad(this as IFileSystemStore);
 		}
 
 		public override string ToString() {
@@ -77,8 +77,8 @@ namespace KFS.Disks {
 		}
 
 		public override SectorStatus GetSectorStatus(ulong sectorNum) {
-			if (m_fileSystem != null) {
-				return m_fileSystem.GetSectorStatus(sectorNum);
+			if (_fileSystem != null) {
+				return _fileSystem.GetSectorStatus(sectorNum);
 			} else {
 				return SectorStatus.UnknownFilesystem;
 			}
@@ -97,7 +97,7 @@ namespace KFS.Disks {
 		}
 
 		public IFileSystem FS {
-			get { return m_fileSystem; }
+			get { return _fileSystem; }
 		}
 	}
 }

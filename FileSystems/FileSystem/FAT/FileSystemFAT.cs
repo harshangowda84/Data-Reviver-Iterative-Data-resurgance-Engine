@@ -79,7 +79,7 @@ namespace KFS.FileSystems.FAT {
 
 		private FileAllocationTable _fileAllocationTable;
 
-		FileSystemNode m_Root = null;
+		FileSystemNode _root = null;
 		public FileSystemFAT(IFileSystemStore store, PartitionType type) {
 			Store = store;
 			Type = type;
@@ -95,7 +95,7 @@ namespace KFS.FileSystems.FAT {
 			} else {
 				_rootDirLocation = afterFAT;
 			}
-			m_Root = new FolderFAT(this, _rootDirLocation, 2);
+			_root = new FolderFAT(this, _rootDirLocation, 2);
 		}
 
 		public long GetNextCluster(long N) {
@@ -139,7 +139,7 @@ namespace KFS.FileSystems.FAT {
 
 		public PartitionType Type { get; private set; }
 		public override FileSystemNode GetRoot() {
-			return m_Root;
+			return _root;
 		}
 		public override string FileSystemType {
 			get {
@@ -183,7 +183,7 @@ namespace KFS.FileSystems.FAT {
 		}
 
 		public void SearchByTree(FileSystem.NodeVisitCallback callback, string searchPath) {
-			FileSystemNode searchRoot = this.m_Root;
+			FileSystemNode searchRoot = this._root;
 			if (!string.IsNullOrEmpty(searchPath)) {
 				searchRoot = this.GetFirstFile(searchPath) ?? searchRoot;
 			}

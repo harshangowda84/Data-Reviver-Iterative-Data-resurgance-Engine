@@ -27,29 +27,29 @@ namespace KickassUndelete {
 	/// Encapsulates the state of a scan for deleted files.
 	/// </summary>
 	public class Scanner {
-		private List<INodeMetadata> m_DeletedFiles = new List<INodeMetadata>();
-		private double m_Progress;
-		private DateTime m_StartTime;
-		private Thread m_Thread;
-		private bool m_ScanCancelled;
-		private IFileSystem m_FileSystem;
-		private string m_DiskName;
+		private List<INodeMetadata> _deletedFiles = new List<INodeMetadata>();
+		private double _progress;
+		private DateTime _startTime;
+		private Thread _thread;
+		private bool _scanCancelled;
+		private IFileSystem _fileSystem;
+		private string _diskName;
 
 		/// <summary>
 		/// Constructs a Scanner on the specified filesystem.
 		/// </summary>
 		/// <param name="fileSystem">The filesystem to scan.</param>
 		public Scanner(string diskName, IFileSystem fileSystem) {
-			m_FileSystem = fileSystem;
-			m_DiskName = diskName;
+			_fileSystem = fileSystem;
+			_diskName = diskName;
 		}
 
 		/// <summary>
 		/// Gets the deleted files found by the scan.
 		/// </summary>
 		public IList<INodeMetadata> GetDeletedFiles() {
-			lock (m_DeletedFiles) {
-				return new List<INodeMetadata>(m_DeletedFiles);
+			lock (_deletedFiles) {
+				return new List<INodeMetadata>(_deletedFiles);
 			}
 		}
 
@@ -57,37 +57,37 @@ namespace KickassUndelete {
 		/// The human-readable device label, e.g. "C: Local Disk (NTFS)".
 		/// </summary>
 		public string DiskName {
-			get { return m_DiskName; }
+			get { return _diskName; }
 		}
 
 		/// <summary>
 		/// The Device ID, e.g. "C:".
 		/// </summary>
 		public string DeviceID {
-			get { return m_FileSystem.Store.DeviceID; }
+			get { return _fileSystem.Store.DeviceID; }
 		}
 
 		/// <summary>
 		/// Gets the current progress of the scan (between 0 and 1).
 		/// </summary>
 		public double Progress {
-			get { return m_Progress; }
+			get { return _progress; }
 		}
 
 		/// <summary>
 		/// Starts a scan on the filesystem.
 		/// </summary>
 		public void StartScan() {
-			m_ScanCancelled = false;
-			m_Thread = new Thread(Run);
-			m_Thread.Start();
+			_scanCancelled = false;
+			_thread = new Thread(Run);
+			_thread.Start();
 		}
 
 		/// <summary>
 		/// Cancels the currently running scan.
 		/// </summary>
 		public void CancelScan() {
-			m_ScanCancelled = true;
+			_scanCancelled = true;
 		}
 
 		/// <summary>
@@ -102,19 +102,19 @@ namespace KickassUndelete {
 			ulong numFiles;
 
 			OnScanStarted();
-			m_Progress = 0;
+			_progress = 0;
 			OnProgressUpdated();
 
 			// TODO: Replace me with a search strategy selected from a text box!
-			ISearchStrategy strat = m_FileSystem.GetDefaultSearchStrategy();
+			ISearchStrategy strat = _fileSystem.GetDefaultSearchStrategy();
 
-			if (m_FileSystem is FileSystemNTFS) {
-				var ntfsFS = m_FileSystem as FileSystemNTFS;
+			if (_fileSystem is FileSystemNTFS) {
+				var ntfsFS = _fileSystem as FileSystemNTFS;
 				numFiles = ntfsFS.MFT.StreamLength / (ulong)(ntfsFS.SectorsPerMFTRecord * ntfsFS.BytesPerSector);
 			}
 
 			Console.WriteLine("Beginning scan...");
-			m_StartTime = DateTime.Now;
+			_startTime = DateTime.Now;
 
 			strat.Search(new FileSystem.NodeVisitCallback(delegate(INodeMetadata metadata, ulong current, ulong total) {
 				var record = metadata as MFTRecord;
@@ -133,23 +133,23 @@ namespace KickassUndelete {
 						&& !metadata.Name.EndsWith(".mum", StringComparison.OrdinalIgnoreCase)) {
 					IFileSystemNode node = metadata.GetFileSystemNode();
 					if (node.Type == FSNodeType.File && node.Size > 0) {
-						lock (m_DeletedFiles) {
-							m_DeletedFiles.Add(metadata);
+						lock (_deletedFiles) {
+							_deletedFiles.Add(metadata);
 						}
 					}
 				}
 
 				if (current % 100 == 0) {
-					m_Progress = (double)current / (double)total;
+					_progress = (double)current / (double)total;
 					OnProgressUpdated();
 				}
-				return !m_ScanCancelled;
+				return !_scanCancelled;
 			}));
 
-			if (m_FileSystem is FileSystemNTFS) {
+			if (_fileSystem is FileSystemNTFS) {
 				List<INodeMetadata> fileList;
-				lock (m_DeletedFiles) {
-					fileList = m_DeletedFiles;
+				lock (_deletedFiles) {
+					fileList = _deletedFiles;
 				}
 				foreach (var file in fileList) {
 					var record = file as MFTRecord;
@@ -174,10 +174,10 @@ namespace KickassUndelete {
 			recordTree.Clear();
 			GC.Collect();
 
-			TimeSpan timeTaken = DateTime.Now - m_StartTime;
-			if (!m_ScanCancelled) {
+			TimeSpan timeTaken = DateTime.Now - _startTime;
+			if (!_scanCancelled) {
 				Console.WriteLine("Scan complete! Time taken: {0}", timeTaken);
-				m_Progress = 1;
+				_progress = 1;
 				OnProgressUpdated();
 				OnScanFinished();
 			} else {

@@ -26,25 +26,25 @@ namespace KickassUndelete {
 		/// <summary>
 		/// Specifies the column to be sorted
 		/// </summary>
-		private int ColumnToSort;
+		private int _columnToSort;
 		/// <summary>
 		/// Specifies the order in which to sort (i.e. 'Ascending').
 		/// </summary>
-		private SortOrder OrderOfSort;
+		private SortOrder _orderOfSort;
 		/// <summary>
 		/// Case insensitive comparer object
 		/// </summary>
-		private CaseInsensitiveComparer ObjectCompare;
+		private CaseInsensitiveComparer _objectCompare;
 
 		/// <summary>
 		/// Class constructor.  Initializes various elements
 		/// </summary>
 		public ListViewColumnSorter() {
 			// Initialize the sort order to 'none'
-			OrderOfSort = SortOrder.None;
+			_orderOfSort = SortOrder.None;
 
 			// Initialize the CaseInsensitiveComparer object
-			ObjectCompare = new CaseInsensitiveComparer(CultureInfo.CurrentCulture);
+			_objectCompare = new CaseInsensitiveComparer(CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
@@ -63,21 +63,21 @@ namespace KickassUndelete {
 
 			// Compare the two items
 			// TODO: Make this not depend on a hardcoded numerical index!
-			if (ColumnToSort == 2) {
-				compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).GetFileSystemNode().Size, ((INodeMetadata)listviewY.Tag).GetFileSystemNode().Size);
-			} else if (ColumnToSort == 3) {
-				compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).LastModified, ((INodeMetadata)listviewY.Tag).LastModified);
-			} else if (ColumnToSort == 5) {
-				compareResult = ObjectCompare.Compare(((INodeMetadata)listviewX.Tag).ChanceOfRecovery, ((INodeMetadata)listviewY.Tag).ChanceOfRecovery);
+			if (_columnToSort == 2) {
+				compareResult = _objectCompare.Compare(((INodeMetadata)listviewX.Tag).GetFileSystemNode().Size, ((INodeMetadata)listviewY.Tag).GetFileSystemNode().Size);
+			} else if (_columnToSort == 3) {
+				compareResult = _objectCompare.Compare(((INodeMetadata)listviewX.Tag).LastModified, ((INodeMetadata)listviewY.Tag).LastModified);
+			} else if (_columnToSort == 5) {
+				compareResult = _objectCompare.Compare(((INodeMetadata)listviewX.Tag).ChanceOfRecovery, ((INodeMetadata)listviewY.Tag).ChanceOfRecovery);
 			} else {
-				compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+				compareResult = _objectCompare.Compare(listviewX.SubItems[_columnToSort].Text, listviewY.SubItems[_columnToSort].Text);
 			}
 
 			// Calculate correct return value based on object comparison
-			if (OrderOfSort == SortOrder.Ascending) {
+			if (_orderOfSort == SortOrder.Ascending) {
 				// Ascending sort is selected, return normal result of compare operation
 				return compareResult;
-			} else if (OrderOfSort == SortOrder.Descending) {
+			} else if (_orderOfSort == SortOrder.Descending) {
 				// Descending sort is selected, return negative result of compare operation
 				return (-compareResult);
 			} else {
@@ -91,10 +91,10 @@ namespace KickassUndelete {
 		/// </summary>
 		public int SortColumn {
 			set {
-				ColumnToSort = value;
+				_columnToSort = value;
 			}
 			get {
-				return ColumnToSort;
+				return _columnToSort;
 			}
 		}
 
@@ -103,10 +103,10 @@ namespace KickassUndelete {
 		/// </summary>
 		public SortOrder Order {
 			set {
-				OrderOfSort = value;
+				_orderOfSort = value;
 			}
 			get {
-				return OrderOfSort;
+				return _orderOfSort;
 			}
 		}
 

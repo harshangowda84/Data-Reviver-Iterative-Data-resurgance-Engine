@@ -25,16 +25,16 @@ namespace KFS.FileSystems.NTFS {
 	/// </summary>
 	public class FileNTFS : File, IDescribable {
 
-		private MFTRecord m_record;
-		private NTFSFileStream m_stream;
+		private MFTRecord _record;
+		private NTFSFileStream _stream;
 
 		public FileNTFS(MFTRecord record, string path) {
-			m_record = record;
-			if (m_record.DataAttribute != null) {
-				m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, AttributeType.Data);
+			_record = record;
+			if (_record.DataAttribute != null) {
+				_stream = new NTFSFileStream(_record.PartitionStream, _record, AttributeType.Data);
 			}
 			FileSystem = record.FileSystem;
-			Deleted = m_record.Deleted;
+			Deleted = _record.Deleted;
 			Name = record.FileName;
 			if (!string.IsNullOrEmpty(path)) {
 				Path = PathUtils.Combine(path, Name);
@@ -48,10 +48,10 @@ namespace KFS.FileSystems.NTFS {
 		/// The constructor for a file contained as a hidden data stream.
 		/// </summary>
 		public FileNTFS(MFTRecord record, MFTAttribute attr, string path) {
-			m_record = record;
-			m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, attr);
+			_record = record;
+			_stream = new NTFSFileStream(_record.PartitionStream, _record, attr);
 			FileSystem = record.FileSystem;
-			Deleted = m_record.Deleted;
+			Deleted = _record.Deleted;
 			Name = PathUtils.MakeFileNameValid(record.FileName + "_" + attr.Name);
 			Path = PathUtils.Combine(path, Name);
 		}
@@ -60,31 +60,31 @@ namespace KFS.FileSystems.NTFS {
 		/// Gets a list of the on-disk runs of this NTFSFile. Returns null if resident.
 		/// </summary>
 		public IEnumerable<IRun> GetRuns() {
-			return m_stream.GetRuns();
+			return _stream.GetRuns();
 		}
 
 		public override long Identifier {
-			get { return (long)m_record.MFTRecordNumber; }
+			get { return (long)_record.MFTRecordNumber; }
 		}
 
 		public override byte[] GetBytes(ulong offset, ulong length) {
-			return m_stream.GetBytes(offset, length);
+			return _stream.GetBytes(offset, length);
 		}
 
 		public override ulong StreamLength {
-			get { return m_stream == null ? 0 : m_stream.StreamLength; }
+			get { return _stream == null ? 0 : _stream.StreamLength; }
 		}
 
 		public override String StreamName {
-			get { return "NTFS File - " + m_record.FileName; }
+			get { return "NTFS File - " + _record.FileName; }
 		}
 
 		public override IDataStream ParentStream {
-			get { return m_record.PartitionStream; }
+			get { return _record.PartitionStream; }
 		}
 
 		public override ulong DeviceOffset {
-			get { return m_stream.DeviceOffset; }
+			get { return _stream.DeviceOffset; }
 		}
 
 		public override void Open() {
@@ -94,23 +94,23 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		public DateTime CreationTime {
-			get { return m_record.CreationTime; }
+			get { return _record.CreationTime; }
 		}
 
 		public DateTime LastAccessed {
-			get { return m_record.LastAccessTime; }
+			get { return _record.LastAccessTime; }
 		}
 
 		public override DateTime LastModified {
-			get { return m_record.LastDataChangeTime; }
+			get { return _record.LastDataChangeTime; }
 		}
 
 		public DateTime LastModifiedMFT {
-			get { return m_record.LastMFTChangeTime; }
+			get { return _record.LastMFTChangeTime; }
 		}
 
 		public string VolumeLabel {
-			get { return m_record.VolumeLabel ?? ""; }
+			get { return _record.VolumeLabel ?? ""; }
 		}
 
 		#region IDescribable Members

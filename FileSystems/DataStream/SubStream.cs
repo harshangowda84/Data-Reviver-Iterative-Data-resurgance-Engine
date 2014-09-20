@@ -20,45 +20,45 @@ namespace KFS.DataStream {
 	/// A data stream that allows access to a subset of another stream.
 	/// </summary>
 	public class SubStream : IDataStream {
-		private IDataStream m_stream;
-		private ulong m_start, m_length;
+		private IDataStream _stream;
+		private ulong _start, _length;
 
 		public SubStream(IDataStream stream, ulong start, ulong length) {
-			m_stream = stream;
-			m_start = start;
-			m_length = length;
+			_stream = stream;
+			_start = start;
+			_length = length;
 		}
 
 		public virtual byte[] GetBytes(ulong offset, ulong length) {
-			return m_stream.GetBytes(m_start + offset, length);
+			return _stream.GetBytes(_start + offset, length);
 		}
 
 		public ulong StreamLength {
 			get {
-				return m_length;
+				return _length;
 			}
 		}
 
 		public ulong DeviceOffset {
 			get {
-				return m_stream.DeviceOffset + m_start;
+				return _stream.DeviceOffset + _start;
 			}
 		}
 
 		public virtual String StreamName {
-			get { return "Substream of " + m_stream.StreamName; }
+			get { return "Substream of " + _stream.StreamName; }
 		}
 
 		public virtual IDataStream ParentStream {
-			get { return m_stream; }
+			get { return _stream; }
 		}
 
 		public void Open() {
-			m_stream.Open();
+			_stream.Open();
 		}
 
 		public void Close() {
-			m_stream.Close();
+			_stream.Close();
 		}
 
 		public override string ToString() {

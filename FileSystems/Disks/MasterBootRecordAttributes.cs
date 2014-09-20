@@ -23,13 +23,13 @@ namespace KFS.Disks {
 		public MasterBootRecordAttributes() { }
 
 		public MasterBootRecordAttributes(string description) {
-			m_Description = description;
+			_description = description;
 		}
 
-		private string m_Description;
+		private string _description;
 		[XmlIgnore]
 		public override string TextDescription {
-			get { return m_Description; }
+			get { return _description; }
 		}
 	}
 }

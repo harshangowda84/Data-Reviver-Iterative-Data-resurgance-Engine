@@ -21,7 +21,7 @@ namespace GuiComponents {
 	/// A minimal popup window that displays a progress bar.
 	/// </summary>
 	public partial class ProgressPopup : Form {
-		IProgressable m_Model;
+		IProgressable _model;
 		private ProgressPopup() {
 			InitializeComponent();
 		}
@@ -31,10 +31,10 @@ namespace GuiComponents {
 		/// </summary>
 		public ProgressPopup(IProgressable model)
 			: this() {
-			m_Model = model;
+			_model = model;
 
-			m_Model.Progress += model_Progress;
-			m_Model.Finished += model_Finished;
+			_model.Progress += model_Progress;
+			_model.Finished += model_Finished;
 		}
 
 		void model_Progress(string status, double progress) {

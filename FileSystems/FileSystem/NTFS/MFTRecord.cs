@@ -106,15 +106,15 @@ namespace KFS.FileSystems.NTFS {
 		public IDataStream PartitionStream;
 
 		// Attributes stored on this MFT Record
-		private List<MFTAttribute> m_Attributes;
+		private List<MFTAttribute> _attributes;
 		public IList<MFTAttribute> Attributes {
-			get { return new ReadOnlyCollection<MFTAttribute>(m_Attributes); }
+			get { return new ReadOnlyCollection<MFTAttribute>(_attributes); }
 		}
-		private MFTAttribute m_DataAttribute;
+		private MFTAttribute _dataAttribute;
 		public MFTAttribute DataAttribute {
 			get {
 				LoadData(MFTLoadDepth.Full);
-				return m_DataAttribute;
+				return _dataAttribute;
 			}
 		}
 		public IList<IRun> Runs {
@@ -126,20 +126,20 @@ namespace KFS.FileSystems.NTFS {
 				return new List<IRun>();
 			}
 		}
-		private List<MFTAttribute> m_NamedDataAttributes = new List<MFTAttribute>();
+		private List<MFTAttribute> _namedDataAttributes = new List<MFTAttribute>();
 		public IList<MFTAttribute> NamedDataAttributes {
 			get {
 				LoadData(MFTLoadDepth.Full);
-				return new ReadOnlyCollection<MFTAttribute>(m_NamedDataAttributes);
+				return new ReadOnlyCollection<MFTAttribute>(_namedDataAttributes);
 			}
 		}
 
 		public bool Valid { get; private set; }
-		private FileSystemNode m_Node = null;
-		private byte[] m_Data;
-		private MFTLoadDepth m_DataLoaded = MFTLoadDepth.None;
-		private string m_Path = "";
-		private FileRecoveryStatus m_ChanceOfRecovery = FileRecoveryStatus.Unknown;
+		private FileSystemNode _node = null;
+		private byte[] _data;
+		private MFTLoadDepth _dataLoaded = MFTLoadDepth.None;
+		private string _path = "";
+		private FileRecoveryStatus _chanceOfRecovery = FileRecoveryStatus.Unknown;
 
 		public static MFTRecord Load(ulong recordNum, FileSystemNTFS fileSystem, MFTLoadDepth loadDepth = MFTLoadDepth.Full, string path = "") {
 			ulong startOffset = recordNum * (ulong)fileSystem.SectorsPerMFTRecord * (ulong)fileSystem.BytesPerSector;
@@ -169,10 +169,10 @@ namespace KFS.FileSystems.NTFS {
 
 			Valid = true;
 
-			m_Data = data;
-			m_Path = path;
+			_data = data;
+			_path = path;
 
-			Flags = (RecordFlags)BitConverter.ToUInt16(m_Data, 22);
+			Flags = (RecordFlags)BitConverter.ToUInt16(_data, 22);
 
 			if (loadDepth != MFTLoadDepth.None) {
 				LoadData(loadDepth);
@@ -180,12 +180,12 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		private void LoadData(MFTLoadDepth loadDepth = MFTLoadDepth.Full) {
-			if (loadDepth.CompareTo(m_DataLoaded) <= 0) {
+			if (loadDepth.CompareTo(_dataLoaded) <= 0) {
 				// If we're not loading more than we already have, just stop here.
 				return;
 			}
 
-			string Magic = Encoding.ASCII.GetString(m_Data, 0, 4);
+			string Magic = Encoding.ASCII.GetString(_data, 0, 4);
 			if (!Magic.Equals("FILE")) {
 				Console.Error.WriteLine("Warning: MFT record number {0} was missing the 'FILE' header. Skipping.", RecordNum);
 				// This record is invalid, so don't read any more.
@@ -193,20 +193,20 @@ namespace KFS.FileSystems.NTFS {
 				return;
 			}
 
-			ushort updateSequenceOffset = BitConverter.ToUInt16(m_Data, 4);
-			ushort updateSequenceLength = BitConverter.ToUInt16(m_Data, 6);
+			ushort updateSequenceOffset = BitConverter.ToUInt16(_data, 4);
+			ushort updateSequenceLength = BitConverter.ToUInt16(_data, 6);
 
-			ushort updateSequenceNumber = BitConverter.ToUInt16(m_Data, updateSequenceOffset);
+			ushort updateSequenceNumber = BitConverter.ToUInt16(_data, updateSequenceOffset);
 			ushort[] updateSequenceArray = new ushort[updateSequenceLength - 1];
 			ushort read = 1;
 			while (read < updateSequenceLength) {
-				updateSequenceArray[read - 1] = BitConverter.ToUInt16(m_Data, (ushort)(updateSequenceOffset + read * 2));
+				updateSequenceArray[read - 1] = BitConverter.ToUInt16(_data, (ushort)(updateSequenceOffset + read * 2));
 				read++;
 			}
 
 			// Apply fixups to the in-memory array
 			try {
-				FixupStream.FixArray(m_Data, updateSequenceNumber, updateSequenceArray, (int)BytesPerSector);
+				FixupStream.FixArray(_data, updateSequenceNumber, updateSequenceArray, (int)BytesPerSector);
 			} catch (NTFSFixupException e) {
 				Console.Error.WriteLine(e);
 				// This record is invalid, so don't read any more.
@@ -217,15 +217,15 @@ namespace KFS.FileSystems.NTFS {
 			LoadHeader();
 			LoadAttributes(AttributeOffset, loadDepth);
 
-			if (m_Attributes.Count == 0) {
+			if (_attributes.Count == 0) {
 				Console.Error.WriteLine("Warning: MFT record number {0} had no attributes.", RecordNum);
 			}
 
-			m_DataLoaded = loadDepth;
+			_dataLoaded = loadDepth;
 
 			// If we've loaded everything, dispose of the underlying byte array.
-			if (m_DataLoaded == MFTLoadDepth.Full) {
-				m_Data = null;
+			if (_dataLoaded == MFTLoadDepth.Full) {
+				_data = null;
 			}
 		}
 
@@ -256,30 +256,30 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		public IFileSystemNode GetFileSystemNode() {
-			if (m_Node == null) {
-				return GetFileSystemNode(m_Path);
+			if (_node == null) {
+				return GetFileSystemNode(_path);
 			}
-			return m_Node;
+			return _node;
 		}
 
 		public FileSystemNode GetFileSystemNode(String path) {
 			LoadData();
-			if (m_Node == null) {
+			if (_node == null) {
 				if (IsDirectory) {
-					m_Node = new FolderNTFS(this, path);
-				} else if (m_NamedDataAttributes.Count > 0) {
-					m_Node = new HiddenDataStreamFileNTFS(this, path);
+					_node = new FolderNTFS(this, path);
+				} else if (_namedDataAttributes.Count > 0) {
+					_node = new HiddenDataStreamFileNTFS(this, path);
 				} else {
-					m_Node = new FileNTFS(this, path);
+					_node = new FileNTFS(this, path);
 				}
 			}
-			return m_Node;
+			return _node;
 		}
 
 		public MFTAttribute GetAttribute(AttributeType type) {
 			LoadData();
 			try {
-				foreach (MFTAttribute attr in m_Attributes) {
+				foreach (MFTAttribute attr in _attributes) {
 					if (attr.Type == type) {
 						return attr;
 					}
@@ -291,19 +291,19 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		private void LoadHeader() {
-			LogSequenceNumber = BitConverter.ToUInt64(m_Data, 8);
-			SequenceNumber = BitConverter.ToUInt16(m_Data, 16);
-			HardLinkCount = BitConverter.ToUInt16(m_Data, 18);
-			AttributeOffset = BitConverter.ToUInt16(m_Data, 20);
-			BytesInUse = BitConverter.ToUInt32(m_Data, 24);
-			BytesAllocated = BitConverter.ToUInt32(m_Data, 28);
-			BaseMFTRecord = BitConverter.ToUInt64(m_Data, 32);
-			NextAttrInstance = BitConverter.ToUInt16(m_Data, 40);
-			MFTRecordNumber = BitConverter.ToUInt32(m_Data, 44);
+			LogSequenceNumber = BitConverter.ToUInt64(_data, 8);
+			SequenceNumber = BitConverter.ToUInt16(_data, 16);
+			HardLinkCount = BitConverter.ToUInt16(_data, 18);
+			AttributeOffset = BitConverter.ToUInt16(_data, 20);
+			BytesInUse = BitConverter.ToUInt32(_data, 24);
+			BytesAllocated = BitConverter.ToUInt32(_data, 28);
+			BaseMFTRecord = BitConverter.ToUInt64(_data, 32);
+			NextAttrInstance = BitConverter.ToUInt16(_data, 40);
+			MFTRecordNumber = BitConverter.ToUInt32(_data, 44);
 		}
 
 		private void LoadAttributes(int startOffset, MFTLoadDepth loadDepth) {
-			m_Attributes = new List<MFTAttribute>();
+			_attributes = new List<MFTAttribute>();
 			while (true) {
 				//Align to 8 byte boundary
 				if (startOffset % 8 != 0) {
@@ -311,18 +311,18 @@ namespace KFS.FileSystems.NTFS {
 				}
 
 				// Read the attribute type and length and determine whether we care about this attribute.
-				AttributeType type = (AttributeType)BitConverter.ToUInt32(m_Data, startOffset);
+				AttributeType type = (AttributeType)BitConverter.ToUInt32(_data, startOffset);
 				if (type == AttributeType.End) {
 					break;
 				}
-				int length = BitConverter.ToUInt16(m_Data, startOffset + 4);
+				int length = BitConverter.ToUInt16(_data, startOffset + 4);
 				if (loadDepth == MFTLoadDepth.NameAttributeOnly && type != AttributeType.FileName) {
 					// Skip this attribute if we're only loading the filename
 					startOffset += length;
 					continue;
 				}
 
-				MFTAttribute attribute = MFTAttribute.Load(m_Data, startOffset, this);
+				MFTAttribute attribute = MFTAttribute.Load(_data, startOffset, this);
 				if (!attribute.NonResident) {
 					switch (attribute.Type) {
 						case AttributeType.StandardInformation:
@@ -342,15 +342,15 @@ namespace KFS.FileSystems.NTFS {
 				if (attribute.Valid) {
 					if (attribute.Type == AttributeType.Data) {
 						if (attribute.Name == null) {
-							if (m_DataAttribute != null) {
+							if (_dataAttribute != null) {
 								Console.Error.WriteLine("Warning: multiple unnamed data streams found on MFT record {0}.", RecordNum);
 							}
-							m_DataAttribute = attribute;
+							_dataAttribute = attribute;
 						} else {
-							m_NamedDataAttributes.Add(attribute);
+							_namedDataAttributes.Add(attribute);
 						}
 					}
-					m_Attributes.Add(attribute);
+					_attributes.Add(attribute);
 				}
 
 				startOffset += (int)attribute.Length;
@@ -358,27 +358,27 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		private void LoadStandardAttribute(int startOffset) {
-			CreationTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset));
-			LastDataChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 8));
-			LastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 16));
-			LastAccessTime = fromNTFS(BitConverter.ToUInt64(m_Data, startOffset + 24));
-			FilePermissions = (FilePermissions)BitConverter.ToInt32(m_Data, startOffset + 32);
+			CreationTime = fromNTFS(BitConverter.ToUInt64(_data, startOffset));
+			LastDataChangeTime = fromNTFS(BitConverter.ToUInt64(_data, startOffset + 8));
+			LastMFTChangeTime = fromNTFS(BitConverter.ToUInt64(_data, startOffset + 16));
+			LastAccessTime = fromNTFS(BitConverter.ToUInt64(_data, startOffset + 24));
+			FilePermissions = (FilePermissions)BitConverter.ToInt32(_data, startOffset + 32);
 		}
 
 		private void LoadNameAttribute(int startOffset) {
 			// Read in the bytes, then parse them.
-			ParentDirectory = BitConverter.ToUInt64(m_Data, startOffset) & 0xFFFFFF;
-			AllocatedSize = BitConverter.ToUInt64(m_Data, startOffset + 40);
-			ActualSize = BitConverter.ToUInt64(m_Data, startOffset + 48);
-			FileNameLength = m_Data[startOffset + 64];
-			FileNameType = (FilenameType)m_Data[startOffset + 65];
+			ParentDirectory = BitConverter.ToUInt64(_data, startOffset) & 0xFFFFFF;
+			AllocatedSize = BitConverter.ToUInt64(_data, startOffset + 40);
+			ActualSize = BitConverter.ToUInt64(_data, startOffset + 48);
+			FileNameLength = _data[startOffset + 64];
+			FileNameType = (FilenameType)_data[startOffset + 65];
 			if (FileName == null && FileNameType != FilenameType.Dos) { // Don't bother reading DOS (8.3) filenames
-				FileName = Encoding.Unicode.GetString(m_Data, startOffset + 66, FileNameLength * 2);
+				FileName = Encoding.Unicode.GetString(_data, startOffset + 66, FileNameLength * 2);
 			}
 		}
 
 		private void LoadVolumeLabelAttribute(int startOffset, int length) {
-			VolumeLabel = Encoding.Unicode.GetString(m_Data, startOffset, length);
+			VolumeLabel = Encoding.Unicode.GetString(_data, startOffset, length);
 		}
 
 		private void LoadExternalAttributeList(int startOffset, MFTAttribute attrList) {
@@ -390,27 +390,27 @@ namespace KFS.FileSystems.NTFS {
 				}
 
 				// Load the header for this external attribute reference.
-				AttributeType type = (AttributeType)BitConverter.ToUInt32(m_Data, offset + startOffset + 0x0);
+				AttributeType type = (AttributeType)BitConverter.ToUInt32(_data, offset + startOffset + 0x0);
 				// 0xFFFFFFFF marks end of attributes.
 				if (offset == attrList.ValueLength || type == AttributeType.End) {
 					break;
 				}
-				ushort length = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x4);
-				byte nameLength = m_Data[offset + startOffset + 0x6];
-				ushort id = BitConverter.ToUInt16(m_Data, offset + startOffset + 0x18);
-				ulong vcn = BitConverter.ToUInt64(m_Data, offset + startOffset + 0x8);
-				ulong extensionRecordNumber = (BitConverter.ToUInt64(m_Data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
+				ushort length = BitConverter.ToUInt16(_data, offset + startOffset + 0x4);
+				byte nameLength = _data[offset + startOffset + 0x6];
+				ushort id = BitConverter.ToUInt16(_data, offset + startOffset + 0x18);
+				ulong vcn = BitConverter.ToUInt64(_data, offset + startOffset + 0x8);
+				ulong extensionRecordNumber = (BitConverter.ToUInt64(_data, offset + startOffset + 0x10) & 0x00000000FFFFFFFF);
 
 				if (extensionRecordNumber != RecordNum && extensionRecordNumber != MFTRecordNumber) { // TODO: Are these ever different?
 					// Load the MFT extension record, locate the attribute we want, and copy it over.
 					MFTRecord extensionRecord = MFTRecord.Load(extensionRecordNumber, this.FileSystem);
 					if (extensionRecord.Valid) {
-						foreach (MFTAttribute externalAttribute in extensionRecord.m_Attributes) {
+						foreach (MFTAttribute externalAttribute in extensionRecord._attributes) {
 							if (id == externalAttribute.Id) {
 								if (externalAttribute.NonResident && externalAttribute.Type == AttributeType.Data) {
 									// Find the corresponding data attribute on this record and merge the runlists
 									bool merged = false;
-									foreach (MFTAttribute attribute in m_Attributes) {
+									foreach (MFTAttribute attribute in _attributes) {
 										if (attribute.Type == AttributeType.Data && externalAttribute.Name == attribute.Name) {
 											MergeRunLists(ref attribute.Runs, externalAttribute.Runs);
 											merged = true;
@@ -418,10 +418,10 @@ namespace KFS.FileSystems.NTFS {
 										}
 									}
 									if (!merged) {
-										this.m_Attributes.Add(externalAttribute);
+										this._attributes.Add(externalAttribute);
 									}
 								} else {
-									this.m_Attributes.Add(externalAttribute);
+									this._attributes.Add(externalAttribute);
 								}
 							}
 						}
@@ -455,13 +455,13 @@ namespace KFS.FileSystems.NTFS {
 
 		public FileRecoveryStatus ChanceOfRecovery {
 			get {
-				if (m_ChanceOfRecovery == FileRecoveryStatus.Unknown) {
-					m_ChanceOfRecovery = GetFileSystemNode().ChanceOfRecovery;
+				if (_chanceOfRecovery == FileRecoveryStatus.Unknown) {
+					_chanceOfRecovery = GetFileSystemNode().ChanceOfRecovery;
 				}
-				return m_ChanceOfRecovery;
+				return _chanceOfRecovery;
 			}
 			set {
-				m_ChanceOfRecovery = value;
+				_chanceOfRecovery = value;
 			}
 		}
 	}
