@@ -227,11 +227,10 @@ namespace KFS.DataStream {
 			return ASCIIEncoding.ASCII.GetString(res);
 		}
 
-
 		public static string DetectFSType(IDataStream stream) {
-			if (GetASCIIString(stream, 3, 4) == "NTFS") {
-				return "NTFS";
-			}
+            if (GetASCIIString(stream, 3, 4) == "NTFS") {
+                return "NTFS";
+            }
 			if (GetASCIIString(stream, 0x36, 5) == "FAT16") {
 				return "FAT16";
 			}
