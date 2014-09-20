@@ -52,7 +52,7 @@ namespace KFS.FileSystems.NTFS {
 			m_stream = new NTFSFileStream(m_record.PartitionStream, m_record, attr);
 			FileSystem = record.FileSystem;
 			Deleted = m_record.Deleted;
-			Name = record.FileName + ":" + attr.Name;
+			Name = PathUtils.MakeFileNameValid(record.FileName + "_" + attr.Name);
 			Path = PathUtils.Combine(path, Name);
 		}
 
