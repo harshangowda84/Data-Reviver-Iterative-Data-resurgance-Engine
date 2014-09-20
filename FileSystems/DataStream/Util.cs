@@ -228,22 +228,15 @@ namespace KFS.DataStream {
 		}
 
 		public static string DetectFSType(IDataStream stream) {
-			var ntfsSig = stream.GetBytes(3, 4);
-			if (ntfsSig[0] == 'N' && ntfsSig[1] == 'T' && ntfsSig[2] == 'F' && ntfsSig[3] == 'S')
-				return "NTFS";
-
-			var fatSig = stream.GetBytes(0x36, 5);
-			if (fatSig[0] == 'F' && fatSig[1] == 'A' && fatSig[2] == 'T'
-					&& fatSig[3] == '1' && fatSig[4] == '6') {
+            if (GetASCIIString(stream, 3, 4) == "NTFS") {
+                return "NTFS";
+            }
+			if (GetASCIIString(stream, 0x36, 5) == "FAT16") {
 				return "FAT16";
 			}
-
-			fatSig = stream.GetBytes(0x52, 5);
-			if (fatSig[0] == 'F' && fatSig[1] == 'A' && fatSig[2] == 'T'
-					&& fatSig[3] == '3' && fatSig[4] == '2') {
+			if (GetASCIIString(stream, 0x52, 5) == "FAT32") {
 				return "FAT16";
 			}
-
 			return "Unknown";
 		}
 	}
