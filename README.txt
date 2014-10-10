@@ -2,6 +2,10 @@
 Kickass Undelete Release Notes
 ==================================================
 
+Version 1.5.2
+Changes:
+ * Fixed crashes on Windows 8
+ 
 Version 1.5.1
 Changes:
  * Fixed startup crash on Windows XP
