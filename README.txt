@@ -2,6 +2,10 @@
 Kickass Undelete Release Notes
 ==================================================
 
+Version 1.5.3 - 2017-10-01
+Changes:
+ * Fixed a crash when parent directories had no recoverable filename
+
 Version 1.5.2
 Changes:
  * Fixed crashes on Windows 8

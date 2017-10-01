@@ -193,8 +193,8 @@ namespace KickassUndelete {
 			} else {
 				var record = recordTree[recordNum];
 				if (record.Path == null) {
-					if (!record.IsDirectory) {
-						// This isn't a directory, so the path must have been broken.
+					if (!record.IsDirectory || record.FileName == null) {
+						// This isn't a directory, or we can't read the directory name, so the path must have been broken.
 						return PathUtils.Combine(DeviceID, "?");
 					} else {
 						record.Path = PathUtils.Combine(GetPathForRecord(recordTree, record.ParentRecord), record.FileName);
