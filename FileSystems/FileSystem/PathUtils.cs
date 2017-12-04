@@ -24,13 +24,10 @@ namespace KFS.FileSystems {
 			if (paths[0].Length == 2 && paths[0][1] == ':') {
 				paths[0] += Path.DirectorySeparatorChar;
 			}
-
 			// Force paths to not have invalid characters
-			for (int i = 0; i < paths.Length; i++ )
-			{
+			for (int i = 0; i < paths.Length; i++) {
 				paths[i] = MakeFileNameValid(paths[i]);
 			}
-			
 			return Path.Combine(paths);
 		}
 
