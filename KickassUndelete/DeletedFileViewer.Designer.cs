@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2013  Joey Scarr, Lukas Korsika
+﻿// Copyright (C) 2017  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
