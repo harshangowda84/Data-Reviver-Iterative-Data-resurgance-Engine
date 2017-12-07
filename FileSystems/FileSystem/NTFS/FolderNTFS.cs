@@ -238,7 +238,7 @@ namespace KFS.FileSystems.NTFS {
 					}
 				}
 			} else {
-				Name = record.FileName;
+				Name = PathUtils.MakeFileNameValid(record.FileName);
 				if (!string.IsNullOrEmpty(path)) {
 					Path = PathUtils.Combine(path, Name);
 				} else {

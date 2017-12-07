@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2017  Joey Scarr, Josh Oosterman, Lukas Korsika
+﻿// Copyright (C) 2013  Joey Scarr, Josh Oosterman, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace KFS.FileSystems.NTFS {
 			}
 			FileSystem = record.FileSystem;
 			Deleted = _record.Deleted;
-			Name = record.FileName;
+			Name = PathUtils.MakeFileNameValid(record.FileName);
 			if (!string.IsNullOrEmpty(path)) {
 				Path = PathUtils.Combine(path, Name);
 			} else {

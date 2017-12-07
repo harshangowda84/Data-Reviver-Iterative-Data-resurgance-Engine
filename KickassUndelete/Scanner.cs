@@ -197,7 +197,8 @@ namespace KickassUndelete {
 						// This isn't a directory, or we can't read the directory name, so the path must have been broken.
 						return PathUtils.Combine(DeviceID, "?");
 					} else {
-						record.Path = PathUtils.Combine(GetPathForRecord(recordTree, record.ParentRecord), record.FileName);
+						var fileName = PathUtils.MakeFileNameValid(record.FileName);
+						record.Path = PathUtils.Combine(GetPathForRecord(recordTree, record.ParentRecord), fileName);
 					}
 				}
 				return record.Path;
