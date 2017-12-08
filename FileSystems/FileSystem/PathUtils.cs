@@ -18,6 +18,12 @@ using System.Text;
 
 namespace KFS.FileSystems {
 	public class PathUtils {
+		/// <summary>
+		/// Combines a list of paths or directory names into a path. Similar to Path.Combine,
+		/// but deals with the case when the first component is a drive letter with
+		/// colon, e.g. 'C:'. Note that this method may throw an exception if there are invalid
+		/// filename chars in the path list.
+		/// </summary>
 		public static string Combine(params string[] paths) {
 			// If the first path is a drive letter and colon (e.g. "C:"), append a
 			// separator before calling Path.Combine.
@@ -27,6 +33,10 @@ namespace KFS.FileSystems {
 			return Path.Combine(paths);
 		}
 
+		/// <summary>
+		/// Sanitizes a given filename by replacing invalid chars with '_'.
+		/// This method assumes the input is a filename only, not a path.
+		/// </summary>
 		public static string MakeFileNameValid(string filename) {
 			StringBuilder sb = new StringBuilder(filename);
 			foreach (char c in Path.GetInvalidFileNameChars()) {
