@@ -404,7 +404,7 @@ namespace KFS.FileSystems.NTFS {
 				if (extensionRecordNumber != RecordNum && extensionRecordNumber != MFTRecordNumber) { // TODO: Are these ever different?
 					// Load the MFT extension record, locate the attribute we want, and copy it over.
 					MFTRecord extensionRecord = MFTRecord.Load(extensionRecordNumber, this.FileSystem);
-					if (extensionRecord.Valid) {
+					if (extensionRecord != null && extensionRecord.Valid) {
 						foreach (MFTAttribute externalAttribute in extensionRecord._attributes) {
 							if (id == externalAttribute.Id) {
 								if (externalAttribute.NonResident && externalAttribute.Type == AttributeType.Data) {
@@ -412,6 +412,8 @@ namespace KFS.FileSystems.NTFS {
 									bool merged = false;
 									foreach (MFTAttribute attribute in _attributes) {
 										if (attribute.Type == AttributeType.Data && externalAttribute.Name == attribute.Name) {
+											if (attribute.Runs == null)
+												attribute.Runs = new List<IRun>();
 											MergeRunLists(ref attribute.Runs, externalAttribute.Runs);
 											merged = true;
 											break;
@@ -433,7 +435,10 @@ namespace KFS.FileSystems.NTFS {
 		}
 
 		private void MergeRunLists(ref List<IRun> list1, List<IRun> list2) {
-			list1.AddRange(list2);
+			if (list2 != null)
+			{
+				list1.AddRange(list2);
+			}
 			// TODO: Verify that the runlists don't overlap
 		}
 
@@ -466,3 +471,4 @@ namespace KFS.FileSystems.NTFS {
 		}
 	}
 }
+
