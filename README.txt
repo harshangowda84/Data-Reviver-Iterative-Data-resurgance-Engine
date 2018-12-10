@@ -2,6 +2,10 @@
 Kickass Undelete Release Notes
 ==================================================
 
+Version 1.5.5 - 2018-12-10
+Changes:
+ * Fixed a crash when failing to parse an attribute. 
+
 Version 1.5.4 - 2017-12-08
 Changes:
  * Fixed a crash when trying to load a file path containing invalid characters.
