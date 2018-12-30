@@ -34,7 +34,7 @@ namespace KFS.DataStream {
 			if (_fs != null) {
 				_fs.Seek((long)offset, SeekOrigin.Begin);
 				byte[] res = new byte[length];
-				_fs.Read(res, (int)offset, (int)length);
+				_fs.Read(res, 0, (int)length);
 				return res;
 			} else {
 				throw new Exception("FileDataStream was closed");
