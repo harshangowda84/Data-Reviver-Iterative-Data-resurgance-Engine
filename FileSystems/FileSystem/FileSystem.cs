@@ -27,8 +27,17 @@ namespace KFS.FileSystems {
 	public abstract class FileSystem : IFileSystem {
 		public delegate bool NodeVisitCallback(INodeMetadata node, ulong current, ulong total);
 
-		public static IFileSystem TryLoad(IFileSystemStore store) {
+		public static IFileSystem TryLoad(IFileSystemStore store, string FSType = null) {
 			if (store == null || store.StreamLength == 0) return null;
+			if (FSType == "NTFS") {
+				return new FileSystemNTFS(store);
+			} else if (FSType == "FAT16") {
+				return new FileSystemFAT(store, PartitionType.FAT16);
+			} else if (FSType == "FAT32") {
+				return new FileSystemFAT(store, PartitionType.FAT32);
+			}
+
+			// TODO: Autodetect based on FS signatures if possible?
 			switch (store.StorageType) {
 				case StorageType.PhysicalDiskPartition: {
 						PhysicalDiskPartitionAttributes attributes = (PhysicalDiskPartitionAttributes)store.Attributes;

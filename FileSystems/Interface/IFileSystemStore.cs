@@ -24,7 +24,8 @@ namespace KFS.Disks {
 		PhysicalDiskRange = 0,
 		PhysicalDisk = 1,
 		PhysicalDiskPartition = 2,
-		LogicalVolume = 3
+		LogicalVolume = 3,
+		DiskImage = 4
 	}
 	/// <summary>
 	/// An IFileSystemStore represents a data source, such as a logical drive
