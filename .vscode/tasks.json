@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build KickassUndelete",
+			"type": "shell",
+			"command": "msbuild",
+			"args": [
+				"KickassUndelete/KickassUndelete.sln",
+				"/p:Configuration=Debug",
+				"/p:Platform=\"Any CPU\"",
+				"/verbosity:minimal"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"isBackground": false
+		}
+	]
+}
