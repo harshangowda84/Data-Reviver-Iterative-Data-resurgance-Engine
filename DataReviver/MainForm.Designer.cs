@@ -41,6 +41,7 @@ namespace DataReviver {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.diskTree = new System.Windows.Forms.TreeView();
+                this.btnRefreshDrives = new System.Windows.Forms.Button();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -48,6 +49,20 @@ namespace DataReviver {
             this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
+                // btnRefreshDrives
+                // 
+                this.btnRefreshDrives.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+                this.btnRefreshDrives.BackColor = System.Drawing.Color.FromArgb(0, 122, 255);
+                this.btnRefreshDrives.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+                this.btnRefreshDrives.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                this.btnRefreshDrives.ForeColor = System.Drawing.Color.White;
+                this.btnRefreshDrives.Location = new System.Drawing.Point(12, 12);
+                this.btnRefreshDrives.Name = "btnRefreshDrives";
+                this.btnRefreshDrives.Size = new System.Drawing.Size(271, 36);
+                this.btnRefreshDrives.TabIndex = 100;
+                this.btnRefreshDrives.Text = "⟳ Refresh Drives";
+                this.btnRefreshDrives.UseVisualStyleBackColor = false;
+                this.btnRefreshDrives.Click += new System.EventHandler(this.btnRefreshDrives_Click);
             // diskTree
             // 
             this.diskTree.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -61,10 +76,10 @@ namespace DataReviver {
             this.diskTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
             this.diskTree.ImageIndex = 0;
             this.diskTree.ImageList = this.imageList1;
-            this.diskTree.Location = new System.Drawing.Point(12, 12);
+                this.diskTree.Location = new System.Drawing.Point(12, 60);
             this.diskTree.Name = "diskTree";
             this.diskTree.SelectedImageIndex = 0;
-            this.diskTree.Size = new System.Drawing.Size(271, 611);
+                this.diskTree.Size = new System.Drawing.Size(271, 563);
             this.diskTree.TabIndex = 0;
             this.diskTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.diskTree_AfterSelect);
             this.diskTree.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.diskTree_BeforeSelect);
@@ -90,7 +105,8 @@ namespace DataReviver {
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
-            this.splitContainer1.Panel1.Controls.Add(this.diskTree);
+                this.splitContainer1.Panel1.Controls.Add(this.btnRefreshDrives);
+                this.splitContainer1.Panel1.Controls.Add(this.diskTree);
             // 
             // splitContainer1.Panel2
             // 
@@ -123,7 +139,8 @@ namespace DataReviver {
 
         #endregion
 
-        private System.Windows.Forms.TreeView diskTree;
+    private System.Windows.Forms.TreeView diskTree;
+    private System.Windows.Forms.Button btnRefreshDrives;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ImageList imageList1;
     }

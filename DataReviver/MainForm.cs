@@ -31,6 +31,10 @@ namespace DataReviver {
 		Dictionary<IFileSystem, DeletedFileViewer> _deletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
 		private CaseManager _caseManager;
 		private UserSession _currentUser;
+	// Refresh Drives button animation state
+	private bool _isRefreshingDrives = false;
+	private Timer _refreshDrivesTimer;
+	private int _refreshAnimationStep = 0;
 
 		/// <summary>
 		/// Constructs the main form.
@@ -43,6 +47,10 @@ namespace DataReviver {
 			_caseManager = new CaseManager();
 			ApplyRoleBasedAccess();
 			UpdateUserInterface();
+			// Setup Refresh Drives animation timer
+			_refreshDrivesTimer = new Timer();
+			_refreshDrivesTimer.Interval = 120;
+			_refreshDrivesTimer.Tick += RefreshDrivesTimer_Tick;
 		}
 
 		/// <summary>
@@ -226,6 +234,10 @@ namespace DataReviver {
 
 		private void MainForm_Load(object sender, EventArgs e) {
 			LoadLogicalDisks();
+			// Ensure button is enabled on load
+			btnRefreshDrives.Enabled = true;
+			btnRefreshDrives.BackColor = Color.FromArgb(0, 122, 255);
+			btnRefreshDrives.Text = "⟳ Refresh Drives";
 		}
 
 		private void LoadLogicalDisks() {
@@ -238,6 +250,15 @@ namespace DataReviver {
 					node.ForeColor = Color.Gray;
 				}
 				diskTree.Nodes.Add(node);
+			}
+			// If called from refresh, re-enable button
+			if (_isRefreshingDrives)
+			{
+				_isRefreshingDrives = false;
+				_refreshDrivesTimer.Stop();
+				btnRefreshDrives.Enabled = true;
+				btnRefreshDrives.BackColor = Color.FromArgb(0, 122, 255);
+				btnRefreshDrives.Text = "⟳ Refresh Drives";
 			}
 		}
 
@@ -294,6 +315,31 @@ namespace DataReviver {
 				// Draw normal node
 				e.DrawDefault = true;
 			}
+		}
+
+		// Animated Refresh Drives button logic
+		private void btnRefreshDrives_Click(object sender, EventArgs e)
+		{
+			if (_isRefreshingDrives) return;
+			_isRefreshingDrives = true;
+			btnRefreshDrives.Enabled = false;
+			btnRefreshDrives.BackColor = Color.Orange;
+			btnRefreshDrives.Text = "⏳ Refreshing...";
+			_refreshAnimationStep = 0;
+			_refreshDrivesTimer.Start();
+
+			// Clear and reload drives
+			diskTree.Nodes.Clear();
+			// Simulate delay for animation (can be replaced with async if needed)
+			LoadLogicalDisks();
+		}
+
+		private void RefreshDrivesTimer_Tick(object sender, EventArgs e)
+		{
+			// Animate button text with dots
+			string[] dots = { "", ".", "..", "..." };
+			btnRefreshDrives.Text = $"⏳ Refreshing{dots[_refreshAnimationStep % dots.Length]}";
+			_refreshAnimationStep++;
 		}
 
 		// Forensic Tools Menu Handlers
