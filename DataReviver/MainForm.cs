@@ -29,8 +29,9 @@ namespace DataReviver {
 		IFileSystem _fileSystem;
 		Dictionary<IFileSystem, Scanner> _scanners = new Dictionary<IFileSystem, Scanner>();
 		Dictionary<IFileSystem, DeletedFileViewer> _deletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
-		private CaseManager _caseManager;
-		private UserSession _currentUser;
+	private CaseManager _caseManager;
+	private UserSession _currentUser;
+	private ForensicCase _currentCase;
 	// Refresh Drives button animation state
 	private bool _isRefreshingDrives = false;
 	private Timer _refreshDrivesTimer;
@@ -39,14 +40,20 @@ namespace DataReviver {
 		/// <summary>
 		/// Constructs the main form.
 		/// </summary>
-		public MainForm(UserSession userSession = null) {
+		public MainForm(UserSession userSession = null, ForensicCase selectedCase = null) {
 			_currentUser = userSession;
+			_currentCase = selectedCase;
 			InitializeComponent();
 			CreateDRIcon();
 			SetupMenuBar();
 			_caseManager = new CaseManager();
 			ApplyRoleBasedAccess();
 			UpdateUserInterface();
+			// Show case name and ID in title if available
+			if (_currentCase != null)
+			{
+				this.Text = $"Data Reviver - Forensic Analysis Tool - {_currentCase.CaseName} (Case ID: {_currentCase.CaseId})";
+			}
 			// Setup Refresh Drives animation timer
 			_refreshDrivesTimer = new Timer();
 			_refreshDrivesTimer.Interval = 120;

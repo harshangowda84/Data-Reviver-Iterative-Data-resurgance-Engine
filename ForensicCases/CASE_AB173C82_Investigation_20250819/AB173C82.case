@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>AB173C82</CaseId>
+  <CaseName><![CDATA[Investigation_20250819]]></CaseName>
+  <InvestigatorName><![CDATA[Harshan]]></InvestigatorName>
+  <Description><![CDATA[]]></Description>
+  <CreatedDate>2025-08-19T15:17:53.6989440+05:30</CreatedDate>
+  <LastModified>2025-08-19T15:17:53.6989440+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_AB173C82_Investigation_20250819]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-08-19T15:17:53.7025030+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by Harshan]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

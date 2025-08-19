@@ -129,6 +129,9 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             btnLogin.FlatAppearance.BorderSize = 0;
+            btnLogin.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 90, 200);
+            btnLogin.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 70, 150);
+            btnLogin.Region = new Region(new Rectangle(0, 0, btnLogin.Width, btnLogin.Height));
             btnLogin.Click += BtnLogin_Click;
 
             btnExit = new Button
@@ -143,7 +146,17 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             btnExit.FlatAppearance.BorderSize = 0;
+            btnExit.FlatAppearance.MouseOverBackColor = Color.FromArgb(180, 40, 50);
+            btnExit.FlatAppearance.MouseDownBackColor = Color.FromArgb(150, 30, 40);
+            btnExit.Region = new Region(new Rectangle(0, 0, btnExit.Width, btnExit.Height));
             btnExit.Click += BtnExit_Click;
+
+            // Add a little more vertical spacing for a cleaner look
+            txtUsername.Location = new Point(30, 55);
+            lblPassword.Location = new Point(30, 95);
+            txtPassword.Location = new Point(30, 120);
+            btnLogin.Location = new Point(140, 160);
+            btnExit.Location = new Point(250, 160);
 
             loginPanel.Controls.AddRange(new Control[] { 
                 lblUsername, txtUsername, lblPassword, txtPassword, btnLogin, btnExit 
@@ -200,7 +213,7 @@ namespace DataReviver
             }
             else
             {
-                MessageBox.Show("Invalid credentials!\n\nValid logins:\n• admin / forensic123 (Administrator)\n• investigator / evidence456 (Lead Investigator)\n• analyst / data789 (Forensic Analyst)\n• harshan / mca2024 (Your Account)", 
+                MessageBox.Show("Invalid credentials!\n\nValid login:\n• admin / forensic123 (Administrator)", 
                               "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtPassword.Clear();
                 txtUsername.Focus();
@@ -209,13 +222,10 @@ namespace DataReviver
 
         private UserSession ValidateCredentials(string username, string password)
         {
-            // You can enhance this with database authentication, AD integration, etc.
+            // Only allow admin login
             var validCredentials = new[]
             {
-                new { Username = "admin", Password = "forensic123", Role = UserRole.Admin, FullName = "System Administrator" },
-                new { Username = "investigator", Password = "evidence456", Role = UserRole.Investigator, FullName = "Lead Digital Investigator" },
-                new { Username = "analyst", Password = "data789", Role = UserRole.Analyst, FullName = "Forensic Data Analyst" },
-                new { Username = "harshan", Password = "mca2024", Role = UserRole.Admin, FullName = "Harshan Gowda B B" }  // Your personal login
+                new { Username = "admin", Password = "forensic123", Role = UserRole.Admin, FullName = "System Administrator" }
             };
 
             foreach (var cred in validCredentials)

@@ -8,7 +8,7 @@
 			"args": [
 				"KickassUndelete/KickassUndelete.sln",
 				"/p:Configuration=Debug",
-				"/p:Platform=\"Any CPU\"",
+				"/p:Platform=Any CPU",
 				"/verbosity:minimal"
 			],
 			"group": "build",

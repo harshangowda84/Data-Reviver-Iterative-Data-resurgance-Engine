@@ -41,15 +41,44 @@ namespace DataReviver {
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			
+
 			// Show login form first
 			using (var loginForm = new LoginForm())
 			{
 				var result = loginForm.ShowDialog();
 				if (result == DialogResult.OK && loginForm.LoginSuccessful)
 				{
-					// Login successful, show main application with user session
-					Application.Run(new MainForm(loginForm.CurrentUser));
+					// After login, prompt for case selection
+					DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
+					DataReviver.ForensicCase selectedCase = null;
+					DialogResult caseResult = DialogResult.None;
+					while (selectedCase == null && caseResult != DialogResult.Cancel)
+					{
+						var caseChoice = MessageBox.Show("Do you want to create a new case? (Yes)\nOr open an existing case? (No)", "Select Case", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+						if (caseChoice == DialogResult.Yes)
+						{
+							selectedCase = caseManager.CreateNewCase();
+							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;
+						}
+						else if (caseChoice == DialogResult.No)
+						{
+							selectedCase = caseManager.OpenExistingCase();
+							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;
+						}
+						else
+						{
+							caseResult = DialogResult.Cancel;
+						}
+					}
+					if (selectedCase != null)
+					{
+						Application.Run(new MainForm(loginForm.CurrentUser, selectedCase));
+					}
+					else
+					{
+						// No case selected, exit
+						Environment.Exit(0);
+					}
 				}
 				else
 				{
