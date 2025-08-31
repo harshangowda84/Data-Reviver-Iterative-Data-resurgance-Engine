@@ -115,6 +115,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DigitalForensicsTools.cs" />
+    <Compile Include="CasePromptForm.cs" />
     <EmbeddedResource Include="DeletedFileViewer.resx">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
       <SubType>Designer</SubType>
