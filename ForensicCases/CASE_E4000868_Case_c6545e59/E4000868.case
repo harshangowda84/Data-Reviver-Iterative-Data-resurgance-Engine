@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>E4000868</CaseId>
+  <CaseName><![CDATA[Case_c6545e59]]></CaseName>
+  <InvestigatorName><![CDATA[Enter investigator name]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-08-31T23:31:31.9047215+05:30</CreatedDate>
+  <LastModified>2025-08-31T23:31:31.9047215+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_E4000868_Case_c6545e59]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-08-31T23:31:31.9057585+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by Enter investigator name]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

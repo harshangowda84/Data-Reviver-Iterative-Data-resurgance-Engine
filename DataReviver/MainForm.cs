@@ -99,12 +99,20 @@ namespace DataReviver {
 		private void SetupMenuBar()
 		{
 			var menuStrip = new MenuStrip();
-			menuStrip.BackColor = Color.FromArgb(70, 130, 180);
+			menuStrip.BackColor = Color.FromArgb(0, 122, 255);
 			menuStrip.ForeColor = Color.White;
-			menuStrip.Font = new Font("Segoe UI", 9);
-			
-			// File Menu
-			var fileMenu = new ToolStripMenuItem("&File");
+			menuStrip.Font = new Font("Segoe UI", 13, FontStyle.Bold);
+			menuStrip.Padding = new Padding(14, 10, 14, 10);
+			menuStrip.Renderer = new EnhancedMenuRenderer();
+			menuStrip.Height = 48;
+			menuStrip.Margin = new Padding(0, 0, 0, 0);
+
+			// File Menu (with icon)
+			var fileMenu = new ToolStripMenuItem("  File");
+			fileMenu.Image = new Bitmap(SystemIcons.Application.ToBitmap(), new Size(28, 28));
+			fileMenu.ImageScaling = ToolStripItemImageScaling.None;
+			fileMenu.Padding = new Padding(12, 0, 12, 0);
+			fileMenu.ToolTipText = "File operations";
 			fileMenu.DropDownItems.Add("&New Case", null, (s, e) => CreateNewCase());
 			fileMenu.DropDownItems.Add("&Open Case", null, (s, e) => OpenExistingCase());
 			fileMenu.DropDownItems.Add(new ToolStripSeparator());
@@ -112,34 +120,99 @@ namespace DataReviver {
 			fileMenu.DropDownItems.Add("&Export Case Report", null, (s, e) => ExportCaseReport());
 			fileMenu.DropDownItems.Add(new ToolStripSeparator());
 			fileMenu.DropDownItems.Add("E&xit", null, (s, e) => this.Close());
-			
-			// Tools Menu
-			var toolsMenu = new ToolStripMenuItem("&Tools");
-			toolsMenu.DropDownItems.Add("🔧 &Forensic Tools Suite", null, (s, e) => OpenForensicTools());
+
+			// Tools Menu (with icon)
+			var toolsMenu = new ToolStripMenuItem("  Tools");
+			toolsMenu.Image = new Bitmap(SystemIcons.Shield.ToBitmap(), new Size(28, 28));
+			toolsMenu.ImageScaling = ToolStripItemImageScaling.None;
+			toolsMenu.Padding = new Padding(12, 0, 12, 0);
+			toolsMenu.ToolTipText = "Forensic tools";
+			toolsMenu.DropDownItems.Add("🔧 Forensic Tools Suite", null, (s, e) => OpenForensicTools());
 			toolsMenu.DropDownItems.Add(new ToolStripSeparator());
-			toolsMenu.DropDownItems.Add("&Disk Imager", null, (s, e) => OpenDiskImager());
-			toolsMenu.DropDownItems.Add("&File Carver", null, (s, e) => MessageBox.Show("Feature: Advanced File Carving"));
-			toolsMenu.DropDownItems.Add("&Hash Calculator", null, (s, e) => OpenHashCalculator());
-			toolsMenu.DropDownItems.Add("&Timeline Analyzer", null, (s, e) => OpenTimelineAnalyzer());
-			
-			// Analysis Menu
-			var analysisMenu = new ToolStripMenuItem("&Analysis");
-			analysisMenu.DropDownItems.Add("&Quick Scan", null, (s, e) => MessageBox.Show("Feature: Quick Recovery Scan"));
-			analysisMenu.DropDownItems.Add("&Deep Scan", null, (s, e) => MessageBox.Show("Feature: Deep Recovery Analysis"));
-			analysisMenu.DropDownItems.Add("🔍 &File Signature Analysis", null, (s, e) => OpenFileSignatureAnalysis());
+			toolsMenu.DropDownItems.Add("💾 Disk Imager", null, (s, e) => OpenDiskImager());
+			toolsMenu.DropDownItems.Add("🗂 File Carver", null, (s, e) => MessageBox.Show("Feature: Advanced File Carving"));
+			toolsMenu.DropDownItems.Add("#️⃣ Hash Calculator", null, (s, e) => OpenHashCalculator());
+			toolsMenu.DropDownItems.Add("📅 Timeline Analyzer", null, (s, e) => OpenTimelineAnalyzer());
+
+			// Analysis Menu (with icon)
+			var analysisMenu = new ToolStripMenuItem("  Analysis");
+			analysisMenu.Image = new Bitmap(SystemIcons.Information.ToBitmap(), new Size(28, 28));
+			analysisMenu.ImageScaling = ToolStripItemImageScaling.None;
+			analysisMenu.Padding = new Padding(12, 0, 12, 0);
+			analysisMenu.ToolTipText = "Analysis features";
+			analysisMenu.DropDownItems.Add("⚡ Quick Scan", null, (s, e) => MessageBox.Show("Feature: Quick Recovery Scan"));
+			analysisMenu.DropDownItems.Add("🔬 Deep Scan", null, (s, e) => MessageBox.Show("Feature: Deep Recovery Analysis"));
+			analysisMenu.DropDownItems.Add("🔍 File Signature Analysis", null, (s, e) => OpenFileSignatureAnalysis());
 			analysisMenu.DropDownItems.Add(new ToolStripSeparator());
-			analysisMenu.DropDownItems.Add("📊 &Generate Forensic Report", null, (s, e) => GenerateForensicReport());
-			
-			// Help Menu
-			var helpMenu = new ToolStripMenuItem("&Help");
-			helpMenu.DropDownItems.Add("&User Guide", null, (s, e) => MessageBox.Show("Feature: User Documentation"));
-			helpMenu.DropDownItems.Add("&Forensic Tools Help", null, (s, e) => OpenForensicHelp());
-			helpMenu.DropDownItems.Add("&About", null, (s, e) => new AboutDialog().ShowDialog(this));
-			
+			analysisMenu.DropDownItems.Add("📊 Generate Forensic Report", null, (s, e) => GenerateForensicReport());
+
+			// Help Menu (with icon)
+			var helpMenu = new ToolStripMenuItem("  Help");
+			helpMenu.Image = new Bitmap(SystemIcons.Question.ToBitmap(), new Size(28, 28));
+			helpMenu.ImageScaling = ToolStripItemImageScaling.None;
+			helpMenu.Padding = new Padding(12, 0, 12, 0);
+			helpMenu.ToolTipText = "Help and documentation";
+			helpMenu.DropDownItems.Add("📖 User Guide", null, (s, e) => MessageBox.Show("Feature: User Documentation"));
+			helpMenu.DropDownItems.Add("🧰 Forensic Tools Help", null, (s, e) => OpenForensicHelp());
+			helpMenu.DropDownItems.Add("ℹ️ About", null, (s, e) => new AboutDialog().ShowDialog(this));
+
 			menuStrip.Items.AddRange(new ToolStripItem[] { fileMenu, toolsMenu, analysisMenu, helpMenu });
 			this.MainMenuStrip = menuStrip;
 			this.Controls.Add(menuStrip);
 		}
+
+		// Enhanced renderer for modern menu bar
+private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
+{
+    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+    {
+        Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
+        if (e.ToolStrip is MenuStrip)
+        {
+            // Top bar: blue and hover effect
+            if (e.Item.Selected)
+            {
+                using (Brush b = new SolidBrush(Color.FromArgb(0, 90, 200)))
+                    e.Graphics.FillRectangle(b, rect);
+            }
+            else
+            {
+                using (Brush b = new SolidBrush(Color.FromArgb(0, 122, 255)))
+                    e.Graphics.FillRectangle(b, rect);
+            }
+        }
+        else
+        {
+            // Dropdown: default light background
+            if (e.Item.Selected)
+            {
+                using (Brush b = new SolidBrush(Color.FromArgb(230, 240, 255)))
+                    e.Graphics.FillRectangle(b, rect);
+            }
+            else
+            {
+                using (Brush b = new SolidBrush(SystemColors.Menu))
+                    e.Graphics.FillRectangle(b, rect);
+            }
+        }
+    }
+
+    protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
+    {
+        if (e.ToolStrip is MenuStrip)
+        {
+            // Draw bottom border for top bar only
+            using (Pen p = new Pen(Color.FromArgb(0, 90, 200), 3))
+            {
+                e.Graphics.DrawLine(p, 0, e.ToolStrip.Height - 2, e.ToolStrip.Width, e.ToolStrip.Height - 2);
+            }
+        }
+        else
+        {
+            base.OnRenderToolStripBorder(e);
+        }
+    }
+}
 
 		private void ApplyRoleBasedAccess()
 		{

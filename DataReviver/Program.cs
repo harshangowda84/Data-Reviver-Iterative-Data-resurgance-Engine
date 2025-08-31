@@ -19,6 +19,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Windows.Forms;
+using DataReviver;
+using DataReviver;
 
 namespace DataReviver {
 	static class Program {
@@ -27,6 +29,9 @@ namespace DataReviver {
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
+
 			if (IsWindows())
 				AttachConsole(-1);
 
@@ -38,9 +43,6 @@ namespace DataReviver {
 				PrintUsage();
 				Environment.Exit(0);
 			}
-
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
 
 			// Show login form first
 			using (var loginForm = new LoginForm())
@@ -142,16 +144,15 @@ namespace DataReviver {
 		static void EnsureUserIsAdmin() {
 			if (IsWindows()) {
 				WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-				if (!principal.IsInRole(WindowsBuiltInRole.Administrator)
-					&& MessageBox.Show(
-					"Warning: You are not currently using an administrator account. " +
-					"This means you will only be able to recover files from external " +
-					"drives, such as flash drives and SD cards. Would you like to run " +
-					"as administrator now? You will need the password for your " +
-					"administrator account.", "Warning", MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes) {
-
-					RelaunchAsAdmin();
+				if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
+				{
+					using (var dialog = new AdminWarningDialogForm())
+					{
+						if (dialog.ShowDialog() == DialogResult.OK && dialog.UserAccepted)
+						{
+							RelaunchAsAdmin();
+						}
+					}
 				}
 			}
 		}
