@@ -416,87 +416,229 @@ namespace DataReviver
 
         public NewCaseDialog()
         {
-            InitializeComponent();
-        }
-
-        private void InitializeComponent()
-        {
-            this.Text = "Create New Forensic Case";
-            this.Size = new System.Drawing.Size(450, 350);
+            this.Text = "Create New Case";
+            this.Size = new System.Drawing.Size(520, 480);
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
+            this.BackColor = System.Drawing.Color.FromArgb(245, 247, 251);
 
-            var lblCaseName = new Label
-            {
+            var cardPanel = new Panel {
+                Location = new System.Drawing.Point(30, 40),
+                Size = new System.Drawing.Size(460, 380),
+                BackColor = System.Drawing.Color.White,
+                BorderStyle = BorderStyle.None
+            };
+            cardPanel.Paint += (s, e) => {
+                var g = e.Graphics;
+                var rect = cardPanel.ClientRectangle;
+                rect.Inflate(-1, -1);
+                using (var shadow = new System.Drawing.Drawing2D.GraphicsPath()) {
+                    shadow.AddRectangle(rect);
+                    using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(rect, System.Drawing.Color.FromArgb(30, 0, 0, 0), System.Drawing.Color.Transparent, 90F)) {
+                        g.FillPath(brush, shadow);
+                    }
+                }
+            };
+
+            // Header icon and title
+            var headerIcon = new Label {
+                Text = "🗂️",
+                Font = new System.Drawing.Font("Segoe UI Emoji", 36F, System.Drawing.FontStyle.Bold),
+                ForeColor = System.Drawing.Color.FromArgb(0, 122, 255),
+                Location = new System.Drawing.Point(0, 0),
+                Size = new System.Drawing.Size(460, 60),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            };
+            var headerTitle = new Label {
+                Text = "Create New Case",
+                Font = new System.Drawing.Font("Segoe UI", 22F, System.Drawing.FontStyle.Bold),
+                ForeColor = System.Drawing.Color.FromArgb(0, 122, 255),
+                Location = new System.Drawing.Point(0, 50),
+                Size = new System.Drawing.Size(460, 50),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            };
+
+            // Investigator Name
+            var iconInvestigator = new Label {
+                Text = "👤",
+                Font = new System.Drawing.Font("Segoe UI Emoji", 18F),
+                Location = new System.Drawing.Point(20, 110),
+                Size = new System.Drawing.Size(32, 32),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            };
+            var lblInvestigator = new Label {
+                Text = "Investigator Name:",
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
+                Location = new System.Drawing.Point(60, 110),
+                Size = new System.Drawing.Size(160, 32)
+            };
+            txtInvestigator = new TextBox {
+                Location = new System.Drawing.Point(230, 110),
+                Size = new System.Drawing.Size(210, 32),
+                Font = new System.Drawing.Font("Segoe UI", 12F),
+                BorderStyle = BorderStyle.FixedSingle,
+                ForeColor = System.Drawing.Color.Gray,
+                Text = "Enter investigator name"
+            };
+            txtInvestigator.GotFocus += (s, e) => {
+                if (txtInvestigator.Text == "Enter investigator name") {
+                    txtInvestigator.Text = "";
+                    txtInvestigator.ForeColor = System.Drawing.Color.Black;
+                }
+            };
+            txtInvestigator.LostFocus += (s, e) => {
+                if (string.IsNullOrWhiteSpace(txtInvestigator.Text)) {
+                    txtInvestigator.Text = "Enter investigator name";
+                    txtInvestigator.ForeColor = System.Drawing.Color.Gray;
+                }
+            };
+
+            // Case ID
+            var iconCaseId = new Label {
+                Text = "🆔",
+                Font = new System.Drawing.Font("Segoe UI Emoji", 18F),
+                Location = new System.Drawing.Point(20, 155),
+                Size = new System.Drawing.Size(32, 32),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            };
+            var lblCaseId = new Label {
+                Text = "Case ID:",
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
+                Location = new System.Drawing.Point(60, 155),
+                Size = new System.Drawing.Size(160, 32)
+            };
+            var txtCaseId = new TextBox {
+                Location = new System.Drawing.Point(230, 155),
+                Size = new System.Drawing.Size(210, 32),
+                Font = new System.Drawing.Font("Segoe UI", 12F),
+                Text = Guid.NewGuid().ToString("N").Substring(0, 8),
+                ReadOnly = true,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            // Case Name
+            var iconCaseName = new Label {
+                Text = "📄",
+                Font = new System.Drawing.Font("Segoe UI Emoji", 18F),
+                Location = new System.Drawing.Point(20, 200),
+                Size = new System.Drawing.Size(32, 32),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            };
+            var lblCaseName = new Label {
                 Text = "Case Name:",
-                Location = new System.Drawing.Point(20, 20),
-                Size = new System.Drawing.Size(100, 23)
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
+                Location = new System.Drawing.Point(60, 200),
+                Size = new System.Drawing.Size(160, 32)
+            };
+            txtCaseName = new TextBox {
+                Location = new System.Drawing.Point(230, 200),
+                Size = new System.Drawing.Size(210, 32),
+                Font = new System.Drawing.Font("Segoe UI", 12F),
+                Text = $"Case_{txtCaseId.Text}",
+                BorderStyle = BorderStyle.FixedSingle,
+                ForeColor = System.Drawing.Color.Gray
+            };
+            txtCaseName.GotFocus += (s, e) => {
+                if (txtCaseName.Text == $"Case_{txtCaseId.Text}" || txtCaseName.Text == "Enter case name") {
+                    txtCaseName.Text = "";
+                    txtCaseName.ForeColor = System.Drawing.Color.Black;
+                }
+            };
+            txtCaseName.LostFocus += (s, e) => {
+                if (string.IsNullOrWhiteSpace(txtCaseName.Text)) {
+                    txtCaseName.Text = "Enter case name";
+                    txtCaseName.ForeColor = System.Drawing.Color.Gray;
+                }
             };
 
-            txtCaseName = new TextBox
-            {
-                Location = new System.Drawing.Point(130, 20),
-                Size = new System.Drawing.Size(280, 23),
-                Text = $"Investigation_{DateTime.Now:yyyyMMdd}"
+            // Case Description
+            var iconDesc = new Label {
+                Text = "📝",
+                Font = new System.Drawing.Font("Segoe UI Emoji", 18F),
+                Location = new System.Drawing.Point(20, 245),
+                Size = new System.Drawing.Size(32, 32),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
             };
-
-            var lblInvestigator = new Label
-            {
-                Text = "Investigator:",
-                Location = new System.Drawing.Point(20, 60),
-                Size = new System.Drawing.Size(100, 23)
+            var lblDescription = new Label {
+                Text = "Case Description:",
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
+                Location = new System.Drawing.Point(60, 245),
+                Size = new System.Drawing.Size(160, 32)
             };
-
-            txtInvestigator = new TextBox
-            {
-                Location = new System.Drawing.Point(130, 60),
-                Size = new System.Drawing.Size(280, 23),
-                Text = Environment.UserName
-            };
-
-            var lblDescription = new Label
-            {
-                Text = "Description:",
-                Location = new System.Drawing.Point(20, 100),
-                Size = new System.Drawing.Size(100, 23)
-            };
-
-            txtDescription = new TextBox
-            {
-                Location = new System.Drawing.Point(130, 100),
-                Size = new System.Drawing.Size(280, 120),
+            txtDescription = new TextBox {
+                Location = new System.Drawing.Point(230, 245),
+                Size = new System.Drawing.Size(210, 60),
+                Font = new System.Drawing.Font("Segoe UI", 11F),
                 Multiline = true,
-                ScrollBars = ScrollBars.Vertical
+                ScrollBars = ScrollBars.Vertical,
+                BorderStyle = BorderStyle.FixedSingle,
+                ForeColor = System.Drawing.Color.Gray,
+                Text = "Enter case description..."
+            };
+            txtDescription.GotFocus += (s, e) => {
+                if (txtDescription.Text == "Enter case description...") {
+                    txtDescription.Text = "";
+                    txtDescription.ForeColor = System.Drawing.Color.Black;
+                }
+            };
+            txtDescription.LostFocus += (s, e) => {
+                if (string.IsNullOrWhiteSpace(txtDescription.Text)) {
+                    txtDescription.Text = "Enter case description...";
+                    txtDescription.ForeColor = System.Drawing.Color.Gray;
+                }
             };
 
-            var btnOK = new Button
-            {
-                Text = "Create Case",
-                Location = new System.Drawing.Point(250, 250),
-                Size = new System.Drawing.Size(80, 30),
+            // Buttons
+            var btnOK = new Button {
+                Text = "Create",
+                Location = new System.Drawing.Point(110, 325),
+                Size = new System.Drawing.Size(100, 38),
                 DialogResult = DialogResult.OK,
-                BackColor = System.Drawing.Color.FromArgb(34, 139, 34),
+                BackColor = System.Drawing.Color.FromArgb(0, 122, 255),
                 ForeColor = System.Drawing.Color.White,
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
                 FlatStyle = FlatStyle.Flat
             };
+            btnOK.FlatAppearance.BorderSize = 0;
+            btnOK.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(0, 90, 200);
+            btnOK.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(0, 90, 200);
+            btnOK.Cursor = Cursors.Hand;
             btnOK.Click += BtnOK_Click;
 
-            var btnCancel = new Button
-            {
+            var btnCancel = new Button {
                 Text = "Cancel",
-                Location = new System.Drawing.Point(340, 250),
-                Size = new System.Drawing.Size(70, 30),
-                DialogResult = DialogResult.Cancel
+                Location = new System.Drawing.Point(250, 325),
+                Size = new System.Drawing.Size(100, 38),
+                DialogResult = DialogResult.Cancel,
+                BackColor = System.Drawing.Color.FromArgb(220, 53, 69),
+                ForeColor = System.Drawing.Color.White,
+                Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat
             };
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(180, 40, 50);
+            btnCancel.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(180, 40, 50);
+            btnCancel.Cursor = Cursors.Hand;
 
-            this.Controls.AddRange(new Control[] { 
-                lblCaseName, txtCaseName, 
-                lblInvestigator, txtInvestigator,
-                lblDescription, txtDescription,
-                btnOK, btnCancel 
-            });
+            cardPanel.Controls.Add(headerIcon);
+            cardPanel.Controls.Add(headerTitle);
+            cardPanel.Controls.Add(iconInvestigator);
+            cardPanel.Controls.Add(lblInvestigator);
+            cardPanel.Controls.Add(txtInvestigator);
+            cardPanel.Controls.Add(iconCaseId);
+            cardPanel.Controls.Add(lblCaseId);
+            cardPanel.Controls.Add(txtCaseId);
+            cardPanel.Controls.Add(iconCaseName);
+            cardPanel.Controls.Add(lblCaseName);
+            cardPanel.Controls.Add(txtCaseName);
+            cardPanel.Controls.Add(iconDesc);
+            cardPanel.Controls.Add(lblDescription);
+            cardPanel.Controls.Add(txtDescription);
+            cardPanel.Controls.Add(btnOK);
+            cardPanel.Controls.Add(btnCancel);
 
+            this.Controls.Add(cardPanel);
             this.AcceptButton = btnOK;
             this.CancelButton = btnCancel;
         }

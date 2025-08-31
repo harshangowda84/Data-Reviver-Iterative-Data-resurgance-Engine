@@ -19,7 +19,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Windows.Forms;
-using DataReviver; // Add this to ensure CasePromptForm is found
 
 namespace DataReviver {
 	static class Program {
@@ -49,7 +48,7 @@ namespace DataReviver {
 				var result = loginForm.ShowDialog();
 				if (result == DialogResult.OK && loginForm.LoginSuccessful)
 				{
-					// Show improved case prompt form instead of MessageBox
+					// After login, prompt for case selection
 					DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
 					DataReviver.ForensicCase selectedCase = null;
 					DialogResult caseResult = DialogResult.None;
@@ -60,12 +59,14 @@ namespace DataReviver {
 						if (promptResult == DialogResult.Yes)
 						{
 							selectedCase = caseManager.CreateNewCase();
-							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;
+							if (selectedCase == null) continue; // If cancelled, show case prompt again
+							caseResult = DialogResult.OK;
 						}
 						else if (promptResult == DialogResult.No)
 						{
 							selectedCase = caseManager.OpenExistingCase();
-							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;
+							if (selectedCase == null) continue; // If cancelled, show case prompt again
+							caseResult = DialogResult.OK;
 						}
 						else
 						{
