@@ -1,4 +1,5 @@
-﻿// Copyright (C) 2017  Joey Scarr, Lukas Korsika
+﻿using DataReviver;
+// Copyright (C) 2017  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +37,6 @@ namespace DataReviver {
 				AttachConsole(-1);
 
 			ParseArgs(args);
-
 			EnsureUserIsAdmin();
 
 			if (!IsWindows()) {
@@ -44,8 +44,8 @@ namespace DataReviver {
 				Environment.Exit(0);
 			}
 
-			// Show login form first
-			using (var loginForm = new LoginForm())
+			// Show new login form first
+			using (var loginForm = new NewLoginForm())
 			{
 				var result = loginForm.ShowDialog();
 				if (result == DialogResult.OK && loginForm.LoginSuccessful)
