@@ -94,6 +94,11 @@ namespace DataReviver
                     searchBox.Text = "";
                     searchBox.ForeColor = Color.Black;
                 }
+                // Reset details when focusing search
+                detailsLabel.Text = "Select a case to view details.";
+                SelectedCase = null;
+                openCaseButton.Visible = false;
+                deleteCaseButton.Visible = false;
             };
             searchBox.LostFocus += (s, e) => {
                 if (string.IsNullOrWhiteSpace(searchBox.Text)) {
@@ -101,7 +106,16 @@ namespace DataReviver
                     searchBox.ForeColor = Color.Gray;
                 }
             };
-            searchBox.TextChanged += (s, e) => FilterCases();
+            searchBox.TextChanged += (s, e) => {
+                FilterCases();
+                // Reset details if no case is selected
+                if (caseListBox.SelectedIndex < 0) {
+                    detailsLabel.Text = "Select a case to view details.";
+                    SelectedCase = null;
+                    openCaseButton.Visible = false;
+                    deleteCaseButton.Visible = false;
+                }
+            };
 
             caseListBox = new ListBox
             {
