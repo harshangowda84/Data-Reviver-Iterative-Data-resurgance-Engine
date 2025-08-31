@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>815CA836</CaseId>
+  <CaseName><![CDATA[Harshan Case]]></CaseName>
+  <InvestigatorName><![CDATA[Harshan]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T00:24:02.3004214+05:30</CreatedDate>
+  <LastModified>2025-09-01T00:24:02.3004214+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_815CA836_Harshan Case]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T00:24:02.3004214+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by Harshan]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

@@ -101,9 +101,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeTree\RangeItem.cs" />
     <Compile Include="Scanner.cs" />
-    <Compile Include="StatisticsPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+  <Compile Include="SuccessDialogForm.cs" />
+    <Compile Include="CasePromptForm.cs" />
     <Compile Include="AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,6 +114,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DigitalForensicsTools.cs" />
+<<<<<<< Updated upstream
+=======
+    <Compile Include="OpenCaseForm.cs" />
+    <Compile Include="PasswordPromptForm.cs" />
+    <Compile Include="DeleteCaseConfirmForm.cs" />
+>>>>>>> Stashed changes
     <EmbeddedResource Include="DeletedFileViewer.resx">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -156,6 +161,7 @@
     <Compile Include="CaseManager.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="AdminWarningDialogForm.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileSystems\FileSystems.csproj">

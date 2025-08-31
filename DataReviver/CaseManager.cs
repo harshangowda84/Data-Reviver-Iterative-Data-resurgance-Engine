@@ -143,23 +143,26 @@ namespace DataReviver
 
         public ForensicCase OpenExistingCase()
         {
-            using (var dialog = new OpenFileDialog())
+            // Load all case files from the cases folder
+            var cases = new List<ForensicCase>();
+            if (Directory.Exists(CASES_FOLDER))
             {
-                dialog.Title = "Open Forensic Case";
-                dialog.Filter = "Case Files (*.case)|*.case|All Files (*.*)|*.*";
-                dialog.InitialDirectory = Path.GetFullPath(CASES_FOLDER);
-
-                if (dialog.ShowDialog() == DialogResult.OK)
+                foreach (var file in Directory.GetFiles(CASES_FOLDER, "*.case", SearchOption.AllDirectories))
                 {
                     try
                     {
-                        _currentCase = LoadCase(dialog.FileName);
-                        return _currentCase;
+                        var loaded = LoadCase(file);
+                        if (loaded != null) cases.Add(loaded);
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error opening case: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    catch { }
+                }
+            }
+            using (var form = new OpenCaseForm(cases))
+            {
+                if (form.ShowDialog() == DialogResult.OK && form.SelectedCase != null)
+                {
+                    _currentCase = form.SelectedCase;
+                    return _currentCase;
                 }
             }
             return null;
