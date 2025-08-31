@@ -17,6 +17,7 @@ namespace DataReviver
         private Panel headerPanel;
         private Panel loginPanel;
         private PictureBox logoBox;
+        private CheckBox chkShowPassword; // Declare chkShowPassword as a class-level field
 
         public bool LoginSuccessful { get; private set; } = false;
         public UserSession CurrentUser { get; private set; } = null;
@@ -116,6 +117,28 @@ namespace DataReviver
                 UseSystemPasswordChar = true
             };
 
+            // Show Password Checkbox
+            chkShowPassword = new CheckBox
+            {
+                Text = "Show Password",
+                Font = new Font("Segoe UI", 9F, FontStyle.Regular),
+                AutoSize = true
+            };
+            chkShowPassword.Location = new Point(txtPassword.Left, txtPassword.Bottom + 8);
+            chkShowPassword.CheckedChanged += (s, e) =>
+            {
+                if (chkShowPassword.Checked)
+                {
+                    txtPassword.UseSystemPasswordChar = false;
+                    txtPassword.PasswordChar = '\0';
+                }
+                else
+                {
+                    txtPassword.UseSystemPasswordChar = true;
+                    txtPassword.PasswordChar = '●';
+                }
+            };
+
             // Buttons
             btnLogin = new Button
             {
@@ -134,17 +157,17 @@ namespace DataReviver
             btnLogin.Region = new Region(new Rectangle(0, 0, btnLogin.Width, btnLogin.Height));
             btnLogin.Click += BtnLogin_Click;
 
-            btnExit = new Button
-            {
-                Text = "EXIT",
-                Size = new Size(80, 35),
-                Location = new Point(250, 155),
-                BackColor = Color.FromArgb(220, 53, 69),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
+                btnExit = new Button
+                {
+                    Text = "EXIT",
+                    Size = new Size(80, 35),
+                    Location = new Point(250, 155),
+                    BackColor = Color.FromArgb(220, 53, 69),
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                    Cursor = Cursors.Hand
+                };
             btnExit.FlatAppearance.BorderSize = 0;
             btnExit.FlatAppearance.MouseOverBackColor = Color.FromArgb(180, 40, 50);
             btnExit.FlatAppearance.MouseDownBackColor = Color.FromArgb(150, 30, 40);
@@ -159,7 +182,7 @@ namespace DataReviver
             btnExit.Location = new Point(250, 160);
 
             loginPanel.Controls.AddRange(new Control[] { 
-                lblUsername, txtUsername, lblPassword, txtPassword, btnLogin, btnExit 
+                lblUsername, txtUsername, lblPassword, txtPassword, chkShowPassword, btnLogin, btnExit 
             });
 
             // Add controls to form
