@@ -19,8 +19,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Windows.Forms;
+<<<<<<< HEAD
 using DataReviver;
 using DataReviver;
+=======
+using DataReviver; // Add this to ensure CasePromptForm is found
+>>>>>>> a82c702 (Integrate modern CasePromptForm for case selection after login; add CasePromptForm.cs to project file)
 
 namespace DataReviver {
 	static class Program {
@@ -50,19 +54,20 @@ namespace DataReviver {
 				var result = loginForm.ShowDialog();
 				if (result == DialogResult.OK && loginForm.LoginSuccessful)
 				{
-					// After login, prompt for case selection
+					// Show improved case prompt form instead of MessageBox
 					DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
 					DataReviver.ForensicCase selectedCase = null;
 					DialogResult caseResult = DialogResult.None;
 					while (selectedCase == null && caseResult != DialogResult.Cancel)
 					{
-						var caseChoice = MessageBox.Show("Do you want to create a new case? (Yes)\nOr open an existing case? (No)", "Select Case", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-						if (caseChoice == DialogResult.Yes)
+						var casePrompt = new CasePromptForm();
+						var promptResult = casePrompt.ShowDialog();
+						if (promptResult == DialogResult.Yes)
 						{
 							selectedCase = caseManager.CreateNewCase();
 							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;
 						}
-						else if (caseChoice == DialogResult.No)
+						else if (promptResult == DialogResult.No)
 						{
 							selectedCase = caseManager.OpenExistingCase();
 							caseResult = selectedCase != null ? DialogResult.OK : DialogResult.Cancel;

@@ -114,12 +114,16 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DigitalForensicsTools.cs" />
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
     <Compile Include="OpenCaseForm.cs" />
     <Compile Include="PasswordPromptForm.cs" />
     <Compile Include="DeleteCaseConfirmForm.cs" />
 >>>>>>> Stashed changes
+=======
+    <Compile Include="CasePromptForm.cs" />
+>>>>>>> a82c702 (Integrate modern CasePromptForm for case selection after login; add CasePromptForm.cs to project file)
     <EmbeddedResource Include="DeletedFileViewer.resx">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
       <SubType>Designer</SubType>

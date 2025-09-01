@@ -67,6 +67,10 @@ namespace DataReviver
 			btnCreateCase.Dock = DockStyle.Fill;
 			btnCreateCase.FlatStyle = FlatStyle.Flat;
 			btnCreateCase.FlatAppearance.BorderSize = 0;
+<<<<<<< HEAD
+=======
+			btnCreateCase.FlatAppearance.BorderColor = btnCreateCase.BackColor;
+>>>>>>> a82c702 (Integrate modern CasePromptForm for case selection after login; add CasePromptForm.cs to project file)
 			btnCreateCase.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 90, 200);
 			btnCreateCase.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 90, 200);
 			btnCreateCase.FlatAppearance.CheckedBackColor = btnCreateCase.BackColor;
