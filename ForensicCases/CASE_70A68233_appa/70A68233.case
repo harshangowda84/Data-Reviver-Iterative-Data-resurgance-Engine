@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>70A68233</CaseId>
+  <CaseName><![CDATA[appa]]></CaseName>
+  <InvestigatorName><![CDATA[appa]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T02:21:41.7451648+05:30</CreatedDate>
+  <LastModified>2025-09-01T02:21:41.7451648+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_70A68233_appa]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T02:21:41.7451648+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by appa]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

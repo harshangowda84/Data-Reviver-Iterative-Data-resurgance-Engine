@@ -10,7 +10,7 @@ namespace DataReviver
 {
     public class OpenCaseForm : Form
     {
-    private List<ForensicCase> cases;
+    private List<ForensicCase> cases = new List<ForensicCase>();
     private ListBox caseListBox;
     private TextBox searchBox;
     private Label detailsLabel;
@@ -21,9 +21,8 @@ namespace DataReviver
 
         public ForensicCase SelectedCase { get; private set; }
 
-        public OpenCaseForm(List<ForensicCase> cases)
+        public OpenCaseForm()
         {
-            this.cases = cases ?? new List<ForensicCase>();
             InitializeComponent();
         }
 
@@ -231,10 +230,73 @@ namespace DataReviver
 
         private void LoadCases()
         {
+            cases.Clear();
             caseListBox.Items.Clear();
-            foreach (var c in cases)
+            string casesFolder = "ForensicCases";
+            if (Directory.Exists(casesFolder))
             {
-                caseListBox.Items.Add($"Case_{c.CaseId} (ID: {c.CaseId})");
+                var caseFiles = Directory.GetFiles(casesFolder, "*.case", SearchOption.AllDirectories);
+                foreach (var file in caseFiles)
+                {
+                    try
+                    {
+                        var xml = File.ReadAllText(file);
+                        var caseObj = DeserializeCaseFromXml(xml);
+                        if (caseObj != null)
+                        {
+                            cases.Add(caseObj);
+                            caseListBox.Items.Add($"Case_{caseObj.CaseId} (ID: {caseObj.CaseId})");
+                        }
+                    }
+                    catch { /* Ignore invalid case files */ }
+                }
+            }
+        }
+
+        // Helper to parse XML to ForensicCase (simple implementation)
+        private ForensicCase DeserializeCaseFromXml(string xml)
+        {
+            try
+            {
+                var doc = System.Xml.Linq.XDocument.Parse(xml);
+                var root = doc.Element("ForensicCase");
+                if (root == null) return null;
+
+                var caseObj = new ForensicCase();
+                caseObj.CaseId = root.Element("CaseId")?.Value;
+                caseObj.CaseName = root.Element("CaseName")?.Value;
+                caseObj.InvestigatorName = root.Element("InvestigatorName")?.Value;
+                caseObj.Description = root.Element("Description")?.Value;
+                caseObj.CaseFolderPath = root.Element("CaseFolderPath")?.Value;
+                caseObj.Status = Enum.TryParse(root.Element("Status")?.Value, out CaseStatus status) ? status : CaseStatus.Active;
+
+                if (DateTime.TryParse(root.Element("CreatedDate")?.Value, out DateTime created))
+                    caseObj.CreatedDate = created;
+                if (DateTime.TryParse(root.Element("LastModified")?.Value, out DateTime modified))
+                    caseObj.LastModified = modified;
+
+                // Notes
+                var notes = root.Element("Notes");
+                if (notes != null)
+                {
+                    foreach (var noteElem in notes.Elements("Note"))
+                    {
+                        var timestampStr = noteElem.Element("Timestamp")?.Value;
+                        var author = noteElem.Element("Author")?.Value;
+                        var content = noteElem.Element("Content")?.Value;
+                        DateTime.TryParse(timestampStr, out DateTime timestamp);
+                        caseObj.Notes.Add(new CaseNote(content ?? "", author ?? "") { Timestamp = timestamp });
+                    }
+                }
+
+                // Evidence (optional, not shown in your sample)
+                // You can add similar parsing for EvidenceItems if needed
+
+                return caseObj;
+            }
+            catch
+            {
+                return null;
             }
         }
 

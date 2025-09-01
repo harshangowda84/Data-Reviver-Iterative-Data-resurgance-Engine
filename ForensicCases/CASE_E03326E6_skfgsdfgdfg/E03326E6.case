@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>E03326E6</CaseId>
+  <CaseName><![CDATA[skfgsdfgdfg]]></CaseName>
+  <InvestigatorName><![CDATA[dfgdfgdfg]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T02:26:42.1564232+05:30</CreatedDate>
+  <LastModified>2025-09-01T02:26:42.1564232+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_E03326E6_skfgsdfgdfg]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T02:26:42.1579520+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by dfgdfgdfg]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

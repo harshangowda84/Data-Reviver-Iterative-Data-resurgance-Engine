@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>B238BD5D</CaseId>
+  <CaseName><![CDATA[fdghjkldfkhd]]></CaseName>
+  <InvestigatorName><![CDATA[ewrgertgtre]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T13:36:29.5106236+05:30</CreatedDate>
+  <LastModified>2025-09-01T13:36:29.5106236+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_B238BD5D_fdghjkldfkhd]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T13:36:29.5106236+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by ewrgertgtre]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

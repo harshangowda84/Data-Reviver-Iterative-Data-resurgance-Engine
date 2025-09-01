@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>54A4CA28</CaseId>
+  <CaseName><![CDATA[amma]]></CaseName>
+  <InvestigatorName><![CDATA[]]></InvestigatorName>
+  <Description><![CDATA[]]></Description>
+  <CreatedDate>2025-09-01T02:18:09.1740110+05:30</CreatedDate>
+  <LastModified>2025-09-01T02:18:09.1740110+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_54A4CA28_amma]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T02:18:09.1768307+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by ]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

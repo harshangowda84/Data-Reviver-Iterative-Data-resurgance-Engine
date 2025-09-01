@@ -127,7 +127,12 @@ namespace DataReviver
                     };
 
                     // Create case folder
-                    var caseFolder = Path.Combine(CASES_FOLDER, $"CASE_{_currentCase.CaseId}_{SanitizeFileName(_currentCase.CaseName)}");
+                    string sanitizedName = SanitizeFileName(_currentCase.CaseName);
+                    if (string.IsNullOrWhiteSpace(sanitizedName))
+                    {
+                        sanitizedName = $"Case_{_currentCase.CaseId}";
+                    }
+                    var caseFolder = Path.Combine(CASES_FOLDER, $"CASE_{_currentCase.CaseId}_{sanitizedName}");
                     Directory.CreateDirectory(caseFolder);
                     _currentCase.CaseFolderPath = caseFolder;
 
@@ -157,7 +162,7 @@ namespace DataReviver
                     catch { }
                 }
             }
-            using (var form = new OpenCaseForm(cases))
+            using (var form = new OpenCaseForm())
             {
                 if (form.ShowDialog() == DialogResult.OK && form.SelectedCase != null)
                 {
@@ -389,8 +394,18 @@ namespace DataReviver
 
         private string SanitizeFileName(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName)) return "";
             var invalidChars = Path.GetInvalidFileNameChars();
-            return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+            var sanitized = new StringBuilder();
+            foreach (char c in fileName)
+            {
+                if (invalidChars.Contains(c)) continue;
+                if (char.IsWhiteSpace(c))
+                    sanitized.Append('_');
+                else
+                    sanitized.Append(c);
+            }
+            return sanitized.ToString().TrimEnd('.');
         }
 
         public List<string> GetRecentCases()
@@ -413,9 +428,11 @@ namespace DataReviver
         public string InvestigatorName { get; private set; }
         public string Description { get; private set; }
 
-        private TextBox txtCaseName;
-        private TextBox txtInvestigator;
-        private TextBox txtDescription;
+    private TextBox txtCaseName;
+    private TextBox txtInvestigator;
+    private TextBox txtDescription;
+    private TextBox txtCaseId;
+    private string _lastCustomCaseName = "";
 
         public NewCaseDialog()
         {
@@ -511,7 +528,7 @@ namespace DataReviver
                 Location = new System.Drawing.Point(60, 155),
                 Size = new System.Drawing.Size(160, 32)
             };
-            var txtCaseId = new TextBox {
+            txtCaseId = new TextBox {
                 Location = new System.Drawing.Point(230, 155),
                 Size = new System.Drawing.Size(210, 32),
                 Font = new System.Drawing.Font("Segoe UI", 12F),
@@ -546,6 +563,11 @@ namespace DataReviver
                 if (txtCaseName.Text == $"Case_{txtCaseId.Text}" || txtCaseName.Text == "Enter case name") {
                     txtCaseName.Text = "";
                     txtCaseName.ForeColor = System.Drawing.Color.Black;
+                }
+            };
+            txtCaseName.TextChanged += (s, e) => {
+                if (!string.IsNullOrWhiteSpace(txtCaseName.Text) && txtCaseName.Text != $"Case_{txtCaseId.Text}" && txtCaseName.Text != "Enter case name") {
+                    _lastCustomCaseName = txtCaseName.Text.Trim();
                 }
             };
             txtCaseName.LostFocus += (s, e) => {
@@ -648,19 +670,29 @@ namespace DataReviver
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCaseName.Text))
+            string generatedName = $"Case_{txtCaseId.Text}";
+            string enteredName = txtCaseName.Text.Trim();
+
+            // Use last custom name if available, otherwise use entered value or generated name
+            if (!string.IsNullOrWhiteSpace(_lastCustomCaseName))
             {
-                MessageBox.Show("Please enter a case name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                CaseName = _lastCustomCaseName;
+            }
+            else if (string.IsNullOrWhiteSpace(enteredName) || enteredName == "Enter case name")
+            {
+                CaseName = generatedName;
+            }
+            else
+            {
+                CaseName = enteredName;
             }
 
-            if (string.IsNullOrWhiteSpace(txtInvestigator.Text))
+            if (string.IsNullOrWhiteSpace(txtInvestigator.Text) || txtInvestigator.Text == "Enter investigator name")
             {
                 MessageBox.Show("Please enter investigator name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.None; // Prevent dialog from closing
                 return;
             }
-
-            CaseName = txtCaseName.Text.Trim();
             InvestigatorName = txtInvestigator.Text.Trim();
             Description = txtDescription.Text.Trim();
         }

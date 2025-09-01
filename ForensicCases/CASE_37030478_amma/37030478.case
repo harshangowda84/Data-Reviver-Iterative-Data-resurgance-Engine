@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>37030478</CaseId>
+  <CaseName><![CDATA[amma]]></CaseName>
+  <InvestigatorName><![CDATA[amma]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T02:18:48.6072402+05:30</CreatedDate>
+  <LastModified>2025-09-01T02:18:48.6072402+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_37030478_amma]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T02:18:48.6082657+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by amma]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>
