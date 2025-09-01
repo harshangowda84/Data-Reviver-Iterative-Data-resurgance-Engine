@@ -50,7 +50,7 @@ namespace DataReviver {
 				var result = loginForm.ShowDialog();
 				if (result == DialogResult.OK && loginForm.LoginSuccessful)
 				{
-					// After login, prompt for case selection
+					// Show improved case prompt form instead of MessageBox
 					DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
 					DataReviver.ForensicCase selectedCase = null;
 					DialogResult caseResult = DialogResult.None;
