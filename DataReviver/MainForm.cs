@@ -590,18 +590,22 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			reportBuilder.AppendLine("This report demonstrates comprehensive forensic capabilities");
 			reportBuilder.AppendLine("suitable for digital investigation and evidence preservation.");
 
-			using (var dialog = new SaveFileDialog())
-			{
-				dialog.Filter = "Text Files (*.txt)|*.txt|PDF Files (*.pdf)|*.pdf";
-				dialog.DefaultExt = "txt";
-				dialog.FileName = $"ForensicReport_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-				
-				if (dialog.ShowDialog() == DialogResult.OK)
+				// Automatically save the report in the current case folder
+				if (_currentCase != null && !string.IsNullOrEmpty(_currentCase.CaseFolderPath))
 				{
-					System.IO.File.WriteAllText(dialog.FileName, reportBuilder.ToString());
-					MessageBox.Show("Forensic report generated successfully!", "Report Generated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					string reportPath = System.IO.Path.Combine(_currentCase.CaseFolderPath, $"ForensicReport_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+					System.IO.File.WriteAllText(reportPath, reportBuilder.ToString());
+					// Use a custom dialog for consistent UI
+					using (var dialog = new SuccessDialogForm($"Forensic report generated and saved to:\n{reportPath}"))
+					{
+						dialog.Text = "Report Generated";
+						dialog.ShowDialog();
+					}
 				}
-			}
+				else
+				{
+					MessageBox.Show("No case folder found. Cannot save report.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 		}
 
 		private void OpenForensicHelp()
