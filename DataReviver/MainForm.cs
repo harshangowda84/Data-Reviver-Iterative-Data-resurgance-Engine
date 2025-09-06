@@ -403,7 +403,7 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			if (logicalDisk.FS != null) {
 				if (!_scanners.ContainsKey(logicalDisk.FS)) {
 					_scanners[logicalDisk.FS] = new Scanner(logicalDisk.ToString(), logicalDisk.FS);
-					_deletedViewers[logicalDisk.FS] = new DeletedFileViewer(_scanners[logicalDisk.FS]);
+					_deletedViewers[logicalDisk.FS] = new DeletedFileViewer(_scanners[logicalDisk.FS], _currentCase);
 					AddDeletedFileViewer(_deletedViewers[logicalDisk.FS]);
 
 					// Subscribe to scan finished event to enable report button and store results

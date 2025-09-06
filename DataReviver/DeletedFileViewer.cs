@@ -57,7 +57,8 @@ namespace DataReviver {
 		private HashSet<string> _systemFileExtensions =
 				new HashSet<string>() { ".DLL", ".TMP", ".CAB", ".LNK", ".LOG", ".EXE", ".XML", ".INI" };
 
-		private Scanner _scanner;
+	private Scanner _scanner;
+	private ForensicCase _currentCase;
 		private FileSavingQueue _fileSavingQueue;
 		private ProgressPopup _progressPopup;
 		private string _mostRecentlySavedFile;
@@ -78,7 +79,10 @@ namespace DataReviver {
 		/// Constructs a DeletedFileViewer, using a given Scanner.
 		/// </summary>
 		/// <param name="scanner">The Scanner that will be the model for this DeletedFileViewer.</param>
-		public DeletedFileViewer(Scanner scanner) {
+		public DeletedFileViewer(Scanner scanner) : this(scanner, null) { }
+
+		public DeletedFileViewer(Scanner scanner, ForensicCase currentCase)
+		{
 			InitializeComponent();
 
 			// Set up auto-resize functionality for columns
@@ -92,6 +96,7 @@ namespace DataReviver {
 			fileView.SmallImageList = _imageList;
 
 			_scanner = scanner;
+			_currentCase = currentCase;
 			scanner.ProgressUpdated += new EventHandler(state_ProgressUpdated);
 			scanner.ScanStarted += new EventHandler(state_ScanStarted);
 			scanner.ScanFinished += new EventHandler(state_ScanFinished);
@@ -454,26 +459,42 @@ namespace DataReviver {
 			}
 		}
 
-		private void PromptUserToSaveFile(INodeMetadata metadata) {
-			if (metadata != null) {
-				SaveFileDialog saveFileDialog = new SaveFileDialog();
-				saveFileDialog.OverwritePrompt = true;
-				saveFileDialog.InitialDirectory = Environment.ExpandEnvironmentVariables("%SystemDrive");
-				saveFileDialog.FileName = metadata.Name;
-				saveFileDialog.Filter = "Any Files|*.*";
-				saveFileDialog.Title = "Select a Location";
+		private void PromptUserToSaveFile(INodeMetadata metadata)
+		{
+			if (metadata != null)
+			{
+				// Save to case's 'recovered' subfolder
+				string recoveredDir = null;
+				if (_currentCase != null && !string.IsNullOrEmpty(_currentCase.CaseFolderPath))
+				{
+					recoveredDir = System.IO.Path.Combine(_currentCase.CaseFolderPath, "recovered");
+					if (!System.IO.Directory.Exists(recoveredDir))
+						System.IO.Directory.CreateDirectory(recoveredDir);
+				}
+				else
+				{
+					MessageBox.Show("No case folder found. Cannot save recovered file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					return;
+				}
 
-				if (saveFileDialog.ShowDialog() == DialogResult.OK) {
-					// Check that the drive isn't the same as the drive being copied from.
-					if (saveFileDialog.FileName[0] != _scanner.DiskName[0]
-						|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
-						"trying to recover from. This may cause recovery to fail, and overwrite your data " +
-						"permanently! Are you sure you wish to continue?", "Warning!",
-						MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+				string fileName = PathUtils.MakeFileNameValid(metadata.Name);
+				string destPath = System.IO.Path.Combine(recoveredDir, fileName);
+				int copyNum = 1;
+				string baseName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+				string ext = System.IO.Path.GetExtension(fileName);
+				while (System.IO.File.Exists(destPath))
+				{
+					destPath = System.IO.Path.Combine(recoveredDir, $"{baseName} ({copyNum}){ext}");
+					copyNum++;
+				}
 
-						IFileSystemNode node = metadata.GetFileSystemNode();
-						SaveSingleFile(node, saveFileDialog.FileName);
-					}
+				IFileSystemNode node = metadata.GetFileSystemNode();
+				SaveSingleFile(node, destPath);
+				// Show confirmation dialog
+				using (var dialog = new SuccessDialogForm($"Recovered file saved to:\n{destPath}", destPath))
+				{
+					dialog.Text = "File Recovered";
+					dialog.ShowDialog();
 				}
 			}
 		}
@@ -491,25 +512,48 @@ namespace DataReviver {
 			_fileSavingQueue.Push(filePath, node);
 		}
 
-		private void PromptUserToSaveFiles(IEnumerable items) {
-			FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+		private void PromptUserToSaveFiles(IEnumerable items)
+		{
+			// Save to case's 'recovered' subfolder
+			string recoveredDir = null;
+			if (_currentCase != null && !string.IsNullOrEmpty(_currentCase.CaseFolderPath))
+			{
+				recoveredDir = System.IO.Path.Combine(_currentCase.CaseFolderPath, "recovered");
+				if (!System.IO.Directory.Exists(recoveredDir))
+					System.IO.Directory.CreateDirectory(recoveredDir);
+			}
+			else
+			{
+				MessageBox.Show("No case folder found. Cannot save recovered files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
 
-			if (folderDialog.ShowDialog() == DialogResult.OK) {
-				// Check that the drive isn't the same as the drive being copied from.
-				if (folderDialog.SelectedPath[0] != _scanner.DiskName[0]
-					|| MessageBox.Show("WARNING: You are about to save this file to the same disk you are " +
-					"trying to recover from. This may cause recovery to fail, and overwrite your data " +
-					"permanently! Are you sure you wish to continue?", "Warning!",
-					MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
-
-					List<IFileSystemNode> nodes = new List<IFileSystemNode>();
-					foreach (ListViewItem item in items) {
-						INodeMetadata metadata = item.Tag as INodeMetadata;
-						if (metadata != null) {
-							nodes.Add(metadata.GetFileSystemNode());
-						}
-					}
-					SaveMultipleFiles(nodes, folderDialog.SelectedPath);
+			List<IFileSystemNode> nodes = new List<IFileSystemNode>();
+			foreach (ListViewItem item in items)
+			{
+				INodeMetadata metadata = item.Tag as INodeMetadata;
+				if (metadata != null)
+				{
+					nodes.Add(metadata.GetFileSystemNode());
+				}
+			}
+			var savedFiles = SaveMultipleFiles(nodes, recoveredDir);
+			// Show confirmation dialog for all files
+			if (savedFiles.Count == 1)
+			{
+				using (var dialog = new SuccessDialogForm($"Recovered file saved to:\n{savedFiles[0]}", savedFiles[0]))
+				{
+					dialog.Text = "File Recovered";
+					dialog.ShowDialog();
+				}
+			}
+			else if (savedFiles.Count > 1)
+			{
+				string folderMsg = $"{savedFiles.Count} files recovered to:\n{recoveredDir}";
+				using (var dialog = new SuccessDialogForm(folderMsg, recoveredDir))
+				{
+					dialog.Text = "Files Recovered";
+					dialog.ShowDialog();
 				}
 			}
 		}
@@ -519,29 +563,35 @@ namespace DataReviver {
 		/// </summary>
 		/// <param name="nodes">The files to recover.</param>
 		/// <param name="folderPath">The folder in which to save the recovered files.</param>
-		private void SaveMultipleFiles(IEnumerable<IFileSystemNode> nodes, string folderPath) {
-			foreach (IFileSystemNode node in nodes) {
+		private List<string> SaveMultipleFiles(IEnumerable<IFileSystemNode> nodes, string folderPath)
+		{
+			List<string> savedFiles = new List<string>();
+			foreach (IFileSystemNode node in nodes)
+			{
 				string file = PathUtils.MakeFileNameValid(node.Name);
-				string fileName = Path.Combine(folderPath, file);
-				if (System.IO.File.Exists(fileName)) {
+				string fileName = System.IO.Path.Combine(folderPath, file);
+				if (System.IO.File.Exists(fileName))
+				{
 					int copyNum = 1;
 					string newFileName;
-					do {
-						newFileName = Path.Combine(Path.GetDirectoryName(fileName),
-							string.Format("{0} ({1}){2}", Path.GetFileNameWithoutExtension(fileName),
-							copyNum, Path.GetExtension(fileName)));
+					do
+					{
+						newFileName = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(fileName),
+							string.Format("{0} ({1}){2}", System.IO.Path.GetFileNameWithoutExtension(fileName),
+							copyNum, System.IO.Path.GetExtension(fileName)));
 						copyNum++;
 					} while (System.IO.File.Exists(newFileName));
 					fileName = newFileName;
 				}
 				SaveSingleFile(node, fileName);
+				savedFiles.Add(fileName);
 			}
+			return savedFiles;
 		}
 
-		private void FileSavingQueue_Finished() {
-			if (!string.IsNullOrEmpty(_mostRecentlySavedFile)) {
-				Process.Start("explorer.exe", "/select, \"" + _mostRecentlySavedFile + '"');
-			}
+		private void FileSavingQueue_Finished()
+		{
+			// No automatic explorer open; handled by SuccessDialogForm if user clicks 'Open'.
 		}
 
 		private void fileView_ColumnClick(object sender, ColumnClickEventArgs e) {
