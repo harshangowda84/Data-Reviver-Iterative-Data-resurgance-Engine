@@ -1,4 +1,20 @@
-﻿
+﻿// Copyright (C) 2017  Joey Scarr, Lukas Korsika
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
 
 // Copyright (C) 2017  Joey Scarr, Lukas Korsika
 //
@@ -24,14 +40,19 @@ using System.Linq;
 using System.Windows.Forms;
 using DataReviver;
 
+
 namespace DataReviver {
 	/// <summary>
 	/// The main form of Kickass Undelete.
 	/// </summary>
 
 	public partial class MainForm : Form {
-		// Static DR icon for use throughout the app
-		private static Icon _drIcon;
+	// Static DR icon for use throughout the app
+	private static Icon _drIcon;
+	// Fields to store references to Case Artifacts submenu and its items
+	private ToolStripMenuItem _caseArtifactsMenu;
+	private ToolStripMenuItem _viewReportMenu;
+	private ToolStripMenuItem _openRecoveredMenu;
 		public static Icon DRIcon {
 			get {
 				return _drIcon != null ? (Icon)_drIcon.Clone() : null;
@@ -203,15 +224,22 @@ namespace DataReviver {
 			analysisMenu.DropDownItems.Add(_generateReportMenuItem);
 
 			// Add submenu for viewing report and recovered files
-			var viewReportMenu = new ToolStripMenuItem("📄 View Case Report");
-			viewReportMenu.Click += new EventHandler(ViewReportMenu_Click);
-			var openRecoveredMenu = new ToolStripMenuItem("📁 Open Recovered Files");
-			openRecoveredMenu.Click += new EventHandler(OpenRecoveredMenu_Click);
-			var reportSubMenu = new ToolStripMenuItem("🗂️ Case Artifacts");
-			reportSubMenu.DropDownItems.Add(viewReportMenu);
-			reportSubMenu.DropDownItems.Add(openRecoveredMenu);
+			_viewReportMenu = new ToolStripMenuItem("📄 View Case Report");
+			_viewReportMenu.Click += new EventHandler(ViewReportMenu_Click);
+			_openRecoveredMenu = new ToolStripMenuItem("📁 Open Recovered Files");
+			_openRecoveredMenu.Click += new EventHandler(OpenRecoveredMenu_Click);
+			_caseArtifactsMenu = new ToolStripMenuItem("🗂️ Case Artifacts");
+			_caseArtifactsMenu.DropDownItems.Add(_viewReportMenu);
+			_caseArtifactsMenu.DropDownItems.Add(_openRecoveredMenu);
 
-			analysisMenu.DropDownItems.Add(reportSubMenu);
+			// Disable by default
+			_caseArtifactsMenu.Enabled = false;
+			_viewReportMenu.Enabled = false;
+			_openRecoveredMenu.Enabled = false;
+
+			analysisMenu.DropDownItems.Add(_caseArtifactsMenu);
+
+			// Store references for later enabling/disabling
 
 			// Help Menu (with icon)
 			var helpMenu = new ToolStripMenuItem("  Help");
@@ -277,55 +305,66 @@ namespace DataReviver {
 		// Enhanced renderer for modern menu bar
 private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 {
-    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
-    {
-        Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
-        if (e.ToolStrip is MenuStrip)
-        {
-            // Top bar: blue and hover effect
-            if (e.Item.Selected)
-            {
-                using (Brush b = new SolidBrush(Color.FromArgb(0, 90, 200)))
-                    e.Graphics.FillRectangle(b, rect);
-            }
-            else
-            {
-                using (Brush b = new SolidBrush(Color.FromArgb(0, 122, 255)))
-                    e.Graphics.FillRectangle(b, rect);
-            }
-        }
-        else
-        {
-            // Dropdown: default light background
-            if (e.Item.Selected)
-            {
-                using (Brush b = new SolidBrush(Color.FromArgb(230, 240, 255)))
-                    e.Graphics.FillRectangle(b, rect);
-            }
-            else
-            {
-                using (Brush b = new SolidBrush(SystemColors.Menu))
-                    e.Graphics.FillRectangle(b, rect);
-            }
-        }
-    }
+	protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+	{
+		Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
+		if (e.ToolStrip is MenuStrip)
+		{
+			// Top bar: blue and hover effect
+			if (e.Item.Selected)
+			{
+				using (Brush b = new SolidBrush(Color.FromArgb(0, 90, 200)))
+					e.Graphics.FillRectangle(b, rect);
+			}
+			else
+			{
+				using (Brush b = new SolidBrush(Color.FromArgb(0, 122, 255)))
+					e.Graphics.FillRectangle(b, rect);
+			}
+		}
+		else
+		{
+			// Dropdown: default light background
+			if (e.Item.Selected)
+			{
+				using (Brush b = new SolidBrush(Color.FromArgb(230, 240, 255)))
+					e.Graphics.FillRectangle(b, rect);
+			}
+			else
+			{
+				using (Brush b = new SolidBrush(SystemColors.Menu))
+					e.Graphics.FillRectangle(b, rect);
+			}
+		}
+	}
 
-    protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
-    {
-        if (e.ToolStrip is MenuStrip)
-        {
-            // Draw bottom border for top bar only
-            using (Pen p = new Pen(Color.FromArgb(0, 90, 200), 3))
-            {
-                e.Graphics.DrawLine(p, 0, e.ToolStrip.Height - 2, e.ToolStrip.Width, e.ToolStrip.Height - 2);
-            }
-        }
-        else
-        {
-            base.OnRenderToolStripBorder(e);
-        }
-    }
+	protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
+	{
+		if (e.ToolStrip is MenuStrip)
+		{
+			// Draw bottom border for top bar only
+			using (Pen p = new Pen(Color.FromArgb(0, 90, 200), 3))
+			{
+				e.Graphics.DrawLine(p, 0, e.ToolStrip.Height - 2, e.ToolStrip.Width, e.ToolStrip.Height - 2);
+			}
+		}
+		else
+		{
+			base.OnRenderToolStripBorder(e);
+		}
+	}
 }
+
+		// Helper to enable Case Artifacts menu when report or recovery is available
+		private void EnableCaseArtifactsMenu()
+		{
+			if (_caseArtifactsMenu != null)
+			{
+				_caseArtifactsMenu.Enabled = true;
+				if (_viewReportMenu != null) _viewReportMenu.Enabled = true;
+				if (_openRecoveredMenu != null) _openRecoveredMenu.Enabled = true;
+			}
+		}
 
 		private void ApplyRoleBasedAccess()
 		{
@@ -479,6 +518,10 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 					};
 				}
 				if (_fileSystem != null && _scanners.ContainsKey(_fileSystem)) {
+								{
+									// Enable Case Artifacts menu after report is generated
+									EnableCaseArtifactsMenu();
+								}
 					_deletedViewers[_fileSystem].Hide();
 				}
 				_fileSystem = logicalDisk.FS;
@@ -643,6 +686,11 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			else
 			{
 				reportBuilder.AppendLine($"Total Files Analyzed: 0 (Scan a drive to see results)");
+						// If any files have been recovered, enable Case Artifacts menu
+						if (_lastScanResults != null && _lastScanResults.Any(md => md.ChanceOfRecovery == FileRecoveryStatus.Recoverable || md.ChanceOfRecovery == FileRecoveryStatus.Resident))
+						{
+							EnableCaseArtifactsMenu();
+						}
 				reportBuilder.AppendLine($"Recoverable Files: 0 (Scan a drive to see results)");
 			}
 

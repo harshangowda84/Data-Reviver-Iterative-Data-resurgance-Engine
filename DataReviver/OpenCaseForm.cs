@@ -247,10 +247,15 @@ namespace DataReviver
                         if (caseObj != null)
                         {
                             cases.Add(caseObj);
-                            caseListBox.Items.Add($"{caseObj.CaseName} (ID: {caseObj.CaseId})");
                         }
                     }
                     catch { /* Ignore invalid case files */ }
+                }
+                // Sort cases by LastModified descending (newest first)
+                cases = cases.OrderByDescending(c => c.LastModified).ToList();
+                foreach (var caseObj in cases)
+                {
+                    caseListBox.Items.Add($"{caseObj.CaseName} (ID: {caseObj.CaseId})");
                 }
             }
         }
