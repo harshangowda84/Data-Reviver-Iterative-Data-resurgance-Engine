@@ -593,10 +593,12 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 				// Automatically save the report in the current case folder
 				if (_currentCase != null && !string.IsNullOrEmpty(_currentCase.CaseFolderPath))
 				{
-					string reportPath = System.IO.Path.Combine(_currentCase.CaseFolderPath, $"ForensicReport_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+					string reportDir = System.IO.Path.Combine(_currentCase.CaseFolderPath, "report");
+					if (!System.IO.Directory.Exists(reportDir))
+						System.IO.Directory.CreateDirectory(reportDir);
+					string reportPath = System.IO.Path.Combine(reportDir, $"ForensicReport_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
 					System.IO.File.WriteAllText(reportPath, reportBuilder.ToString());
-					// Use a custom dialog for consistent UI
-					using (var dialog = new SuccessDialogForm($"Forensic report generated and saved to:\n{reportPath}"))
+					using (var dialog = new SuccessDialogForm($"Forensic report generated and saved to:\n{reportPath}", reportPath))
 					{
 						dialog.Text = "Report Generated";
 						dialog.ShowDialog();
