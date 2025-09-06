@@ -1,4 +1,5 @@
 ﻿// Copyright (C) 2017  Joey Scarr, Lukas Korsika
+// Copyright (C) 2017  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +38,10 @@ namespace DataReviver {
 				_drIcon = value;
 			}
 		}
+
+		// Forensic Report menu item and scan results storage
+		private ToolStripMenuItem _generateReportMenuItem;
+		private IList<INodeMetadata> _lastScanResults;
 		// Call this at app startup to ensure icon is ready for all forms
 		public static void GenerateDRIcon() {
 			try {
@@ -97,6 +102,9 @@ namespace DataReviver {
 			_refreshDrivesTimer = new Timer();
 			_refreshDrivesTimer.Interval = 120;
 			_refreshDrivesTimer.Tick += RefreshDrivesTimer_Tick;
+
+			// Subscribe to scan finished events for all scanners (if any are created later)
+			// This will be handled in SetFileSystem when a new scanner is created
 		}
 
 		/// <summary>
@@ -189,7 +197,9 @@ namespace DataReviver {
 			analysisMenu.Padding = new Padding(12, 0, 12, 0);
 			analysisMenu.ToolTipText = "Analysis features";
 			analysisMenu.DropDownItems.Add(new ToolStripSeparator());
-			analysisMenu.DropDownItems.Add("📊 Generate Forensic Report", null, (s, e) => GenerateForensicReport());
+			_generateReportMenuItem = new ToolStripMenuItem("📊 Generate Forensic Report", null, (s, e) => GenerateForensicReport());
+			_generateReportMenuItem.Enabled = false; // Disabled by default
+			analysisMenu.DropDownItems.Add(_generateReportMenuItem);
 
 			// Help Menu (with icon)
 			var helpMenu = new ToolStripMenuItem("  Help");
@@ -396,6 +406,18 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 					_scanners[logicalDisk.FS] = new Scanner(logicalDisk.ToString(), logicalDisk.FS);
 					_deletedViewers[logicalDisk.FS] = new DeletedFileViewer(_scanners[logicalDisk.FS]);
 					AddDeletedFileViewer(_deletedViewers[logicalDisk.FS]);
+
+					// Subscribe to scan finished event to enable report button and store results
+					_scanners[logicalDisk.FS].ScanFinished += (sender, e) =>
+					{
+						// Store the latest scan results
+						_lastScanResults = _scanners[logicalDisk.FS].GetDeletedFiles();
+						// Enable the report button
+						if (_generateReportMenuItem != null)
+						{
+							_generateReportMenuItem.Enabled = _lastScanResults != null && _lastScanResults.Count > 0;
+						}
+					};
 				}
 				if (_fileSystem != null && _scanners.ContainsKey(_fileSystem)) {
 					_deletedViewers[_fileSystem].Hide();
@@ -543,18 +565,29 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			reportBuilder.AppendLine($"Tool Version: Data Reviver v1.0");
 			reportBuilder.AppendLine();
 			reportBuilder.AppendLine("SCAN SUMMARY:");
-			reportBuilder.AppendLine($"Total Files Analyzed: 0 (Scan a drive to see results)");
-			reportBuilder.AppendLine($"Recoverable Files: 0 (Scan a drive to see results)");
+
+			if (_lastScanResults != null && _lastScanResults.Count > 0)
+			{
+				reportBuilder.AppendLine($"Total Files Analyzed: {_lastScanResults.Count}");
+				int recoverable = _lastScanResults.Count(md => md.ChanceOfRecovery == FileRecoveryStatus.Recoverable || md.ChanceOfRecovery == FileRecoveryStatus.Resident);
+				reportBuilder.AppendLine($"Recoverable Files: {recoverable}");
+				// Optionally, add a table of files
+				reportBuilder.AppendLine();
+				reportBuilder.AppendLine("DELETED FILES:");
+				reportBuilder.AppendLine("Name\tType\tSize\tLast Modified\tPath\tRecovery Status");
+				foreach (var md in _lastScanResults)
+				{
+					var node = md.GetFileSystemNode();
+					reportBuilder.AppendLine($"{md.Name}\t{System.IO.Path.GetExtension(md.Name)}\t{node.Size}\t{md.LastModified}\t{node.Path}\t{md.ChanceOfRecovery}");
+				}
+			}
+			else
+			{
+				reportBuilder.AppendLine($"Total Files Analyzed: 0 (Scan a drive to see results)");
+				reportBuilder.AppendLine($"Recoverable Files: 0 (Scan a drive to see results)");
+			}
+
 			reportBuilder.AppendLine();
-			reportBuilder.AppendLine("FORENSIC CAPABILITIES DEMONSTRATED:");
-			reportBuilder.AppendLine("✅ File Signature Analysis - 20+ file types detected");
-			reportBuilder.AppendLine("✅ Hash Calculation - MD5, SHA1, SHA256, SHA512");
-			reportBuilder.AppendLine("✅ Timeline Analysis - File activity reconstruction");
-			reportBuilder.AppendLine("✅ Disk Imaging - Multiple forensic formats supported");
-			reportBuilder.AppendLine("✅ Integrity Verification - Chain of custody maintained");
-			reportBuilder.AppendLine();
-			reportBuilder.AppendLine("This report demonstrates comprehensive forensic capabilities");
-			reportBuilder.AppendLine("suitable for digital investigation and evidence preservation.");
 
 			using (var dialog = new SaveFileDialog())
 			{

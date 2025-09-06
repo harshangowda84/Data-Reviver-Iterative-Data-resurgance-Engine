@@ -16,6 +16,87 @@
 				"$msCompile"
 			],
 			"isBackground": false
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.sln",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.sln /p:Configuration=Release",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build DataReviver.csproj (Debug)",
+			"type": "shell",
+			"command": "msbuild DataReviver\\DataReviver.csproj /p:Configuration=Debug /p:Platform=\"Any CPU\" /verbosity:minimal",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
 		}
 	]
 }
