@@ -50,15 +50,16 @@ namespace DataReviver
             
             headerPanel.Controls.AddRange(new Control[] { logoLabel, subtitleLabel });
             
-            // Info Panel
+            // Info Panel with scrolling
             var infoPanel = new Panel
             {
                 Size = new Size(460, 250),
                 Location = new Point(20, 100),
                 BackColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                AutoScroll = true
             };
-            
+
             var infoText = new Label
             {
                 Text = @"🎓 MCA Final Year Project
@@ -87,9 +88,10 @@ namespace DataReviver
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Color.FromArgb(60, 60, 60),
                 Location = new Point(15, 15),
-                Size = new Size(430, 220)
+                AutoSize = true,
+                MaximumSize = new Size(430, 0)
             };
-            
+
             infoPanel.Controls.Add(infoText);
             
             // Close Button

@@ -162,7 +162,8 @@
     <Compile Include="CaseManager.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AdminWarningDialogForm.cs" />
+  <Compile Include="AdminWarningDialogForm.cs" />
+  <Compile Include="LogoutConfirmDialog.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileSystems\FileSystems.csproj">

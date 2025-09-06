@@ -26,6 +26,8 @@ namespace DataReviver
         {
             InitializeComponent();
             SetupLoginForm();
+            if (MainForm.DRIcon != null)
+                this.Icon = MainForm.DRIcon;
         }
 
         private void SetupLoginForm()

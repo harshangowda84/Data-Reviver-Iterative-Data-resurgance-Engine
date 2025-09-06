@@ -33,6 +33,9 @@ namespace DataReviver {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
+			// Generate DR icon before any forms are shown
+			MainForm.GenerateDRIcon();
+
 			if (IsWindows())
 				AttachConsole(-1);
 

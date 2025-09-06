@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>004AC20C</CaseId>
+  <CaseName><![CDATA[Case_2ef8095d]]></CaseName>
+  <InvestigatorName><![CDATA[harshan]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-01T15:50:25.6080745+05:30</CreatedDate>
+  <LastModified>2025-09-01T15:50:25.6080745+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_004AC20C_Case_2ef8095d]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-01T15:50:25.6110664+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by harshan]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

@@ -20,12 +20,49 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DataReviver;
 
 namespace DataReviver {
 	/// <summary>
 	/// The main form of Kickass Undelete.
 	/// </summary>
 	public partial class MainForm : Form {
+		// Static DR icon for use throughout the app
+		private static Icon _drIcon;
+		public static Icon DRIcon {
+			get {
+				return _drIcon != null ? (Icon)_drIcon.Clone() : null;
+			}
+			private set {
+				_drIcon = value;
+			}
+		}
+		// Call this at app startup to ensure icon is ready for all forms
+		public static void GenerateDRIcon() {
+			try {
+				Bitmap iconBitmap = new Bitmap(32, 32);
+				using (Graphics g = Graphics.FromImage(iconBitmap)) {
+					g.Clear(Color.FromArgb(0, 122, 255));
+					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+					Font font = new Font("Segoe UI", 12, FontStyle.Bold);
+					SizeF textSize = g.MeasureString("DR", font);
+					g.DrawString("DR", font, Brushes.White, (32 - textSize.Width) / 2, (32 - textSize.Height) / 2);
+				}
+				using (var ms = new System.IO.MemoryStream())
+				{
+					iconBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+					using (var bmp = new Bitmap(ms))
+					{
+						IntPtr hIcon = bmp.GetHicon();
+						DRIcon = Icon.FromHandle(hIcon);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error creating DR icon: {ex.Message}");
+			}
+		}
 		IFileSystem _fileSystem;
 		Dictionary<IFileSystem, Scanner> _scanners = new Dictionary<IFileSystem, Scanner>();
 		Dictionary<IFileSystem, DeletedFileViewer> _deletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
@@ -44,7 +81,9 @@ namespace DataReviver {
 			_currentUser = userSession;
 			_currentCase = selectedCase;
 			InitializeComponent();
-			CreateDRIcon();
+			// Icon is now generated at app startup
+			if (DRIcon != null)
+				this.Icon = DRIcon;
 			SetupMenuBar();
 			_caseManager = new CaseManager();
 			ApplyRoleBasedAccess();
@@ -65,37 +104,57 @@ namespace DataReviver {
 		/// </summary>
 		private void CreateDRIcon() {
 			try {
-				// Create a bitmap with the text "DR"
 				Bitmap iconBitmap = new Bitmap(32, 32);
 				using (Graphics g = Graphics.FromImage(iconBitmap)) {
-					// Clear with blue background
 					g.Clear(Color.FromArgb(0, 122, 255));
-					
-					// Set up text rendering
 					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-					
-					// Draw "DR" text in white
 					Font font = new Font("Segoe UI", 12, FontStyle.Bold);
 					SizeF textSize = g.MeasureString("DR", font);
-					float x = (32 - textSize.Width) / 2;
-					float y = (32 - textSize.Height) / 2;
-					
-					g.DrawString("DR", font, Brushes.White, x, y);
-					font.Dispose();
+					g.DrawString("DR", font, Brushes.White, (32 - textSize.Width) / 2, (32 - textSize.Height) / 2);
 				}
-				
-				// Convert bitmap to icon and set it
-				IntPtr hIcon = iconBitmap.GetHicon();
-				Icon drIcon = Icon.FromHandle(hIcon);
-				this.Icon = drIcon;
-				
-				iconBitmap.Dispose();
-			} catch (Exception ex) {
-				Console.WriteLine("Failed to create DR icon: " + ex.Message);
-				// Keep the default icon if creation fails
+				using (var ms = new System.IO.MemoryStream())
+				{
+					iconBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+					using (var bmp = new Bitmap(ms))
+					{
+						IntPtr hIcon = bmp.GetHicon();
+						DRIcon = Icon.FromHandle(hIcon);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error creating DR icon: {ex.Message}");
 			}
 		}
 
+		private void LogoutUser()
+		{
+			using (var confirmDialog = new LogoutConfirmDialog())
+			{
+				var confirmResult = confirmDialog.ShowDialog(this);
+				if (confirmResult == DialogResult.Yes)
+				{
+					// Hide the main form
+					this.Hide();
+					// Show the login form modally
+					using (var loginForm = new NewLoginForm())
+					{
+						var result = loginForm.ShowDialog();
+						if (result == DialogResult.OK && loginForm.DialogResult == DialogResult.OK)
+						{
+							// Optionally, you can re-initialize the main form with the new user
+							Application.Restart();
+						}
+						else
+						{
+							// Exit if login is cancelled
+							Application.Exit();
+						}
+					}
+				}
+			}
+		}
 		private void SetupMenuBar()
 		{
 			var menuStrip = new MenuStrip();
@@ -103,9 +162,6 @@ namespace DataReviver {
 			menuStrip.ForeColor = Color.White;
 			menuStrip.Font = new Font("Segoe UI", 13, FontStyle.Bold);
 			menuStrip.Padding = new Padding(14, 10, 14, 10);
-			menuStrip.Renderer = new EnhancedMenuRenderer();
-			menuStrip.Height = 48;
-			menuStrip.Margin = new Padding(0, 0, 0, 0);
 
 			// File Menu (with icon)
 			var fileMenu = new ToolStripMenuItem("  File");
@@ -116,10 +172,7 @@ namespace DataReviver {
 			fileMenu.DropDownItems.Add("&New Case", null, (s, e) => CreateNewCase());
 			fileMenu.DropDownItems.Add("&Open Case", null, (s, e) => OpenExistingCase());
 			fileMenu.DropDownItems.Add(new ToolStripSeparator());
-			fileMenu.DropDownItems.Add("&Export Report", null, (s, e) => GenerateForensicReport());
-			fileMenu.DropDownItems.Add("&Export Case Report", null, (s, e) => ExportCaseReport());
-			fileMenu.DropDownItems.Add(new ToolStripSeparator());
-			fileMenu.DropDownItems.Add("E&xit", null, (s, e) => this.Close());
+			fileMenu.DropDownItems.Add("Logout", null, (s, e) => LogoutUser());
 
 			// Tools Menu (with icon)
 			var toolsMenu = new ToolStripMenuItem("  Tools");
@@ -127,12 +180,7 @@ namespace DataReviver {
 			toolsMenu.ImageScaling = ToolStripItemImageScaling.None;
 			toolsMenu.Padding = new Padding(12, 0, 12, 0);
 			toolsMenu.ToolTipText = "Forensic tools";
-			toolsMenu.DropDownItems.Add("🔧 Forensic Tools Suite", null, (s, e) => OpenForensicTools());
-			toolsMenu.DropDownItems.Add(new ToolStripSeparator());
-			toolsMenu.DropDownItems.Add("💾 Disk Imager", null, (s, e) => OpenDiskImager());
-			toolsMenu.DropDownItems.Add("🗂 File Carver", null, (s, e) => MessageBox.Show("Feature: Advanced File Carving"));
-			toolsMenu.DropDownItems.Add("#️⃣ Hash Calculator", null, (s, e) => OpenHashCalculator());
-			toolsMenu.DropDownItems.Add("📅 Timeline Analyzer", null, (s, e) => OpenTimelineAnalyzer());
+			toolsMenu.Click += (s, e) => OpenForensicTools();
 
 			// Analysis Menu (with icon)
 			var analysisMenu = new ToolStripMenuItem("  Analysis");
@@ -140,9 +188,6 @@ namespace DataReviver {
 			analysisMenu.ImageScaling = ToolStripItemImageScaling.None;
 			analysisMenu.Padding = new Padding(12, 0, 12, 0);
 			analysisMenu.ToolTipText = "Analysis features";
-			analysisMenu.DropDownItems.Add("⚡ Quick Scan", null, (s, e) => MessageBox.Show("Feature: Quick Recovery Scan"));
-			analysisMenu.DropDownItems.Add("🔬 Deep Scan", null, (s, e) => MessageBox.Show("Feature: Deep Recovery Analysis"));
-			analysisMenu.DropDownItems.Add("🔍 File Signature Analysis", null, (s, e) => OpenFileSignatureAnalysis());
 			analysisMenu.DropDownItems.Add(new ToolStripSeparator());
 			analysisMenu.DropDownItems.Add("📊 Generate Forensic Report", null, (s, e) => GenerateForensicReport());
 
@@ -152,7 +197,6 @@ namespace DataReviver {
 			helpMenu.ImageScaling = ToolStripItemImageScaling.None;
 			helpMenu.Padding = new Padding(12, 0, 12, 0);
 			helpMenu.ToolTipText = "Help and documentation";
-			helpMenu.DropDownItems.Add("📖 User Guide", null, (s, e) => MessageBox.Show("Feature: User Documentation"));
 			helpMenu.DropDownItems.Add("🧰 Forensic Tools Help", null, (s, e) => OpenForensicHelp());
 			helpMenu.DropDownItems.Add("ℹ️ About", null, (s, e) => new AboutDialog().ShowDialog(this));
 
@@ -374,6 +418,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			foreach (Scanner state in _scanners.Values) {
 				state.CancelScan();
 			}
+			// Default close behavior: exit application
+			Application.Exit();
 		}
 
 		private void diskTree_BeforeSelect(object sender, TreeViewCancelEventArgs e) {

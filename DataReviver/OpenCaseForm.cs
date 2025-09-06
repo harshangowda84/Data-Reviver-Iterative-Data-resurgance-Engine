@@ -24,6 +24,8 @@ namespace DataReviver
         public OpenCaseForm()
         {
             InitializeComponent();
+            if (MainForm.DRIcon != null)
+                this.Icon = MainForm.DRIcon;
         }
 
         private void InitializeComponent()

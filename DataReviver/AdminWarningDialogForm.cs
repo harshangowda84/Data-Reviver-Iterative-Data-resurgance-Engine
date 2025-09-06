@@ -17,6 +17,8 @@ namespace DataReviver
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.BackColor = Color.FromArgb(245, 247, 251);
+            if (MainForm.DRIcon != null)
+                this.Icon = MainForm.DRIcon;
 
             var icon = new PictureBox
             {
