@@ -106,7 +106,7 @@ namespace DataReviver
             loginPanel.Padding = new Padding(0);
             loginPanel.Margin = new Padding(20, 20, 40, 20);
             var loginLayout = new TableLayoutPanel();
-            loginLayout.RowCount = 7;
+            loginLayout.RowCount = 8;
             loginLayout.ColumnCount = 2;
             loginLayout.Dock = DockStyle.Fill;
             loginLayout.BackColor = Color.Transparent;
@@ -119,8 +119,26 @@ namespace DataReviver
             loginLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); // Username
             loginLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); // Password
             loginLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Show password
+            loginLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Remember me
             loginLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Buttons
             loginLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Filler
+            // Autofill button
+            btnAutofill = new Button();
+            btnAutofill.Text = "Autofill";
+            btnAutofill.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
+            btnAutofill.Dock = DockStyle.Left;
+            btnAutofill.AutoSize = true;
+            btnAutofill.BackColor = Color.FromArgb(230, 230, 230);
+            btnAutofill.ForeColor = Color.Black;
+            btnAutofill.FlatStyle = FlatStyle.Flat;
+            btnAutofill.FlatAppearance.BorderSize = 0;
+            btnAutofill.Click += (s, e) => {
+                txtUsername.Text = "admin";
+                txtPassword.Text = "forensic123";
+                BtnLogin_Click(btnAutofill, EventArgs.Empty);
+            };
+            loginLayout.Controls.Add(new Label(), 0, 5); // Empty cell for alignment
+            loginLayout.Controls.Add(btnAutofill, 1, 5);
 
             // Spacer row
             loginLayout.Controls.Add(new Label(), 0, 0);
@@ -237,8 +255,8 @@ namespace DataReviver
             btnExit.FlatAppearance.MouseOverBackColor = Color.FromArgb(180, 40, 50);
             btnExit.FlatAppearance.MouseDownBackColor = Color.FromArgb(150, 30, 40);
             btnExit.Click += BtnExit_Click;
-            loginLayout.Controls.Add(btnLogin, 0, 5);
-            loginLayout.Controls.Add(btnExit, 1, 5);
+            loginLayout.Controls.Add(btnLogin, 0, 6);
+            loginLayout.Controls.Add(btnExit, 1, 6);
             loginPanel.Controls.Add(loginLayout);
             contentLayout.Controls.Add(loginPanel, 1, 0);
             mainLayout.Controls.Add(contentLayout, 0, 1);
@@ -252,8 +270,8 @@ namespace DataReviver
             mainLayout.Controls.Add(footerLabel, 0, 2);
             this.Controls.Clear();
             this.Controls.Add(mainLayout);
-            // Focus on username
-            txtUsername.Focus();
+            // Always focus on username after loading settings
+            this.Shown += (s, e) => txtUsername.Focus();
             // Remove AcceptButton so Enter in username only moves focus to password
         }
 
@@ -269,10 +287,18 @@ namespace DataReviver
             }
         }
 
-        private void BtnLogin_Click(object sender, EventArgs e)
+    private Button btnAutofill;
+
+    private void BtnLogin_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text;
+            // Save login details for autofill
+            try {
+                Properties.Settings.Default["SavedUsername"] = username;
+                Properties.Settings.Default["SavedPassword"] = password;
+                Properties.Settings.Default.Save();
+            } catch {}
 
             // Simple authentication (you can enhance this)
             var userInfo = ValidateCredentials(username, password);

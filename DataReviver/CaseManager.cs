@@ -436,15 +436,17 @@ namespace DataReviver
 
         public NewCaseDialog()
         {
+            if (MainForm.DRIcon != null)
+                this.Icon = MainForm.DRIcon;
             this.Text = "Create New Case";
-            this.Size = new System.Drawing.Size(520, 480);
+            this.Size = new System.Drawing.Size(560, 520);
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.BackColor = System.Drawing.Color.FromArgb(245, 247, 251);
 
             var cardPanel = new Panel {
-                Location = new System.Drawing.Point(30, 40),
+                Location = new System.Drawing.Point(50, 60),
                 Size = new System.Drawing.Size(460, 380),
                 BackColor = System.Drawing.Color.White,
                 BorderStyle = BorderStyle.None
@@ -452,12 +454,9 @@ namespace DataReviver
             cardPanel.Paint += (s, e) => {
                 var g = e.Graphics;
                 var rect = cardPanel.ClientRectangle;
-                rect.Inflate(-1, -1);
-                using (var shadow = new System.Drawing.Drawing2D.GraphicsPath()) {
-                    shadow.AddRectangle(rect);
-                    using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(rect, System.Drawing.Color.FromArgb(30, 0, 0, 0), System.Drawing.Color.Transparent, 90F)) {
-                        g.FillPath(brush, shadow);
-                    }
+                using (var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(160, 160, 160), 1))
+                {
+                    g.DrawRectangle(pen, rect.X, rect.Y, rect.Width - 1, rect.Height - 1);
                 }
             };
 

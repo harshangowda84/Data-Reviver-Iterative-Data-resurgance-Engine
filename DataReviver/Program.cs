@@ -48,50 +48,51 @@ namespace DataReviver {
 			}
 
 			// Show new login form first
-			using (var loginForm = new NewLoginForm())
+			bool loggedIn = false;
+			while (!loggedIn)
 			{
-				var result = loginForm.ShowDialog();
-				if (result == DialogResult.OK && loginForm.LoginSuccessful)
+				using (var loginForm = new NewLoginForm())
 				{
-					// Show improved case prompt form instead of MessageBox
-					DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
-					DataReviver.ForensicCase selectedCase = null;
-					DialogResult caseResult = DialogResult.None;
-					while (selectedCase == null && caseResult != DialogResult.Cancel)
+					var result = loginForm.ShowDialog();
+					if (result == DialogResult.OK && loginForm.LoginSuccessful)
 					{
-						var casePrompt = new CasePromptForm();
-						var promptResult = casePrompt.ShowDialog();
-						if (promptResult == DialogResult.Yes)
+						// Show improved case prompt form instead of MessageBox
+						DataReviver.CaseManager caseManager = new DataReviver.CaseManager();
+						DataReviver.ForensicCase selectedCase = null;
+						DialogResult caseResult = DialogResult.None;
+						while (selectedCase == null && caseResult != DialogResult.Cancel)
 						{
-							selectedCase = caseManager.CreateNewCase();
-							if (selectedCase == null) continue; // If cancelled, show case prompt again
-							caseResult = DialogResult.OK;
+							var casePrompt = new CasePromptForm();
+							var promptResult = casePrompt.ShowDialog();
+							if (promptResult == DialogResult.Yes)
+							{
+								selectedCase = caseManager.CreateNewCase();
+								if (selectedCase == null) continue; // If cancelled, show case prompt again
+								caseResult = DialogResult.OK;
+							}
+							else if (promptResult == DialogResult.No)
+							{
+								selectedCase = caseManager.OpenExistingCase();
+								if (selectedCase == null) continue; // If cancelled, show case prompt again
+								caseResult = DialogResult.OK;
+							}
+							else
+							{
+								caseResult = DialogResult.Cancel;
+							}
 						}
-						else if (promptResult == DialogResult.No)
+						if (selectedCase != null)
 						{
-							selectedCase = caseManager.OpenExistingCase();
-							if (selectedCase == null) continue; // If cancelled, show case prompt again
-							caseResult = DialogResult.OK;
+							Application.Run(new MainForm(loginForm.CurrentUser, selectedCase));
+							loggedIn = true;
 						}
-						else
-						{
-							caseResult = DialogResult.Cancel;
-						}
-					}
-					if (selectedCase != null)
-					{
-						Application.Run(new MainForm(loginForm.CurrentUser, selectedCase));
+						// If Back pressed (DialogResult.Cancel), loop to show login again
 					}
 					else
 					{
-						// No case selected, exit
+						// Login failed or cancelled, exit application
 						Environment.Exit(0);
 					}
-				}
-				else
-				{
-					// Login failed or cancelled, exit application
-					Environment.Exit(0);
 				}
 			}
 		}

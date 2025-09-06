@@ -12,12 +12,14 @@ namespace DataReviver
 {
     public partial class RealForensicTools : Form
     {
-        private TabControl _tabControl;
-        private string _selectedFilePath;
+    private TabControl _tabControl;
+    private ImageList _tabIcons;
+    private string _selectedFilePath;
 
         public RealForensicTools()
         {
             InitializeComponent();
+            SetupTabIcons();
             SetupTabs();
         }
 
@@ -34,30 +36,57 @@ namespace DataReviver
             _tabControl = new TabControl
             {
                 Dock = DockStyle.Fill,
-                Font = new Font("Segoe UI", 10)
+                Font = new Font("Segoe UI", 10),
+                ImageList = _tabIcons
             };
 
             // File Information Tab
-            var infoTab = new TabPage("📁 File Information");
+            var infoTab = new TabPage("File Information") { ImageIndex = 0 };
             SetupFileInfoTab(infoTab);
             _tabControl.TabPages.Add(infoTab);
 
             // Hash Calculator Tab
-            var hashTab = new TabPage("🔐 Hash Calculator");
+            var hashTab = new TabPage("Hash Calculator") { ImageIndex = 1 };
             SetupHashTab(hashTab);
             _tabControl.TabPages.Add(hashTab);
 
             // File Content Viewer Tab
-            var contentTab = new TabPage("📄 Content Viewer");
+            var contentTab = new TabPage("Content Viewer") { ImageIndex = 2 };
             SetupContentTab(contentTab);
             _tabControl.TabPages.Add(contentTab);
 
             // File Type Detector Tab
-            var typeTab = new TabPage("🔍 File Type Detector");
+            var typeTab = new TabPage("File Type Detector") { ImageIndex = 3 };
             SetupFileTypeTab(typeTab);
             _tabControl.TabPages.Add(typeTab);
 
             this.Controls.Add(_tabControl);
+
+        }
+
+        private void SetupTabIcons()
+        {
+            _tabIcons = new ImageList();
+            _tabIcons.ImageSize = new Size(20, 20);
+            _tabIcons.Images.Add(CreateTabIcon("📄")); // File Info
+            _tabIcons.Images.Add(CreateTabIcon("#")); // Hash
+            _tabIcons.Images.Add(CreateTabIcon("👁️")); // Viewer
+            _tabIcons.Images.Add(CreateTabIcon("🔍")); // Type Detector
+        }
+
+        // Helper to create a bitmap icon from emoji
+        private Bitmap CreateTabIcon(string emoji)
+        {
+            Bitmap bmp = new Bitmap(20, 20);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Transparent);
+                using (Font font = new Font("Segoe UI Emoji", 13, FontStyle.Regular, GraphicsUnit.Pixel))
+                {
+                    g.DrawString(emoji, font, Brushes.Black, -2, 0);
+                }
+            }
+            return bmp;
         }
 
         private void SetupFileInfoTab(TabPage tab)
