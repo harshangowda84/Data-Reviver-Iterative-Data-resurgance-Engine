@@ -247,7 +247,7 @@ namespace DataReviver
                         if (caseObj != null)
                         {
                             cases.Add(caseObj);
-                            caseListBox.Items.Add($"Case_{caseObj.CaseId} (ID: {caseObj.CaseId})");
+                            caseListBox.Items.Add($"{caseObj.CaseName} (ID: {caseObj.CaseId})");
                         }
                     }
                     catch { /* Ignore invalid case files */ }
@@ -314,7 +314,7 @@ namespace DataReviver
                     (c.CaseName != null && c.CaseName.ToLower().Contains(query)) ||
                     (c.CaseId != null && c.CaseId.ToLower().Contains(query)))
                 {
-                    caseListBox.Items.Add($"Case_{c.CaseId} (ID: {c.CaseId})");
+                    caseListBox.Items.Add($"{c.CaseName} (ID: {c.CaseId})");
                 }
             }
         }

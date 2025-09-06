@@ -588,6 +588,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 			}
 
 			reportBuilder.AppendLine();
+			reportBuilder.AppendLine("This report demonstrates comprehensive forensic capabilities");
+			reportBuilder.AppendLine("suitable for digital investigation and evidence preservation.");
 
 			using (var dialog = new SaveFileDialog())
 			{
