@@ -177,8 +177,7 @@ namespace DataReviver {
 			fileMenu.ImageScaling = ToolStripItemImageScaling.None;
 			fileMenu.Padding = new Padding(12, 0, 12, 0);
 			fileMenu.ToolTipText = "File operations";
-			fileMenu.DropDownItems.Add("&New Case", null, (s, e) => CreateNewCase());
-			fileMenu.DropDownItems.Add("&Open Case", null, (s, e) => OpenExistingCase());
+			// Removed 'New Case' and 'Open Case' from File menu as requested
 			fileMenu.DropDownItems.Add(new ToolStripSeparator());
 			fileMenu.DropDownItems.Add("Logout", null, (s, e) => LogoutUser());
 

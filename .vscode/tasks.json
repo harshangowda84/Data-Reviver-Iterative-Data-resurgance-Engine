@@ -97,6 +97,24 @@
 				"$msCompile"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Run DataReviver",
+			"type": "shell",
+			"command": "DataReviver\\bin\\Release\\DataReviver.exe",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Run DataReviver",
+			"type": "shell",
+			"command": "DataReviver\\bin\\Release\\DataReviver.exe",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }
