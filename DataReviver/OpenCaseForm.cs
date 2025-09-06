@@ -37,6 +37,7 @@ namespace DataReviver
             this.MaximizeBox = false;
             this.BackColor = Color.FromArgb(245, 247, 251);
 
+
             var headerLabel = new Label
             {
                 Text = "Open Existing Case",
@@ -219,6 +220,7 @@ namespace DataReviver
             cardPanel.Controls.Add(detailsLabel);
             cardPanel.Controls.Add(openCaseButton);
             cardPanel.Controls.Add(deleteCaseButton);
+
 
             this.Controls.Add(headerLabel);
             this.Controls.Add(backButton);
