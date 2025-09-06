@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ForensicCase>
+  <CaseId>00600E47</CaseId>
+  <CaseName><![CDATA[Datareviver]]></CaseName>
+  <InvestigatorName><![CDATA[Harshan]]></InvestigatorName>
+  <Description><![CDATA[Enter case description...]]></Description>
+  <CreatedDate>2025-09-06T23:59:50.0240067+05:30</CreatedDate>
+  <LastModified>2025-09-06T23:59:50.0240067+05:30</LastModified>
+  <Status>Active</Status>
+  <CaseFolderPath><![CDATA[ForensicCases\CASE_00600E47_Datareviver]]></CaseFolderPath>
+  <Evidence>
+  </Evidence>
+  <Notes>
+    <Note>
+      <Timestamp>2025-09-06T23:59:50.0250147+05:30</Timestamp>
+      <Author><![CDATA[Harshan]]></Author>
+      <Content><![CDATA[Case created by Harshan]]></Content>
+    </Note>
+  </Notes>
+</ForensicCase>

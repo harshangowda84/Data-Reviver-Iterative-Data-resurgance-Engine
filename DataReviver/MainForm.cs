@@ -1,4 +1,5 @@
-﻿// Copyright (C) 2017  Joey Scarr, Lukas Korsika
+﻿
+
 // Copyright (C) 2017  Joey Scarr, Lukas Korsika
 //
 // This program is free software: you can redistribute it and/or modify
@@ -27,6 +28,7 @@ namespace DataReviver {
 	/// <summary>
 	/// The main form of Kickass Undelete.
 	/// </summary>
+
 	public partial class MainForm : Form {
 		// Static DR icon for use throughout the app
 		private static Icon _drIcon;
@@ -37,7 +39,7 @@ namespace DataReviver {
 			private set {
 				_drIcon = value;
 			}
-		}
+			}
 
 		// Forensic Report menu item and scan results storage
 		private ToolStripMenuItem _generateReportMenuItem;
@@ -71,13 +73,13 @@ namespace DataReviver {
 		IFileSystem _fileSystem;
 		Dictionary<IFileSystem, Scanner> _scanners = new Dictionary<IFileSystem, Scanner>();
 		Dictionary<IFileSystem, DeletedFileViewer> _deletedViewers = new Dictionary<IFileSystem, DeletedFileViewer>();
-	private CaseManager _caseManager;
-	private UserSession _currentUser;
-	private ForensicCase _currentCase;
-	// Refresh Drives button animation state
-	private bool _isRefreshingDrives = false;
-	private Timer _refreshDrivesTimer;
-	private int _refreshAnimationStep = 0;
+		private CaseManager _caseManager;
+		private UserSession _currentUser;
+		private ForensicCase _currentCase;
+		// Refresh Drives button animation state
+		private bool _isRefreshingDrives = false;
+		private Timer _refreshDrivesTimer;
+		private int _refreshAnimationStep = 0;
 
 		/// <summary>
 		/// Constructs the main form.
@@ -200,18 +202,76 @@ namespace DataReviver {
 			_generateReportMenuItem.Enabled = false; // Disabled by default
 			analysisMenu.DropDownItems.Add(_generateReportMenuItem);
 
+			// Add submenu for viewing report and recovered files
+			var viewReportMenu = new ToolStripMenuItem("📄 View Case Report");
+			viewReportMenu.Click += new EventHandler(ViewReportMenu_Click);
+			var openRecoveredMenu = new ToolStripMenuItem("📁 Open Recovered Files");
+			openRecoveredMenu.Click += new EventHandler(OpenRecoveredMenu_Click);
+			var reportSubMenu = new ToolStripMenuItem("🗂️ Case Artifacts");
+			reportSubMenu.DropDownItems.Add(viewReportMenu);
+			reportSubMenu.DropDownItems.Add(openRecoveredMenu);
+
+			analysisMenu.DropDownItems.Add(reportSubMenu);
+
 			// Help Menu (with icon)
 			var helpMenu = new ToolStripMenuItem("  Help");
 			helpMenu.Image = new Bitmap(SystemIcons.Question.ToBitmap(), new Size(28, 28));
 			helpMenu.ImageScaling = ToolStripItemImageScaling.None;
 			helpMenu.Padding = new Padding(12, 0, 12, 0);
 			helpMenu.ToolTipText = "Help and documentation";
-			helpMenu.DropDownItems.Add("🧰 Forensic Tools Help", null, (s, e) => OpenForensicHelp());
-			helpMenu.DropDownItems.Add("ℹ️ About", null, (s, e) => new AboutDialog().ShowDialog(this));
+			helpMenu.DropDownItems.Add("🧰 Forensic Tools Help", null, (ss, ee) => OpenForensicHelp());
+			helpMenu.DropDownItems.Add("ℹ️ About", null, (ss, ee) => new AboutDialog().ShowDialog(this));
 
 			menuStrip.Items.AddRange(new ToolStripItem[] { fileMenu, toolsMenu, analysisMenu, helpMenu });
 			this.MainMenuStrip = menuStrip;
 			this.Controls.Add(menuStrip);
+		}
+
+
+		// Event handler for View Case Report menu
+		private void ViewReportMenu_Click(object sender, EventArgs e)
+		{
+			if (_currentCase == null || string.IsNullOrEmpty(_currentCase.CaseFolderPath))
+			{
+				MessageBox.Show("No case is currently open.", "No Active Case", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+			string reportDir = System.IO.Path.Combine(_currentCase.CaseFolderPath, "report");
+			if (!System.IO.Directory.Exists(reportDir))
+			{
+				MessageBox.Show("No report folder found for this case.", "No Reports", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+			var reports = System.IO.Directory.GetFiles(reportDir, "ForensicReport_*.txt");
+			if (reports.Length == 0)
+			{
+				MessageBox.Show("No reports found for this case.", "No Reports", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+			// Get the latest report by file creation time
+			string latestReport = reports.OrderByDescending(f => System.IO.File.GetCreationTime(f)).First();
+			string reportText = System.IO.File.ReadAllText(latestReport);
+			using (var viewer = new ReportViewerDialog(reportText, latestReport))
+			{
+				viewer.ShowDialog(this);
+			}
+		}
+
+		// Event handler for Open Recovered Files menu
+		private void OpenRecoveredMenu_Click(object sender, EventArgs e)
+		{
+			if (_currentCase == null || string.IsNullOrEmpty(_currentCase.CaseFolderPath))
+			{
+				MessageBox.Show("No case is currently open.", "No Active Case", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+			string recoveredDir = System.IO.Path.Combine(_currentCase.CaseFolderPath, "recovered");
+			if (!System.IO.Directory.Exists(recoveredDir))
+			{
+				MessageBox.Show("No recovered files found for this case.", "No Recovered Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+			System.Diagnostics.Process.Start("explorer.exe", recoveredDir);
 		}
 
 		// Enhanced renderer for modern menu bar
