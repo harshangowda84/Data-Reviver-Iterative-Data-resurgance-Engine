@@ -36,16 +36,71 @@ namespace DataReviver
             this.MaximizeBox = false;
         }
 
+    // Removed modern button bar and tool buttons
+
         private void SetupTabs()
         {
+            // Create TabControl as before
             _tabControl = new TabControl
             {
-                Location = new Point(0, 56), // below header bar
+                Location = new Point(0, 56), // directly below header
                 Size = new Size(this.ClientSize.Width, this.ClientSize.Height - 56),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                Font = new Font("Segoe UI", 10),
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
                 ImageList = _tabIcons,
-                Appearance = TabAppearance.Normal
+                Appearance = TabAppearance.Normal,
+                DrawMode = TabDrawMode.OwnerDrawFixed,
+                ItemSize = new Size(180, 38)
+            };
+
+            int hoveredTab = -1;
+            _tabControl.MouseMove += (s, e) =>
+            {
+                for (int i = 0; i < _tabControl.TabCount; i++)
+                {
+                    if (_tabControl.GetTabRect(i).Contains(e.Location))
+                    {
+                        if (hoveredTab != i)
+                        {
+                            hoveredTab = i;
+                            _tabControl.Invalidate();
+                        }
+                        return;
+                    }
+                }
+                if (hoveredTab != -1)
+                {
+                    hoveredTab = -1;
+                    _tabControl.Invalidate();
+                }
+            };
+            _tabControl.MouseLeave += (s, e) => { if (hoveredTab != -1) { hoveredTab = -1; _tabControl.Invalidate(); } };
+
+            // Keyboard focus/arrow navigation support for hover effect
+            _tabControl.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+                {
+                    _tabControl.Invalidate();
+                }
+            };
+            _tabControl.GotFocus += (s, e) => { _tabControl.Invalidate(); };
+            _tabControl.LostFocus += (s, e) => { _tabControl.Invalidate(); };
+
+            _tabControl.DrawItem += (s, e) =>
+            {
+                var g = e.Graphics;
+                var tabPage = _tabControl.TabPages[e.Index];
+                var rect = e.Bounds;
+                bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+                bool hovered = (e.Index == hoveredTab);
+                bool focused = (_tabControl.Focused && e.Index == _tabControl.SelectedIndex);
+                Color backColor = selected ? Color.White : (hovered || focused) ? Color.FromArgb(0, 122, 255) : Color.FromArgb(245, 249, 255);
+                Color foreColor = selected ? Color.FromArgb(0, 122, 255) : (hovered || focused) ? Color.White : Color.FromArgb(80, 80, 80);
+                using (var b = new SolidBrush(backColor)) g.FillRectangle(b, rect);
+                TextRenderer.DrawText(g, tabPage.Text, _tabControl.Font, rect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                if (selected)
+                    g.DrawRectangle(new Pen(Color.FromArgb(0, 122, 255), 2), rect.X, rect.Y, rect.Width - 1, rect.Height - 1);
             };
 
             // File Information Tab
@@ -68,10 +123,11 @@ namespace DataReviver
             SetupFileTypeTab(typeTab);
             _tabControl.TabPages.Add(typeTab);
 
-            // Use default tab rendering (no icons, just text)
+            // Removed SetupButtonBar();
 
             this.Controls.Add(_tabControl);
         }
+
 
         // Add a colored header bar with app name and icon
         private void SetupHeaderBar()
@@ -140,284 +196,200 @@ namespace DataReviver
         private void SetupFileInfoTab(TabPage tab)
         {
             var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
-            int marginLeft = 32;
-            int marginTop = 18;
-            int buttonSpacing = 32;
-            int buttonWidth = 180;
-            int buttonHeight = 44;
-            Font buttonFont = new Font("Segoe UI", 10F, FontStyle.Bold);
-            Color buttonBack = Color.FromArgb(0, 122, 255);
-            Color buttonFore = Color.White;
-
-            var selectButton = new Button
-            {
-                Text = "Select File",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            selectButton.FlatAppearance.BorderSize = 0;
-            selectButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            selectButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
-            var clearButton = new Button
-            {
-                Text = "Clear",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft + buttonWidth + buttonSpacing, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            clearButton.FlatAppearance.BorderSize = 0;
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            clearButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
             var pathLabel = new Label
             {
                 Text = "No file selected",
-                Location = new Point(marginLeft, marginTop + buttonHeight + 8),
+                Location = new Point(280, 18),
                 Size = new Size(600, 20),
                 ForeColor = Color.Gray
             };
-
+            var selectFileButton = new Button
+            {
+                Text = "Select File",
+                Location = new Point(32, 12),
+                Size = new Size(110, 36),
+                BackColor = Color.FromArgb(0, 122, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            selectFileButton.FlatAppearance.BorderSize = 0;
+            var clearButton = new Button
+            {
+                Text = "Clear",
+                Location = new Point(150, 12),
+                Size = new Size(90, 36),
+                BackColor = Color.FromArgb(220, 53, 69), // Red
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            clearButton.FlatAppearance.BorderSize = 0;
+            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
-                Location = new Point(10, marginTop + buttonHeight + 40),
+                Location = new Point(10, 50),
                 Size = new Size(960, 540),
                 Font = new Font("Consolas", 10),
                 ReadOnly = true,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            selectButton.Click += (s, e) => SelectFile(pathLabel, resultsText, AnalyzeFileInfo);
-            clearButton.Click += (s, e) => { resultsText.Clear(); pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; _selectedFilePath = null; };
-
-            panel.Controls.AddRange(new Control[] { selectButton, clearButton, pathLabel, resultsText });
+            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, AnalyzeFileInfo);
+            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
 
         private void SetupHashTab(TabPage tab)
         {
             var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
-            int marginLeft = 32;
-            int marginTop = 18;
-            int buttonSpacing = 32;
-            int buttonWidth = 180;
-            int buttonHeight = 44;
-            Font buttonFont = new Font("Segoe UI", 10F, FontStyle.Bold);
-            Color buttonBack = Color.FromArgb(0, 122, 255);
-            Color buttonFore = Color.White;
-
-            var selectButton = new Button
-            {
-                Text = "Select File",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            selectButton.FlatAppearance.BorderSize = 0;
-            selectButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            selectButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
-            var clearButton = new Button
-            {
-                Text = "Clear",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft + buttonWidth + buttonSpacing, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            clearButton.FlatAppearance.BorderSize = 0;
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            clearButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
             var pathLabel = new Label
             {
                 Text = "No file selected",
-                Location = new Point(marginLeft, marginTop + buttonHeight + 8),
+                Location = new Point(280, 18),
                 Size = new Size(600, 20),
                 ForeColor = Color.Gray
             };
-
+            var selectFileButton = new Button
+            {
+                Text = "Select File",
+                Location = new Point(32, 12),
+                Size = new Size(110, 36),
+                BackColor = Color.FromArgb(0, 122, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            selectFileButton.FlatAppearance.BorderSize = 0;
+            var clearButton = new Button
+            {
+                Text = "Clear",
+                Location = new Point(150, 12),
+                Size = new Size(90, 36),
+                BackColor = Color.FromArgb(220, 53, 69), // Red
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            clearButton.FlatAppearance.BorderSize = 0;
+            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
-                Location = new Point(10, marginTop + buttonHeight + 40),
+                Location = new Point(10, 50),
                 Size = new Size(960, 540),
                 Font = new Font("Consolas", 10),
                 ReadOnly = true,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            selectButton.Click += (s, e) => SelectFile(pathLabel, resultsText, CalculateRealHashes);
-            clearButton.Click += (s, e) => { resultsText.Clear(); pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; _selectedFilePath = null; };
-
-            panel.Controls.AddRange(new Control[] { selectButton, clearButton, pathLabel, resultsText });
+            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, CalculateRealHashes);
+            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
 
         private void SetupContentTab(TabPage tab)
         {
             var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
-            int marginLeft = 32;
-            int marginTop = 18;
-            int buttonSpacing = 32;
-            int buttonWidth = 180;
-            int buttonHeight = 44;
-            Font buttonFont = new Font("Segoe UI", 10F, FontStyle.Bold);
-            Color buttonBack = Color.FromArgb(0, 122, 255);
-            Color buttonFore = Color.White;
-
-            var selectButton = new Button
-            {
-                Text = "Select File",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            selectButton.FlatAppearance.BorderSize = 0;
-            selectButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            selectButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
-            var clearButton = new Button
-            {
-                Text = "Clear",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft + buttonWidth + buttonSpacing, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            clearButton.FlatAppearance.BorderSize = 0;
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            clearButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
             var pathLabel = new Label
             {
                 Text = "No file selected",
-                Location = new Point(marginLeft, marginTop + buttonHeight + 8),
+                Location = new Point(280, 18),
                 Size = new Size(600, 20),
                 ForeColor = Color.Gray
             };
-
+            var selectFileButton = new Button
+            {
+                Text = "Select File",
+                Location = new Point(32, 12),
+                Size = new Size(110, 36),
+                BackColor = Color.FromArgb(0, 122, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            selectFileButton.FlatAppearance.BorderSize = 0;
+            var clearButton = new Button
+            {
+                Text = "Clear",
+                Location = new Point(150, 12),
+                Size = new Size(90, 36),
+                BackColor = Color.FromArgb(220, 53, 69), // Red
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            clearButton.FlatAppearance.BorderSize = 0;
+            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
-                Location = new Point(10, marginTop + buttonHeight + 40),
+                Location = new Point(10, 50),
                 Size = new Size(960, 540),
                 Font = new Font("Consolas", 9),
                 ReadOnly = true,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            selectButton.Click += (s, e) => SelectFile(pathLabel, resultsText, ViewFileContent);
-            clearButton.Click += (s, e) => { resultsText.Clear(); pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; _selectedFilePath = null; };
-
-            panel.Controls.AddRange(new Control[] { selectButton, clearButton, pathLabel, resultsText });
+            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, ViewFileContent);
+            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
 
         private void SetupFileTypeTab(TabPage tab)
         {
             var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
-            int marginLeft = 32;
-            int marginTop = 18;
-            int buttonSpacing = 32;
-            int buttonWidth = 180;
-            int buttonHeight = 44;
-            Font buttonFont = new Font("Segoe UI", 10F, FontStyle.Bold);
-            Color buttonBack = Color.FromArgb(0, 122, 255);
-            Color buttonFore = Color.White;
-
-            var selectButton = new Button
-            {
-                Text = "Select File",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            selectButton.FlatAppearance.BorderSize = 0;
-            selectButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            selectButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
-            var clearButton = new Button
-            {
-                Text = "Clear",
-                Size = new Size(buttonWidth, buttonHeight),
-                Location = new Point(marginLeft + buttonWidth + buttonSpacing, marginTop),
-                BackColor = buttonBack,
-                ForeColor = buttonFore,
-                FlatStyle = FlatStyle.Flat,
-                Font = buttonFont,
-                Cursor = Cursors.Hand,
-                Padding = new Padding(8, 6, 8, 6),
-                TabStop = false
-            };
-            clearButton.FlatAppearance.BorderSize = 0;
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 170, 255);
-            clearButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 100, 200);
-
             var pathLabel = new Label
             {
                 Text = "No file selected",
-                Location = new Point(marginLeft, marginTop + buttonHeight + 8),
+                Location = new Point(280, 18),
                 Size = new Size(600, 20),
                 ForeColor = Color.Gray
             };
-
+            var selectFileButton = new Button
+            {
+                Text = "Select File",
+                Location = new Point(32, 12),
+                Size = new Size(110, 36),
+                BackColor = Color.FromArgb(0, 122, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            selectFileButton.FlatAppearance.BorderSize = 0;
+            var clearButton = new Button
+            {
+                Text = "Clear",
+                Location = new Point(150, 12),
+                Size = new Size(90, 36),
+                BackColor = Color.FromArgb(220, 53, 69), // Red
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            clearButton.FlatAppearance.BorderSize = 0;
+            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
-                Location = new Point(10, marginTop + buttonHeight + 40),
+                Location = new Point(10, 50),
                 Size = new Size(960, 540),
                 Font = new Font("Consolas", 10),
                 ReadOnly = true,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            selectButton.Click += (s, e) => SelectFile(pathLabel, resultsText, DetectFileType);
-            clearButton.Click += (s, e) => { resultsText.Clear(); pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; _selectedFilePath = null; };
-
-            panel.Controls.AddRange(new Control[] { selectButton, clearButton, pathLabel, resultsText });
+            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, DetectFileType);
+            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
 
