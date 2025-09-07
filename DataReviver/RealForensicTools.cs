@@ -15,20 +15,25 @@ namespace DataReviver
     private TabControl _tabControl;
     private ImageList _tabIcons;
     private string _selectedFilePath;
+    private readonly string _caseFolderPath;
 
-        public RealForensicTools()
+
+        public RealForensicTools(string caseFolderPath = null)
         {
+            _caseFolderPath = caseFolderPath;
             InitializeComponent();
             if (MainForm.DRIcon != null)
                 this.Icon = MainForm.DRIcon;
             SetupTabIcons();
             SetupTabs();
             SetupHeaderBar();
+            // Force window title in case something resets it
+            this.Text = "Data Reviver - Forensic Tools Dashboard";
         }
 
         private void InitializeComponent()
         {
-            this.Text = "Data Reviver - Working Forensic Tools";
+            this.Text = "Data Reviver - Forensic Tools Dashboard";
             this.Size = new Size(1000, 700);
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = Color.FromArgb(240, 248, 255);
@@ -134,7 +139,7 @@ namespace DataReviver
         {
             var headerPanel = new Panel
             {
-                Height = 56,
+                Height = 57, // Reduced height for a more compact header
                 Dock = DockStyle.Top,
                 BackColor = Color.FromArgb(0, 122, 255)
             };
@@ -153,16 +158,49 @@ namespace DataReviver
                 headerPanel.Controls.Add(drIconBox);
             }
 
+
+            // Show case name and ID if available
+            string caseName = "";
+            string caseId = "";
+            if (!string.IsNullOrEmpty(_caseFolderPath))
+            {
+                // Try to extract case name and id from folder path (format: ...\CASE_<ID>_<Name>\)
+                var folder = new DirectoryInfo(_caseFolderPath);
+                var folderName = folder.Name;
+                if (folderName.StartsWith("CASE_") && folderName.Length > 10)
+                {
+                    int firstUnderscore = folderName.IndexOf('_', 5);
+                    if (firstUnderscore > 5)
+                    {
+                        caseId = folderName.Substring(5, firstUnderscore - 5);
+                        caseName = folderName.Substring(firstUnderscore + 1);
+                    }
+                }
+            }
+
             var titleLabel = new Label
             {
-                Text = "Forensic Toolkit",
-                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
+                Text = "Forensic Tools Dashboard",
+                Font = new Font("Segoe UI", 15F, FontStyle.Bold), // Smaller font
                 ForeColor = Color.White,
-                Location = new Point(64, 12),
+                Location = new Point(64, 8),
                 AutoSize = true,
                 BackColor = Color.Transparent
             };
             headerPanel.Controls.Add(titleLabel);
+
+            // Place case info label below the title label
+            var caseInfoLabel = new Label
+            {
+                Text = (string.IsNullOrEmpty(caseName) || string.IsNullOrEmpty(caseId)) ? "" : $"Case: {caseName} (ID: {caseId})",
+                Font = new Font("Segoe UI", 9F, FontStyle.Regular), // Smaller font
+                ForeColor = Color.White,
+                AutoSize = true,
+                BackColor = Color.Transparent
+            };
+            // Add smaller vertical spacing (e.g., 6px) below the title
+            caseInfoLabel.Location = new Point(64, titleLabel.Location.Y + titleLabel.Height + 6);
+            headerPanel.Controls.Add(caseInfoLabel);
 
             this.Controls.Add(headerPanel);
             headerPanel.BringToFront();
@@ -414,7 +452,15 @@ namespace DataReviver
             {
                 dialog.Title = "Select File for Analysis";
                 dialog.Filter = "All Files (*.*)|*.*";
-                
+                if (!string.IsNullOrEmpty(_caseFolderPath) && Directory.Exists(_caseFolderPath))
+                {
+                    dialog.InitialDirectory = _caseFolderPath;
+                    dialog.FileName = string.Empty; // Ensures dialog always starts in the case folder
+                }
+                else
+                {
+                    dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
+                }
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     pathLabel.Text = dialog.FileName;

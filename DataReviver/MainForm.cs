@@ -597,8 +597,9 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 		{
 			try
 			{
-				var forensicForm = new RealForensicTools();
-				forensicForm.ShowDialog(this);
+				   string caseFolder = _currentCase != null ? _currentCase.CaseFolderPath : null;
+				   var forensicForm = new RealForensicTools(caseFolder);
+				   forensicForm.ShowDialog(this);
 			}
 			catch (Exception ex)
 			{
