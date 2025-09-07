@@ -7,10 +7,11 @@ namespace DataReviver
 {
     public class SelectFileForm : Form
     {
-        private ListBox fileListBox;
-        private Label headerLabel;
-        private Button selectButton;
-        private Button cancelButton;
+    private ListBox fileListBox;
+    private Label headerLabel;
+    private TextBox searchBox;
+    private Button selectButton;
+    private Button cancelButton;
     private string _caseFolderPath;
     private string _recoveredFolderPath;
     private string _currentFolderPath;
@@ -37,6 +38,7 @@ namespace DataReviver
             this.MaximizeBox = false;
             this.BackColor = Color.FromArgb(245, 247, 251);
 
+
             headerLabel = new Label
             {
                 Text = "Select a file from the current case folder:",
@@ -47,10 +49,32 @@ namespace DataReviver
                 BackColor = Color.Transparent
             };
 
-            fileListBox = new ListBox
+            searchBox = new TextBox
             {
                 Location = new Point(20, 60),
-                Size = new Size(540, 220),
+                Size = new Size(540, 28),
+                Font = new Font("Segoe UI", 11F),
+                ForeColor = Color.Gray,
+                Text = "Search files or folders"
+            };
+            searchBox.GotFocus += (s, e) => {
+                if (searchBox.Text == "Search files or folders") {
+                    searchBox.Text = "";
+                    searchBox.ForeColor = Color.Black;
+                }
+            };
+            searchBox.LostFocus += (s, e) => {
+                if (string.IsNullOrWhiteSpace(searchBox.Text)) {
+                    searchBox.Text = "Search files or folders";
+                    searchBox.ForeColor = Color.Gray;
+                }
+            };
+            searchBox.TextChanged += (s, e) => { LoadFiles(); };
+
+            fileListBox = new ListBox
+            {
+                Location = new Point(20, 95),
+                Size = new Size(540, 185),
                 Font = new Font("Segoe UI", 11F),
                 BackColor = Color.White,
                 ForeColor = Color.FromArgb(0, 122, 255),
@@ -129,6 +153,7 @@ namespace DataReviver
             cancelButton.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
 
             this.Controls.Add(headerLabel);
+            this.Controls.Add(searchBox);
             this.Controls.Add(fileListBox);
             this.Controls.Add(selectButton);
             this.Controls.Add(cancelButton);
@@ -149,6 +174,7 @@ namespace DataReviver
             selectButton.Enabled = false;
             if (!string.IsNullOrEmpty(_currentFolderPath) && Directory.Exists(_currentFolderPath))
             {
+                string query = (searchBox != null && searchBox.Text != null && searchBox.Text != "Search files or folders") ? searchBox.Text.Trim().ToLower() : "";
                 // Show .. if not at root of 'recovered'
                 if (!string.Equals(_currentFolderPath.TrimEnd(Path.DirectorySeparatorChar), _recoveredFolderPath.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
                 {
@@ -158,13 +184,17 @@ namespace DataReviver
                 var dirs = Directory.GetDirectories(_currentFolderPath);
                 foreach (var dir in dirs)
                 {
-                    fileListBox.Items.Add(Path.GetFileName(dir));
+                    var name = Path.GetFileName(dir);
+                    if (string.IsNullOrEmpty(query) || name.ToLower().Contains(query))
+                        fileListBox.Items.Add(name);
                 }
                 // Then files
                 var files = Directory.GetFiles(_currentFolderPath);
                 foreach (var file in files)
                 {
-                    fileListBox.Items.Add(Path.GetFileName(file));
+                    var name = Path.GetFileName(file);
+                    if (string.IsNullOrEmpty(query) || name.ToLower().Contains(query))
+                        fileListBox.Items.Add(name);
                 }
             }
         }
