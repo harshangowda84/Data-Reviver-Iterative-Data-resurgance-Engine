@@ -452,15 +452,26 @@ namespace DataReviver
             {
                 dialog.Title = "Select File for Analysis";
                 dialog.Filter = "All Files (*.*)|*.*";
+                string initialDir = null;
                 if (!string.IsNullOrEmpty(_caseFolderPath) && Directory.Exists(_caseFolderPath))
                 {
-                    dialog.InitialDirectory = _caseFolderPath;
-                    dialog.FileName = string.Empty; // Ensures dialog always starts in the case folder
+                    initialDir = System.IO.Path.GetFullPath(_caseFolderPath);
                 }
                 else
                 {
-                    dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
+                    string fallback = @"C:\kick 1\ForensicCases";
+                    if (Directory.Exists(fallback))
+                        initialDir = System.IO.Path.GetFullPath(fallback);
+                    else
+                        initialDir = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
                 }
+                dialog.InitialDirectory = initialDir;
+                dialog.FileName = string.Empty;
+                dialog.DefaultExt = string.Empty;
+                // Debug: Show which path is being used
+                // MessageBox.Show($"Dialog InitialDirectory: {dialog.InitialDirectory}", "Debug");
+                // Force dialog to not remember previous directory
+                dialog.RestoreDirectory = false;
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     pathLabel.Text = dialog.FileName;

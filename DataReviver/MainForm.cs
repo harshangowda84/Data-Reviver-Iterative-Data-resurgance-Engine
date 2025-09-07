@@ -611,7 +611,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 		{
 			try
 			{
-				var forensicForm = new RealForensicTools();
+				string caseFolder = _currentCase != null ? _currentCase.CaseFolderPath : null;
+				var forensicForm = new RealForensicTools(caseFolder);
 				forensicForm.ShowDialog(this);
 			}
 			catch (Exception ex)
@@ -624,7 +625,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 		{
 			try
 			{
-				var forensicForm = new RealForensicTools();
+				string caseFolder = _currentCase != null ? _currentCase.CaseFolderPath : null;
+				var forensicForm = new RealForensicTools(caseFolder);
 				forensicForm.ShowDialog(this);
 			}
 			catch (Exception ex)
@@ -637,7 +639,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 		{
 			try
 			{
-				var forensicForm = new RealForensicTools();
+				string caseFolder = _currentCase != null ? _currentCase.CaseFolderPath : null;
+				var forensicForm = new RealForensicTools(caseFolder);
 				forensicForm.ShowDialog(this);
 			}
 			catch (Exception ex)
@@ -650,7 +653,8 @@ private class EnhancedMenuRenderer : ToolStripProfessionalRenderer
 		{
 			try
 			{
-				var forensicForm = new RealForensicTools();
+				string caseFolder = _currentCase != null ? _currentCase.CaseFolderPath : null;
+				var forensicForm = new RealForensicTools(caseFolder);
 				forensicForm.ShowDialog(this);
 			}
 			catch (Exception ex)
