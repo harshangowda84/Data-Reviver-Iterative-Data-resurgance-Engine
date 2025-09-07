@@ -17,6 +17,11 @@ namespace DataReviver
     private string _selectedFilePath;
     private readonly string _caseFolderPath;
 
+    // Store all path labels and results text boxes for sync
+    private List<Label> _pathLabels = new List<Label>();
+    private List<RichTextBox> _resultsTexts = new List<RichTextBox>();
+    private List<Action<string, RichTextBox>> _analysisActions = new List<Action<string, RichTextBox>>();
+
 
         public RealForensicTools(string caseFolderPath = null)
         {
@@ -265,7 +270,6 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             clearButton.FlatAppearance.BorderSize = 0;
-            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
                 Location = new Point(10, 50),
@@ -275,8 +279,12 @@ namespace DataReviver
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, AnalyzeFileInfo);
-            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            // Register for sync
+            _pathLabels.Add(pathLabel);
+            _resultsTexts.Add(resultsText);
+            _analysisActions.Add(AnalyzeFileInfo);
+            selectFileButton.Click += (s, e) => SelectFileAndSync(pathLabel, resultsText, AnalyzeFileInfo);
+            clearButton.Click += (s, e) => ClearAllTabs();
             panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
@@ -315,7 +323,6 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             clearButton.FlatAppearance.BorderSize = 0;
-            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
                 Location = new Point(10, 50),
@@ -325,8 +332,11 @@ namespace DataReviver
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, CalculateRealHashes);
-            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            _pathLabels.Add(pathLabel);
+            _resultsTexts.Add(resultsText);
+            _analysisActions.Add(CalculateRealHashes);
+            selectFileButton.Click += (s, e) => SelectFileAndSync(pathLabel, resultsText, CalculateRealHashes);
+            clearButton.Click += (s, e) => ClearAllTabs();
             panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
@@ -365,7 +375,6 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             clearButton.FlatAppearance.BorderSize = 0;
-            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
                 Location = new Point(10, 50),
@@ -375,8 +384,11 @@ namespace DataReviver
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, ViewFileContent);
-            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            _pathLabels.Add(pathLabel);
+            _resultsTexts.Add(resultsText);
+            _analysisActions.Add(ViewFileContent);
+            selectFileButton.Click += (s, e) => SelectFileAndSync(pathLabel, resultsText, ViewFileContent);
+            clearButton.Click += (s, e) => ClearAllTabs();
             panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
@@ -415,7 +427,6 @@ namespace DataReviver
                 Cursor = Cursors.Hand
             };
             clearButton.FlatAppearance.BorderSize = 0;
-            // No hover effect for Select File and Clear
             var resultsText = new RichTextBox
             {
                 Location = new Point(10, 50),
@@ -425,8 +436,11 @@ namespace DataReviver
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-            selectFileButton.Click += (s, e) => SelectFile(pathLabel, resultsText, DetectFileType);
-            clearButton.Click += (s, e) => { pathLabel.Text = "No file selected"; pathLabel.ForeColor = Color.Gray; resultsText.Clear(); };
+            _pathLabels.Add(pathLabel);
+            _resultsTexts.Add(resultsText);
+            _analysisActions.Add(DetectFileType);
+            selectFileButton.Click += (s, e) => SelectFileAndSync(pathLabel, resultsText, DetectFileType);
+            clearButton.Click += (s, e) => ClearAllTabs();
             panel.Controls.AddRange(new Control[] { selectFileButton, clearButton, pathLabel, resultsText });
             tab.Controls.Add(panel);
         }
@@ -446,7 +460,8 @@ namespace DataReviver
             }
         }
 
-        private void SelectFile(Label pathLabel, RichTextBox resultsText, Action<string, RichTextBox> analysisAction)
+        // New: Select file and update all tabs
+        private void SelectFileAndSync(Label pathLabel, RichTextBox resultsText, Action<string, RichTextBox> analysisAction)
         {
             using (var dialog = new OpenFileDialog())
             {
@@ -468,17 +483,38 @@ namespace DataReviver
                 dialog.InitialDirectory = initialDir;
                 dialog.FileName = string.Empty;
                 dialog.DefaultExt = string.Empty;
-                // Debug: Show which path is being used
-                // MessageBox.Show($"Dialog InitialDirectory: {dialog.InitialDirectory}", "Debug");
-                // Force dialog to not remember previous directory
                 dialog.RestoreDirectory = false;
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    pathLabel.Text = dialog.FileName;
-                    pathLabel.ForeColor = Color.Black;
                     _selectedFilePath = dialog.FileName;
-                    analysisAction(dialog.FileName, resultsText);
+                    SyncAllTabsWithFile(_selectedFilePath);
                 }
+            }
+        }
+
+        // Update all tabs' path labels and results
+        private void SyncAllTabsWithFile(string filePath)
+        {
+            for (int i = 0; i < _pathLabels.Count; i++)
+            {
+                var label = _pathLabels[i];
+                var results = _resultsTexts[i];
+                var action = _analysisActions[i];
+                label.Text = filePath;
+                label.ForeColor = Color.Black;
+                action(filePath, results);
+            }
+        }
+
+        // Clear all tabs
+        private void ClearAllTabs()
+        {
+            _selectedFilePath = null;
+            for (int i = 0; i < _pathLabels.Count; i++)
+            {
+                _pathLabels[i].Text = "No file selected";
+                _pathLabels[i].ForeColor = Color.Gray;
+                _resultsTexts[i].Clear();
             }
         }
 
