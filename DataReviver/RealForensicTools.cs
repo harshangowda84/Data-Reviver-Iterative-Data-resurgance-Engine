@@ -5,8 +5,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+
 using System.Text;
 using System.Windows.Forms;
+using DataReviver;
 
 namespace DataReviver
 {
@@ -463,30 +465,12 @@ namespace DataReviver
         // New: Select file and update all tabs
         private void SelectFileAndSync(Label pathLabel, RichTextBox resultsText, Action<string, RichTextBox> analysisAction)
         {
-            using (var dialog = new OpenFileDialog())
+            // Use the new SelectFileForm for case folder browsing
+            using (var form = new SelectFileForm(_caseFolderPath))
             {
-                dialog.Title = "Select File for Analysis";
-                dialog.Filter = "All Files (*.*)|*.*";
-                string initialDir = null;
-                if (!string.IsNullOrEmpty(_caseFolderPath) && Directory.Exists(_caseFolderPath))
+                if (form.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(form.SelectedFilePath))
                 {
-                    initialDir = System.IO.Path.GetFullPath(_caseFolderPath);
-                }
-                else
-                {
-                    string fallback = @"C:\kick 1\ForensicCases";
-                    if (Directory.Exists(fallback))
-                        initialDir = System.IO.Path.GetFullPath(fallback);
-                    else
-                        initialDir = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
-                }
-                dialog.InitialDirectory = initialDir;
-                dialog.FileName = string.Empty;
-                dialog.DefaultExt = string.Empty;
-                dialog.RestoreDirectory = false;
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    _selectedFilePath = dialog.FileName;
+                    _selectedFilePath = form.SelectedFilePath;
                     SyncAllTabsWithFile(_selectedFilePath);
                 }
             }

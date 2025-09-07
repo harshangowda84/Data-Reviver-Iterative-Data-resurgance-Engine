@@ -122,6 +122,7 @@
   <Compile Include="OpenCaseForm.cs" />
   <Compile Include="PasswordPromptForm.cs" />
   <Compile Include="DeleteCaseConfirmForm.cs" />
+  <Compile Include="SelectFileForm.cs" />
     <EmbeddedResource Include="DeletedFileViewer.resx">
       <DependentUpon>DeletedFileViewer.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -1,0 +1,179 @@
+=== DATA REVIVER FORENSIC ANALYSIS REPORT ===
+Generated: 07-09-2025 12:08:10
+Examiner: Harshan
+Tool Version: Data Reviver v1.0
+
+SCAN SUMMARY:
+Total Files Analyzed: 165
+Recoverable Files: 0
+
+DELETED FILES:
+Name	Type	Size	Last Modified	Path	Recovery Status
+Product.log	.log	2750	27-04-2025 21:26:50	E:\Windows Password Recovery Tool Logs\20250427_212649\Product.log	Overwritten
+PC_Info1.log	.log	77271	27-04-2025 21:27:00	E:\Windows Password Recovery Tool Logs\20250427_212649\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1603	27-04-2025 21:27:12	E:\Windows Password Recovery Tool Logs\20250427_212649\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2308	27-04-2025 21:26:50	E:\Windows Password Recovery Tool Logs\20250427_212649\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	131072	22-04-2025 15:26:28	E:\Windows Password Recovery Tool Logs\20250427_212649\_am.log	Overwritten
+D_ResetUser.log	.log	892	27-04-2025 21:27:14	E:\Windows Password Recovery Tool Logs\20250427_212649\D_ResetUser.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250427_212723.zip	.zip	26328	27-04-2025 21:27:26	E:\Windows Password Recovery Tool Logs\20250427_212649\Windows Password Recovery Tool Logs_a_20250427_212723.zip	Overwritten
+Product.log	.log	4973	27-04-2025 21:26:50	E:\Windows Password Recovery Tool Logs\20250427_212649\Product.log	Overwritten
+PC_Info1.log	.log	77271	27-04-2025 21:27:00	E:\Windows Password Recovery Tool Logs\20250427_212649\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1603	27-04-2025 21:27:12	E:\Windows Password Recovery Tool Logs\20250427_212649\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2308	27-04-2025 21:26:50	E:\Windows Password Recovery Tool Logs\20250427_212649\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	131072	22-04-2025 15:26:28	E:\Windows Password Recovery Tool Logs\20250427_212649\_am.log	Overwritten
+D_ResetUser.log	.log	892	27-04-2025 21:27:14	E:\Windows Password Recovery Tool Logs\20250427_212649\D_ResetUser.log	Overwritten
+Product.log	.log	2945	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\Product.log	Overwritten
+PC_Info1.log	.log	70493	30-04-2025 20:49:06	E:\Windows Password Recovery Tool Logs\20250430_204854\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1611	30-04-2025 20:49:16	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2448	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	01-05-2025 12:39:06	E:\Windows Password Recovery Tool Logs\20250430_204854\_am.log	Overwritten
+D_ResetUser.log	.log	892	30-04-2025 20:49:26	E:\Windows Password Recovery Tool Logs\20250430_204854\D_ResetUser.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250430_204929.zip	.zip	25544	30-04-2025 20:49:32	E:\Windows Password Recovery Tool Logs\20250430_204854\Windows Password Recovery Tool Logs_a_20250430_204929.zip	Overwritten
+Product.log	.log	5168	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\Product.log	Overwritten
+PC_Info1.log	.log	70493	30-04-2025 20:49:06	E:\Windows Password Recovery Tool Logs\20250430_204854\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1611	30-04-2025 20:49:16	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2448	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	01-05-2025 12:39:06	E:\Windows Password Recovery Tool Logs\20250430_204854\_am.log	Overwritten
+D_ResetUser.log	.log	892	30-04-2025 20:49:26	E:\Windows Password Recovery Tool Logs\20250430_204854\D_ResetUser.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250430_205000.zip	.zip	25780	30-04-2025 20:50:02	E:\Windows Password Recovery Tool Logs\20250430_204854\Windows Password Recovery Tool Logs_a_20250430_205000.zip	Overwritten
+Product.log	.log	7391	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\Product.log	Overwritten
+PC_Info1.log	.log	70493	30-04-2025 20:49:06	E:\Windows Password Recovery Tool Logs\20250430_204854\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1611	30-04-2025 20:49:16	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2448	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	01-05-2025 12:39:06	E:\Windows Password Recovery Tool Logs\20250430_204854\_am.log	Overwritten
+D_ResetUser.log	.log	892	30-04-2025 20:49:26	E:\Windows Password Recovery Tool Logs\20250430_204854\D_ResetUser.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250430_205031.zip	.zip	25943	30-04-2025 20:50:32	E:\Windows Password Recovery Tool Logs\20250430_204854\Windows Password Recovery Tool Logs_a_20250430_205031.zip	Overwritten
+Product.log	.log	9614	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\Product.log	Overwritten
+PC_Info1.log	.log	70493	30-04-2025 20:49:06	E:\Windows Password Recovery Tool Logs\20250430_204854\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1611	30-04-2025 20:49:16	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2448	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	01-05-2025 12:39:06	E:\Windows Password Recovery Tool Logs\20250430_204854\_am.log	Overwritten
+D_ResetUser.log	.log	892	30-04-2025 20:49:26	E:\Windows Password Recovery Tool Logs\20250430_204854\D_ResetUser.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250430_205102.zip	.zip	26098	30-04-2025 20:51:04	E:\Windows Password Recovery Tool Logs\20250430_204854\Windows Password Recovery Tool Logs_a_20250430_205102.zip	Overwritten
+Product.log	.log	11837	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\Product.log	Overwritten
+PC_Info1.log	.log	70493	30-04-2025 20:49:06	E:\Windows Password Recovery Tool Logs\20250430_204854\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1611	30-04-2025 20:49:16	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2448	30-04-2025 20:48:56	E:\Windows Password Recovery Tool Logs\20250430_204854\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	01-05-2025 12:39:06	E:\Windows Password Recovery Tool Logs\20250430_204854\_am.log	Overwritten
+D_ResetUser.log	.log	892	30-04-2025 20:49:26	E:\Windows Password Recovery Tool Logs\20250430_204854\D_ResetUser.log	Overwritten
+Product.log	.log	2277	26-05-2025 13:42:16	E:\Windows Password Recovery Tool Logs\20250526_134214\Product.log	Overwritten
+PC_Info1.log	.log	99307	26-05-2025 13:42:18	E:\Windows Password Recovery Tool Logs\20250526_134214\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	5379	26-05-2025 13:42:16	E:\Windows Password Recovery Tool Logs\20250526_134214\lib_unlockVolume_sdk.log	Overwritten
+Product.log	.log	58503	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	9321	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Product.log	.log	5028	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	7547	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134516.zip	.zip	13513	26-05-2025 13:45:18	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134516.zip	Overwritten
+Product.log	.log	7042	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	7547	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134547.zip	.zip	13649	26-05-2025 13:45:48	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134547.zip	Overwritten
+Product.log	.log	9056	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	7547	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134617.zip	.zip	13792	26-05-2025 13:46:18	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134617.zip	Overwritten
+Product.log	.log	11593	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8146	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134648.zip	.zip	14010	26-05-2025 13:46:50	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134648.zip	Overwritten
+Product.log	.log	13762	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8146	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134719.zip	.zip	14162	26-05-2025 13:47:20	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134719.zip	Overwritten
+Product.log	.log	15776	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8146	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134749.zip	.zip	14299	26-05-2025 13:47:50	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134749.zip	Overwritten
+Product.log	.log	18047	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8831	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134819.zip	.zip	14566	26-05-2025 13:48:20	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134819.zip	Overwritten
+Product.log	.log	20061	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8831	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250526_134849.zip	.zip	14698	26-05-2025 13:48:50	E:\Windows Password Recovery Tool Logs\20250526_134415\Windows Password Recovery Tool Logs_a_20250526_134849.zip	Overwritten
+Product.log	.log	22075	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+PC_Info1.log	.log	98615	26-05-2025 13:44:18	E:\Windows Password Recovery Tool Logs\20250526_134415\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	8831	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\lib_unlockVolume_sdk.log	Overwritten
+Product.log	.log	24265	26-05-2025 13:44:16	E:\Windows Password Recovery Tool Logs\20250526_134415\Product.log	Overwritten
+Product.log	.log	2194	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\Product.log	Overwritten
+PC_Info1.log	.log	95551	29-06-2025 21:23:54	E:\Windows Password Recovery Tool Logs\20250629_212300\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2233	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250629_212412.zip	.zip	13335	29-06-2025 21:24:14	E:\Windows Password Recovery Tool Logs\20250629_212300\Windows Password Recovery Tool Logs_a_20250629_212412.zip	Overwritten
+Product.log	.log	4306	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\Product.log	Overwritten
+PC_Info1.log	.log	95551	29-06-2025 21:23:54	E:\Windows Password Recovery Tool Logs\20250629_212300\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2233	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250629_212443.zip	.zip	13562	29-06-2025 21:24:44	E:\Windows Password Recovery Tool Logs\20250629_212300\Windows Password Recovery Tool Logs_a_20250629_212443.zip	Overwritten
+Product.log	.log	6418	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\Product.log	Overwritten
+PC_Info1.log	.log	95551	29-06-2025 21:23:54	E:\Windows Password Recovery Tool Logs\20250629_212300\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2233	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250629_212513.zip	.zip	13716	29-06-2025 21:25:14	E:\Windows Password Recovery Tool Logs\20250629_212300\Windows Password Recovery Tool Logs_a_20250629_212513.zip	Overwritten
+Product.log	.log	8530	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\Product.log	Overwritten
+PC_Info1.log	.log	95551	29-06-2025 21:23:54	E:\Windows Password Recovery Tool Logs\20250629_212300\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2233	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250629_212544.zip	.zip	13858	29-06-2025 21:25:46	E:\Windows Password Recovery Tool Logs\20250629_212300\Windows Password Recovery Tool Logs_a_20250629_212544.zip	Overwritten
+Product.log	.log	11347	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\Product.log	Overwritten
+PC_Info1.log	.log	95551	29-06-2025 21:23:54	E:\Windows Password Recovery Tool Logs\20250629_212300\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	2069	29-06-2025 21:25:50	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	2430	29-06-2025 21:23:02	E:\Windows Password Recovery Tool Logs\20250629_212300\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	65536	29-06-2025 21:26:08	E:\Windows Password Recovery Tool Logs\20250629_212300\_am.log	Overwritten
+C_ResetUser.log	.log	892	29-06-2025 21:25:54	E:\Windows Password Recovery Tool Logs\20250629_212300\C_ResetUser.log	Overwritten
+Product.log	.log	2103	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\Product.log	Overwritten
+PC_Info1.log	.log	92727	04-08-2025 17:19:08	E:\Windows Password Recovery Tool Logs\20250804_171904\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	1953	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250804_171935.zip	.zip	12736	04-08-2025 17:19:36	E:\Windows Password Recovery Tool Logs\20250804_171904\Windows Password Recovery Tool Logs_a_20250804_171935.zip	Overwritten
+Product.log	.log	4215	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\Product.log	Overwritten
+PC_Info1.log	.log	92727	04-08-2025 17:19:08	E:\Windows Password Recovery Tool Logs\20250804_171904\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	1953	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250804_172005.zip	.zip	12976	04-08-2025 17:20:06	E:\Windows Password Recovery Tool Logs\20250804_171904\Windows Password Recovery Tool Logs_a_20250804_172005.zip	Overwritten
+Product.log	.log	6858	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\Product.log	Overwritten
+PC_Info1.log	.log	92727	04-08-2025 17:19:08	E:\Windows Password Recovery Tool Logs\20250804_171904\PC_Info1.log	Overwritten
+lib_changepw_sdk.log	.log	1605	04-08-2025 17:20:08	E:\Windows Password Recovery Tool Logs\20250804_171904\lib_changepw_sdk.log	Overwritten
+lib_unlockVolume_sdk.log	.log	1953	04-08-2025 17:19:06	E:\Windows Password Recovery Tool Logs\20250804_171904\lib_unlockVolume_sdk.log	Overwritten
+_am.log	.log	131072	03-08-2025 12:45:28	E:\Windows Password Recovery Tool Logs\20250804_171904\_am.log	Overwritten
+C_ResetUser.log	.log	892	04-08-2025 17:20:08	E:\Windows Password Recovery Tool Logs\20250804_171904\C_ResetUser.log	Overwritten
+Product.log	.log	34502	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Product.log	.log	4292	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190353.zip	.zip	12190	07-08-2025 19:03:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190353.zip	Overwritten
+Product.log	.log	6306	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190423.zip	.zip	12323	07-08-2025 19:04:24	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190423.zip	Overwritten
+Product.log	.log	8320	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190454.zip	.zip	12457	07-08-2025 19:04:56	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190454.zip	Overwritten
+Product.log	.log	10334	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190524.zip	.zip	12594	07-08-2025 19:05:26	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190524.zip	Overwritten
+Product.log	.log	12348	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190554.zip	.zip	12719	07-08-2025 19:05:56	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190554.zip	Overwritten
+Product.log	.log	14362	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190624.zip	.zip	12844	07-08-2025 19:06:26	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190624.zip	Overwritten
+Product.log	.log	16376	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190655.zip	.zip	12973	07-08-2025 19:06:56	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190655.zip	Overwritten
+Product.log	.log	18390	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Windows Password Recovery Tool Logs_a_20250807_190725.zip	.zip	13107	07-08-2025 19:07:26	E:\Windows Password Recovery Tool Logs\20250807_190252\Windows Password Recovery Tool Logs_a_20250807_190725.zip	Overwritten
+Product.log	.log	20404	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+PC_Info1.log	.log	97353	07-08-2025 19:02:56	E:\Windows Password Recovery Tool Logs\20250807_190252\PC_Info1.log	Overwritten
+lib_unlockVolume_sdk.log	.log	3625	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\lib_unlockVolume_sdk.log	Overwritten
+Product.log	.log	22418	07-08-2025 19:02:54	E:\Windows Password Recovery Tool Logs\20250807_190252\Product.log	Overwritten
+_ootex.log	.log	1436	26-05-2025 13:59:26	E:\_ootex.log	Overwritten
+
+This report demonstrates comprehensive forensic capabilities
+suitable for digital investigation and evidence preservation.
