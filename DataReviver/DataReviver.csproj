@@ -111,6 +111,7 @@
     <Compile Include="Enhancements\DeepMetadataValidator.cs" />
     <Compile Include="Enhancements\EntropyAnalyzer.cs" />
     <Compile Include="Enhancements\FileCarvingEngine.cs" />
+    <Compile Include="Enhancements\FAT32DeepScanner.cs" />
   <Compile Include="SuccessDialogForm.cs" />
     <Compile Include="CasePromptForm.cs" />
     <Compile Include="AboutDialog.cs">

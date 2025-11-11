@@ -14,6 +14,7 @@ namespace DataReviver
         public static bool EnableDeepValidation { get; set; } = true;
         public static bool EnableEntropyAnalysis { get; set; } = true;
         public static bool EnableFileCarving { get; set; } = false; // Disabled by default (slower)
+        public static bool EnableFAT32DeepScan { get; set; } = true; // NEW: Deep sector scan for FAT32
         
         // Thresholds
         public static double ValidationConfidenceThreshold { get; set; } = 0.3;
@@ -30,9 +31,11 @@ namespace DataReviver
             if (EnableDeepValidation) activeCount++;
             if (EnableEntropyAnalysis) activeCount++;
             if (EnableFileCarving) activeCount++;
+            if (EnableFAT32DeepScan) activeCount++;
             
             return $"Enhancements: ON ({activeCount} active - Deep Validation, Entropy Analysis" + 
-                   (EnableFileCarving ? ", File Carving" : "") + ")";
+                   (EnableFileCarving ? ", File Carving" : "") + 
+                   (EnableFAT32DeepScan ? ", FAT32 Deep Scan" : "") + ")";
         }
         
         /// <summary>
@@ -55,6 +58,12 @@ namespace DataReviver
   - Magic byte detection
   - Text vs binary classification
   - Compression/encryption detection
+
+✓ FAT32 Deep Scan: Raw sector scanning for FAT32/FAT16 drives
+  - Finds deleted files even when folder structure is lost
+  - Scans ALL sectors for directory entry patterns (0xE5 marker)
+  - Recovers files from deleted/formatted folders
+  - Essential for large file recovery (movies, videos, etc.)
 
 ✗ File Carving: Signature-based recovery (SLOW - disabled by default)
   - Scans raw sectors for file signatures

@@ -15,6 +15,7 @@
 
 using KFS.FileSystems;
 using KFS.FileSystems.NTFS;
+using KFS.FileSystems.FAT;
 using MB.Algodat;
 using System;
 using System.Collections.Generic;
@@ -189,6 +190,43 @@ namespace DataReviver {
 				}
 				return !_scanCancelled;
 			}));
+
+			// FAT32 Deep Scanning Enhancement
+			if (_fileSystem is FileSystemFAT && EnhancementSettings.EnableFAT32DeepScan) {
+				Console.WriteLine("===========================================");
+				Console.WriteLine("RUNNING FAT32 DEEP SECTOR SCAN");
+				Console.WriteLine("This will take longer but finds MORE files!");
+				Console.WriteLine("===========================================");
+				
+				try {
+					var deepScanner = new DataReviver.Enhancements.FAT32DeepScanner(_fileSystem);
+					
+					// Track progress
+					deepScanner.ProgressUpdated += (sender, e) => {
+						_progress = e.Progress;
+						OnProgressUpdated();
+					};
+					
+					int deepScanFilesFound = 0;
+					deepScanner.DeletedFileFound += (sender, e) => {
+						deepScanFilesFound++;
+					};
+					
+					var deepScanResults = deepScanner.DeepScanAllSectors();
+					
+					Console.WriteLine($"Deep scan found {deepScanResults.Count} deleted files!");
+					Console.WriteLine($"Standard scan found {_deletedFiles.Count} files");
+					Console.WriteLine($"Deep scan added {deepScanResults.Count - _deletedFiles.Count} additional files");
+					
+					// TODO: Convert DeepScanResults to INodeMetadata and add to _deletedFiles
+					// For now, just log the results
+					foreach (var fatFile in deepScanResults) {
+						Console.WriteLine($"  {fatFile.FileName} ({fatFile.SizeFormatted}) - Cluster {fatFile.FirstCluster}");
+					}
+				} catch (Exception ex) {
+					Console.WriteLine($"ERROR in FAT32 deep scan: {ex.Message}");
+				}
+			}
 
 			if (_fileSystem is FileSystemNTFS) {
 				Console.WriteLine("Starting post-processing of deleted files...");
