@@ -105,6 +105,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeTree\RangeItem.cs" />
     <Compile Include="Scanner.cs" />
+    <Compile Include="EnhancementSettings.cs" />
+    <Compile Include="EnhancementStats.cs" />
+    <Compile Include="Enhancements\EnhancementConfig.cs" />
+    <Compile Include="Enhancements\DeepMetadataValidator.cs" />
+    <Compile Include="Enhancements\EntropyAnalyzer.cs" />
+    <Compile Include="Enhancements\FileCarvingEngine.cs" />
   <Compile Include="SuccessDialogForm.cs" />
     <Compile Include="CasePromptForm.cs" />
     <Compile Include="AboutDialog.cs">

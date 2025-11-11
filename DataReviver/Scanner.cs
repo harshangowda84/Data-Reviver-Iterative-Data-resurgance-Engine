@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using DataReviver.Enhancements;
 
 namespace DataReviver {
 	/// <summary>
@@ -34,6 +35,12 @@ namespace DataReviver {
 		private bool _scanCancelled;
 		private IFileSystem _fileSystem;
 		private string _diskName;
+		private DeepMetadataValidator _validator;
+		private EntropyAnalyzer _entropyAnalyzer;
+		
+		// Statistics for enhancements
+		private int _totalFilesFound = 0;
+		private int _filesFilteredByValidation = 0;
 
 		/// <summary>
 		/// Constructs a Scanner on the specified filesystem.
@@ -42,6 +49,14 @@ namespace DataReviver {
 		public Scanner(string diskName, IFileSystem fileSystem) {
 			_fileSystem = fileSystem;
 			_diskName = diskName;
+			
+			// Initialize enhancement modules if enabled
+			if (EnhancementConfig.EnableDeepValidation) {
+				_validator = new DeepMetadataValidator(fileSystem);
+			}
+			if (EnhancementConfig.EnableEntropyAnalysis) {
+				_entropyAnalyzer = new EntropyAnalyzer();
+			}
 		}
 
 		/// <summary>
@@ -101,13 +116,18 @@ namespace DataReviver {
 
 			OnScanStarted();
 			
-			// Clear previous scan results
+			// Clear previous scan results and statistics
 			lock (_deletedFiles) {
 				_deletedFiles.Clear();
 			}
+			_totalFilesFound = 0;
+			_filesFilteredByValidation = 0;
 			
 			_progress = 0;
 			OnProgressUpdated();
+			
+			// Log enhancement status
+			Console.WriteLine(EnhancementConfig.GetEnabledSummary());
 
 			// TODO: Replace me with a search strategy selected from a text box!
 			ISearchStrategy strat = _fileSystem.GetDefaultSearchStrategy();
@@ -136,8 +156,26 @@ namespace DataReviver {
 					try {
 						IFileSystemNode node = metadata.GetFileSystemNode();
 						if (node.Type == FSNodeType.File && node.Size > 0) {
-							lock (_deletedFiles) {
-								_deletedFiles.Add(metadata);
+							_totalFilesFound++;
+							
+							// Apply deep validation if enabled
+							bool shouldAdd = true;
+							if (EnhancementConfig.EnableDeepValidation && _validator != null) {
+								var validationResult = _validator.ValidateDeletedFile(metadata);
+								if (!validationResult.IsValid || validationResult.Confidence < EnhancementConfig.MinimumConfidence) {
+									shouldAdd = false;
+									_filesFilteredByValidation++;
+									
+									if (validationResult.Issues.Count > 0) {
+										Console.WriteLine($"Filtered: {metadata.Name} - {string.Join(", ", validationResult.Issues)}");
+									}
+								}
+							}
+							
+							if (shouldAdd) {
+								lock (_deletedFiles) {
+									_deletedFiles.Add(metadata);
+								}
 							}
 						}
 					} catch {
@@ -189,6 +227,16 @@ namespace DataReviver {
 			TimeSpan timeTaken = DateTime.Now - _startTime;
 			if (!_scanCancelled) {
 				Console.WriteLine("Scan complete! Time taken: {0}", timeTaken);
+				
+				// Log enhancement statistics
+				if (EnhancementConfig.EnableDeepValidation && _totalFilesFound > 0) {
+					Console.WriteLine("Enhancement Statistics:");
+					Console.WriteLine($"  Total deleted files found: {_totalFilesFound}");
+					Console.WriteLine($"  Files shown (passed validation): {_deletedFiles.Count}");
+					Console.WriteLine($"  Files filtered (failed validation): {_filesFilteredByValidation}");
+					Console.WriteLine($"  Filter rate: {(double)_filesFilteredByValidation / _totalFilesFound:P1}");
+				}
+				
 				_progress = 1;
 				OnProgressUpdated();
 				OnScanFinished();

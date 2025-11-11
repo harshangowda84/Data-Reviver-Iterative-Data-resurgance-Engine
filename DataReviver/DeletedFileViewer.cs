@@ -240,6 +240,32 @@ namespace DataReviver {
 			progressBar.Hide();
 			lblProgress.Hide();
 			bRestoreFiles.Show();
+			
+			// Show enhancement statistics if enabled
+			if (EnhancementSettings.EnableEnhancements && _enhancementStats != null) {
+				ShowEnhancementStatsDialog();
+			}
+		}
+		
+		private EnhancementStats _enhancementStats;
+		
+		/// <summary>
+		/// Set enhancement statistics to display after scan
+		/// </summary>
+		public void SetEnhancementStats(EnhancementStats stats) {
+			_enhancementStats = stats;
+		}
+		
+		/// <summary>
+		/// Show enhancement statistics in a dialog
+		/// </summary>
+		private void ShowEnhancementStatsDialog() {
+			if (_enhancementStats == null) return;
+			
+			string message = _enhancementStats.GetSummary();
+			string title = "🎯 Enhancement Results - Deep Analysis Complete";
+			
+			MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
 		private void bScan_Click(object sender, EventArgs e) {
@@ -326,10 +352,14 @@ namespace DataReviver {
 				if (percentage != _lastProgressPercentage) {
 					_lastProgressPercentage = percentage;
 					progressBar.Value = (int)(progress * progressBar.Maximum);
+					
+					// Show enhancement status
+					string enhStatus = EnhancementSettings.EnableEnhancements ? " [⚡ Enhanced]" : "";
+					
 					if (_scanner != null) {
-						lblProgress.Text = $"Scanning {_scanner.DiskName}: {percentage}% Complete";
+						lblProgress.Text = $"Scanning {_scanner.DiskName}: {percentage}% Complete{enhStatus}";
 					} else {
-						lblProgress.Text = $"Scanning: {percentage}% Complete";
+						lblProgress.Text = $"Scanning: {percentage}% Complete{enhStatus}";
 					}
 				}
 			} catch (Exception ex) {
